@@ -6,8 +6,8 @@ import com.intellij.openapi.components.BaseState;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
-public class WOConfigurationFactory extends ConfigurationFactory {
-    public WOConfigurationFactory(WORunConfigType type) {
+public class RunConfigurationFactory extends ConfigurationFactory {
+    public RunConfigurationFactory(WORunConfigType type) {
         super(type);
     }
 

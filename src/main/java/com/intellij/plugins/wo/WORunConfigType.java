@@ -9,7 +9,7 @@ public class WORunConfigType extends ConfigurationTypeBase {
 
     protected WORunConfigType() {
         super(ID, "WebObjects Plugin", "Enable Running of WebObjects Java applications", WOIcons.PLUGIN_ICON);
-        addFactory(new WOConfigurationFactory(this));
+        addFactory(new RunConfigurationFactory(this));
     }
 
     @NotNull

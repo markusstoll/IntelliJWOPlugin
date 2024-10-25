@@ -27,6 +27,7 @@ patchPluginXml {
 }
 
 dependencies {
+    implementation('org.jetbrains:annotations:24.0.0')
     testImplementation('org.junit.jupiter:junit-jupiter:5.10.0')
     implementation('org.seleniumhq.selenium:htmlunit3-driver:4.9.1')
 }
