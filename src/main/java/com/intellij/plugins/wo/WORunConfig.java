@@ -7,6 +7,9 @@ import com.intellij.execution.ShortenCommandLine;
 import com.intellij.execution.application.JavaSettingsEditorBase;
 import com.intellij.execution.configurations.*;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.target.LanguageRuntimeType;
+import com.intellij.execution.target.TargetEnvironmentAwareRunProfile;
+import com.intellij.execution.target.TargetEnvironmentConfiguration;
 import com.intellij.execution.ui.CommonParameterFragments;
 import com.intellij.execution.ui.ModuleClasspathCombo;
 import com.intellij.execution.ui.SettingsEditorFragment;
@@ -23,8 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class WORunConfig extends JavaRunConfigurationBase
-{
+public class WORunConfig extends JavaRunConfigurationBase implements TargetEnvironmentAwareRunProfile {
     private final RunConfigData runConfigData; // TODO use RunConfigurationOptions ?
 
     public WORunConfig(String name, ConfigurationFactory factory, Project project) {
@@ -48,12 +50,7 @@ public class WORunConfig extends JavaRunConfigurationBase
     @Override
     public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
 //        return new PageObjectConfigurable(this, getProject());
-        return new JavaSettingsEditorBase<WORunConfig>(this) {
-            @Override
-            protected void customizeFragments(List<SettingsEditorFragment<WORunConfig, ?>> settingsEditorFragments, SettingsEditorFragment<WORunConfig, ModuleClasspathCombo> moduleClasspath, CommonParameterFragments<WORunConfig> commonParameterFragments) {
-
-            }
-        };
+        return new WOApplicationSettingsEditor(this);
     }
 
     @Nullable
@@ -95,8 +92,15 @@ public class WORunConfig extends JavaRunConfigurationBase
 
     @Override
     public @Nullable String getRunClass() {
-//        return MAIN_CLASS_NAME;
-        return null;
+        return "";
+    }
+
+    public @Nullable String getMainClassName() {
+        return runConfigData.mainClassName;
+    }
+
+    public void setMainClassName(@Nullable String value) {
+        runConfigData.setMainClassName(value);
     }
 
     @Nullable
@@ -174,6 +178,26 @@ public class WORunConfig extends JavaRunConfigurationBase
 
     }
 
+    @Override
+    public boolean canRunOn(@NotNull TargetEnvironmentConfiguration target) {
+        return false;
+    }
+
+    @Override
+    public @Nullable LanguageRuntimeType<?> getDefaultLanguageRuntimeType() {
+        return null;
+    }
+
+    @Override
+    public @Nullable String getDefaultTargetName() {
+        return "";
+    }
+
+    @Override
+    public void setDefaultTargetName(@Nullable String targetName) {
+
+    }
+
     public static class RunConfigData {
 
         private boolean passParentEnvs;
@@ -185,8 +209,7 @@ public class WORunConfig extends JavaRunConfigurationBase
         private String alternativeJrePath;
         private String pageObjectClass;
         private String aPackage;
-        private String htmlFile;
-        private String htmlSnippet;
+        private String mainClassName;
 
         public void setEnvs(Map<String, String> envs) {
             this.envs = envs;
@@ -264,20 +287,12 @@ public class WORunConfig extends JavaRunConfigurationBase
             this.aPackage = aPackage;
         }
 
-        public String getHtmlFile() {
-            return htmlFile;
+        public String getMainClassName() {
+            return mainClassName;
         }
 
-        public void setHtmlFile(String htmlFile) {
-            this.htmlFile = htmlFile;
-        }
-
-        public String getHtmlSnippet() {
-            return htmlSnippet;
-        }
-
-        public void setHtmlSnippet(String htmlSnippet) {
-            this.htmlSnippet = htmlSnippet;
+        public void setMainClassName(String mainClassName) {
+            this.mainClassName = mainClassName;
         }
     }
 }

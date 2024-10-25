@@ -8,7 +8,7 @@ public class WORunConfigType extends ConfigurationTypeBase {
     static final String ID = "PageObjectEvaluator";
 
     protected WORunConfigType() {
-        super(ID, "WebObjects Plugin", "Enable Running of WebObjects Java applications", WOIcons.PLUGIN_ICON);
+        super(ID, "WebObjects", "Enable Running of WebObjects Java applications", WOIcons.PLUGIN_ICON);
         addFactory(new RunConfigurationFactory(this));
     }
 
