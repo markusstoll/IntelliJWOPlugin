@@ -1,0 +1,32 @@
+plugins {
+    id "org.jetbrains.intellij" version '1.17.4'
+}
+
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'java'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+}
+
+group = 'com.intellij.plugin.wo'
+
+test {
+    useJUnitPlatform()
+}
+
+intellij {
+    version = '2023.2.6'
+    plugins = ['com.intellij.java']
+}
+
+patchPluginXml {
+    sinceBuild = "232"
+    untilBuild = "242.*"
+}
+
+dependencies {
+    testImplementation('org.junit.jupiter:junit-jupiter:5.10.0')
+    implementation('org.seleniumhq.selenium:htmlunit3-driver:4.9.1')
+}
