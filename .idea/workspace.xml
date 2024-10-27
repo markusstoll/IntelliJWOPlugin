@@ -5,20 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/RunConfigurationFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/RunConfigurationFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WOApplicationSettingsEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WOIcons.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOIcons.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfigType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunConfigType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfigurationOptions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunConfigurationOptions.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfigurationProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunConfigurationProducer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/pluginIcon.svg" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/pluginIcon.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +101,7 @@
     "Gradle.IntelliJWOPlugin [compileJava].executor": "Run",
     "Gradle.IntelliJWOPlugin [setupDependencies].executor": "Run",
     "Gradle.Load Gradle Dependencies.executor": "Run",
-    "Gradle.Run Plugin.executor": "Debug",
+    "Gradle.Run Plugin.executor": "Run",
     "Gradle.WOApplicationRunner [setupDependencies].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
