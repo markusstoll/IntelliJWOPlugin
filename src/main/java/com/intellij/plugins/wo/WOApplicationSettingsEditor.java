@@ -1,10 +1,9 @@
 package com.intellij.plugins.wo;
 
 import com.intellij.execution.ExecutionBundle;
-import com.intellij.execution.application.ApplicationConfiguration;
+import com.intellij.execution.ui.*;
 import com.intellij.execution.application.ClassEditorField;
 import com.intellij.execution.application.JavaSettingsEditorBase;
-import com.intellij.execution.ui.*;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.ui.EditorTextField;
@@ -12,6 +11,8 @@ import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+
+import static com.intellij.execution.ui.CommandLinePanel.setMinimumWidth;
 
 public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WORunConfig> {
 
@@ -49,7 +50,7 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WORunCon
         String placeholder = ExecutionBundle.message("application.configuration.main.class.placeholder");
         mainClass.setPlaceholder(placeholder);
         mainClass.getAccessibleContext().setAccessibleName(placeholder);
-//        setMinimumWidth(mainClass, 300);
+        setMinimumWidth(mainClass, 300);
         SettingsEditorFragment<WORunConfig, EditorTextField> mainClassFragment =
                 new SettingsEditorFragment<>("mainClass", ExecutionBundle.message("application.configuration.main.class"), null, mainClass, 20,
                         (configuration, component) -> component.setText(configuration.getMainClassName()),
