@@ -1,4 +1,4 @@
-package com.intellij.plugins.wo;
+package org.wocommunity.plugins.intellij;
 
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.execution.ui.*;
@@ -14,34 +14,34 @@ import java.util.List;
 
 import static com.intellij.execution.ui.CommandLinePanel.setMinimumWidth;
 
-public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WORunConfig> {
+public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplicationConfiguration> {
 
-    public WOApplicationSettingsEditor(WORunConfig configuration) {
+    public WOApplicationSettingsEditor(WOApplicationConfiguration configuration) {
         super(configuration);
     }
 
     @Override
-    protected void customizeFragments(List<SettingsEditorFragment<WORunConfig, ?>> fragments,
-                                      SettingsEditorFragment<WORunConfig, ModuleClasspathCombo> moduleClasspath,
-                                      CommonParameterFragments<WORunConfig> commonParameterFragments) {
+    protected void customizeFragments(List<SettingsEditorFragment<WOApplicationConfiguration, ?>> fragments,
+                                      SettingsEditorFragment<WOApplicationConfiguration, ModuleClasspathCombo> moduleClasspath,
+                                      CommonParameterFragments<WOApplicationConfiguration> commonParameterFragments) {
 //        fragments.add(SettingsEditorFragment.createTag("include.provided",
 //                ExecutionBundle.message("application.configuration.include.provided.scope"),
 //                ExecutionBundle.message("group.java.options"),
 //                configuration -> configuration.getOptions().isIncludeProvidedScope(),
 //                (configuration, value) -> configuration.getOptions().setIncludeProvidedScope(value)));
         fragments.add(commonParameterFragments.programArguments());
-        fragments.add(new TargetPathFragment<>());
+//        fragments.add(new TargetPathFragment<>());
 //        fragments.add(commonParameterFragments.createRedirectFragment());
-        SettingsEditorFragment<WORunConfig, EditorTextField> mainClassFragment = createMainClass(moduleClasspath.component());
+        SettingsEditorFragment<WOApplicationConfiguration, EditorTextField> mainClassFragment = createMainClass(moduleClasspath.component());
         fragments.add(mainClassFragment);
         DefaultJreSelector jreSelector = DefaultJreSelector.fromSourceRootsDependencies(moduleClasspath.component(), mainClassFragment.component());
-        SettingsEditorFragment<WORunConfig, JrePathEditor> jrePath = CommonJavaFragments.createJrePath(jreSelector);
+        SettingsEditorFragment<WOApplicationConfiguration, JrePathEditor> jrePath = CommonJavaFragments.createJrePath(jreSelector);
         fragments.add(jrePath);
         fragments.add(createShortenClasspath(moduleClasspath.component(), jrePath, true));
     }
 
     @NotNull
-    private SettingsEditorFragment<WORunConfig, EditorTextField> createMainClass(ModuleClasspathCombo classpathCombo) {
+    private SettingsEditorFragment<WOApplicationConfiguration, EditorTextField> createMainClass(ModuleClasspathCombo classpathCombo) {
         EditorTextField mainClass = ClassEditorField.createClassField(getProject(), () -> classpathCombo.getSelectedModule(),
                 JavaCodeFragment.VisibilityChecker.PROJECT_SCOPE_VISIBLE, null);
         mainClass.setBackground(UIUtil.getTextFieldBackground());
@@ -51,7 +51,7 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WORunCon
         mainClass.setPlaceholder(placeholder);
         mainClass.getAccessibleContext().setAccessibleName(placeholder);
         setMinimumWidth(mainClass, 300);
-        SettingsEditorFragment<WORunConfig, EditorTextField> mainClassFragment =
+        SettingsEditorFragment<WOApplicationConfiguration, EditorTextField> mainClassFragment =
                 new SettingsEditorFragment<>("mainClass", ExecutionBundle.message("application.configuration.main.class"), null, mainClass, 20,
                         (configuration, component) -> component.setText(configuration.getMainClassName()),
                         (configuration, component) -> configuration.setMainClassName(component.getText()),

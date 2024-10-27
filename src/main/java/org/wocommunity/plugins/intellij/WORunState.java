@@ -1,4 +1,4 @@
-package com.intellij.plugins.wo;
+package org.wocommunity.plugins.intellij;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.application.BaseJavaApplicationCommandLineState;
@@ -6,11 +6,9 @@ import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.configurations.JavaRunConfigurationModule;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.util.JavaParametersUtil;
-import com.intellij.util.PathUtil;
-import org.apache.log4j.Logger;
 
-public class WORunState extends BaseJavaApplicationCommandLineState<WORunConfig> {
-    public WORunState(ExecutionEnvironment environment, WORunConfig configuration) {
+public class WORunState extends BaseJavaApplicationCommandLineState<WOApplicationConfiguration> {
+    public WORunState(ExecutionEnvironment environment, WOApplicationConfiguration configuration) {
         super(environment, configuration);
     }
 

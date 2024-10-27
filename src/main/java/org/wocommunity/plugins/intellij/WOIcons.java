@@ -1,4 +1,4 @@
-package com.intellij.plugins.wo;
+package org.wocommunity.plugins.intellij;
 
 import com.intellij.openapi.util.IconLoader;
 

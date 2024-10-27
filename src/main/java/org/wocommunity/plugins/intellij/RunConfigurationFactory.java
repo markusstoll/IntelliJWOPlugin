@@ -1,4 +1,4 @@
-package com.intellij.plugins.wo;
+package org.wocommunity.plugins.intellij;
 
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.RunConfiguration;
@@ -19,7 +19,7 @@ public class RunConfigurationFactory extends ConfigurationFactory {
     @NotNull
     @Override
     public RunConfiguration createTemplateConfiguration(@NotNull Project project) {
-        return new WORunConfig("WebObjects", this, project);
+        return new WOApplicationConfiguration("WebObjects", this, project);
     }
 
     @Override

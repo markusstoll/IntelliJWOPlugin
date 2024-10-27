@@ -1,4 +1,4 @@
-package com.intellij.plugins.wo;
+package org.wocommunity.plugins.intellij;
 
 import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;

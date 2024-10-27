@@ -1,4 +1,4 @@
-package com.intellij.plugins.wo;
+package org.wocommunity.plugins.intellij;
 
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.LazyRunConfigurationProducer;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class WORunConfigurationProducer extends LazyRunConfigurationProducer<WORunConfig> {
+public class WORunConfigurationProducer extends LazyRunConfigurationProducer<WOApplicationConfiguration> {
     private final List<String> imports = List.of("org.openqa.selenium.support.FindBy", "org.openqa.selenium.WebElement", "org.openqa.selenium.By");
 
     @NotNull
@@ -26,7 +26,7 @@ public class WORunConfigurationProducer extends LazyRunConfigurationProducer<WOR
     }
 
     @Override
-    protected boolean setupConfigurationFromContext(@NotNull WORunConfig configuration, @NotNull ConfigurationContext context, @NotNull Ref<PsiElement> sourceElement) {
+    protected boolean setupConfigurationFromContext(@NotNull WOApplicationConfiguration configuration, @NotNull ConfigurationContext context, @NotNull Ref<PsiElement> sourceElement) {
         var psiLocation = context.getPsiLocation();
 
         if (psiLocation == null || (psiLocation != null && !psiLocation.getLanguage().is(JavaLanguage.INSTANCE))) {
@@ -47,7 +47,7 @@ public class WORunConfigurationProducer extends LazyRunConfigurationProducer<WOR
     }
 
     @Override
-    public boolean isConfigurationFromContext(@NotNull WORunConfig configuration, @NotNull ConfigurationContext context) {
+    public boolean isConfigurationFromContext(@NotNull WOApplicationConfiguration configuration, @NotNull ConfigurationContext context) {
         var psiLocation = context.getPsiLocation();
 
         if (psiLocation == null || (psiLocation != null && !psiLocation.getLanguage().is(JavaLanguage.INSTANCE))) {
@@ -71,7 +71,7 @@ public class WORunConfigurationProducer extends LazyRunConfigurationProducer<WOR
         @NotNull
         @Override
         public RunConfiguration createTemplateConfiguration(@NotNull Project project) {
-            return new WORunConfig("WO", this, project);
+            return new WOApplicationConfiguration("WO", this, project);
         }
 
         @Override
