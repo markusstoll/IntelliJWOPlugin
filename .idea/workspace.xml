@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WOApplicationSettingsEditor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfigType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WORunConfigType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WOApplicationSettingsEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WOApplicationSettingsEditor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -296,7 +294,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/intellij/plugins/wo/WOApplicationSettingsEditor.java</url>
-          <line>32</line>
+          <line>33</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
