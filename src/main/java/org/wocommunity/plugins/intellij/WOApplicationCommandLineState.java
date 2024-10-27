@@ -6,6 +6,10 @@ import com.intellij.execution.configurations.JavaCommandLineState;
 import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.openapi.projectRoots.JavaSdk;
+import com.intellij.openapi.projectRoots.JavaSdkVersion;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.projectRoots.SdkTypeId;
 import org.jetbrains.annotations.NotNull;
 
 public class WOApplicationCommandLineState<T extends WOApplicationConfiguration> extends ApplicationConfiguration.JavaApplicationCommandLineState<T> {
@@ -19,8 +23,10 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
 
         ParametersList vmParametersList = javaParameters.getVMParametersList();
 
-        int majorVersion = Integer.parseInt(getJavaParameters().getJdk().getVersionString().split("\\.")[0]);
-        if(majorVersion > 11)
+        Sdk jdk = javaParameters.getJdk();
+        SdkTypeId sdkType = jdk.getSdkType();
+        JavaSdk javaSdk = (JavaSdk) sdkType;
+        if(javaSdk.isOfVersionOrHigher(jdk, JavaSdkVersion.JDK_11))
         {
             vmParametersList.add("--add-exports=java.base/sun.security.action=ALL-UNNAMED");
             vmParametersList.add("--add-exports=java.base/sun.util.calendar=ALL-UNNAMED");

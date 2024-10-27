@@ -75,6 +75,20 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/JavaRunConfigurationBase.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationCommandLineState.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationConfiguration.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/BaseJavaApplicationCommandLineState.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/configurations/JavaCommandLineState.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/configurations/SimpleJavaParameters.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/impl/statistics/RunConfigurationUsageTriggerCollector.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/runners/ExecutionEnvironment.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/openapi/application/Application.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/openapi/application/ReadAction.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/openapi/projectRoots/Sdk.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/openapi/projectRoots/SdkTypeId.java" root0="SKIP_INSPECTION" />
+  </component>
   <component name="LogFilters">
     <option name="FILTER_ERRORS" value="false" />
     <option name="FILTER_WARNINGS" value="false" />
@@ -99,9 +113,10 @@
     "Gradle.IntelliJWOPlugin [build].executor": "Run",
     "Gradle.IntelliJWOPlugin [clean].executor": "Run",
     "Gradle.IntelliJWOPlugin [compileJava].executor": "Run",
+    "Gradle.IntelliJWOPlugin [jar].executor": "Run",
     "Gradle.IntelliJWOPlugin [setupDependencies].executor": "Run",
     "Gradle.Load Gradle Dependencies.executor": "Run",
-    "Gradle.Run Plugin.executor": "Run",
+    "Gradle.Run Plugin.executor": "Debug",
     "Gradle.WOApplicationRunner [setupDependencies].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -112,7 +127,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
@@ -143,28 +158,6 @@
         <option name="taskNames">
           <list>
             <option value="assemble" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="IntelliJWOPlugin [buildDependents]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="buildDependents" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -241,21 +234,43 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="IntelliJWOPlugin [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="jar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Gradle.Run Plugin" />
       <item itemvalue="Gradle.IntelliJWOPlugin [assemble]" />
       <item itemvalue="Gradle.IntelliJWOPlugin [build]" />
-      <item itemvalue="Gradle.IntelliJWOPlugin [buildDependents]" />
       <item itemvalue="Gradle.IntelliJWOPlugin [clean]" />
       <item itemvalue="Gradle.IntelliJWOPlugin [compileJava]" />
+      <item itemvalue="Gradle.IntelliJWOPlugin [jar]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.IntelliJWOPlugin [jar]" />
         <item itemvalue="Gradle.IntelliJWOPlugin [compileJava]" />
         <item itemvalue="Gradle.IntelliJWOPlugin [clean]" />
-        <item itemvalue="Gradle.IntelliJWOPlugin [assemble]" />
         <item itemvalue="Gradle.IntelliJWOPlugin [build]" />
-        <item itemvalue="Gradle.IntelliJWOPlugin [buildDependents]" />
+        <item itemvalue="Gradle.IntelliJWOPlugin [assemble]" />
       </list>
     </recent_temporary>
   </component>
@@ -294,19 +309,9 @@
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationConfiguration.java</url>
-          <line>98</line>
-          <option name="timeStamp" value="25" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationCommandLineState.java</url>
-          <line>36</line>
-          <option name="timeStamp" value="27" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationCommandLineState.java</url>
-          <line>57</line>
-          <option name="timeStamp" value="28" />
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java</url>
+          <line>25</line>
+          <option name="timeStamp" value="29" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
