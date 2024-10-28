@@ -17,7 +17,7 @@ test {
 }
 
 intellij {
-    version = '2024.2.4'
+    version = '2023.2.6'
     plugins = ['com.intellij.java']
 }
 
