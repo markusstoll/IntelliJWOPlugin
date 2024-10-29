@@ -10,6 +10,7 @@ import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class WOApplicationCommandLineState<T extends WOApplicationConfiguration> extends ApplicationConfiguration.JavaApplicationCommandLineState<T> {
@@ -20,6 +21,12 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
     @Override
     protected JavaParameters createJavaParameters() throws ExecutionException {
         JavaParameters javaParameters = super.createJavaParameters();
+
+        if(StringUtils.isEmpty(javaParameters.getWorkingDirectory())
+            || javaParameters.getWorkingDirectory().equals(myConfiguration.getProject().getBasePath()))
+        {
+            javaParameters.setWorkingDirectory(myConfiguration.getProject().getBasePath() + "/target/" + myConfiguration.getConfigurationModule().getModule().getName() + ".woa");
+        }
 
         ParametersList vmParametersList = javaParameters.getVMParametersList();
 

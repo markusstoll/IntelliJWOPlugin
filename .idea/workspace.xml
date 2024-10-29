@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,18 +49,6 @@
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="IntelliJWOPlugin" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build setup" type="c8890929:TasksNode$1" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="IntelliJWOPlugin" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="other" type="c8890929:TasksNode$1" />
-              </path>
             </expand>
             <select />
           </tree_state>
@@ -79,12 +71,14 @@
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationCommandLineState.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationConfiguration.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/BaseJavaApplicationCommandLineState.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/JavaSettingsEditorBase.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/configurations/JavaCommandLineState.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/configurations/SimpleJavaParameters.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/configurations/runConfigurationType.kt" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/impl/statistics/RunConfigurationUsageTriggerCollector.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/runners/ExecutionEnvironment.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/target/TargetEnvironmentAwareRunProfileState.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/ui/CommonParameterFragments.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/openapi/application/Application.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/openapi/application/ReadAction.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/openapi/progress/impl/CoreProgressManager.java" root0="SKIP_INSPECTION" />
@@ -110,32 +104,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.Build IntelliJWOPlugin.executor": "Run",
-    "Gradle.IntelliJWOPlugin [assemble].executor": "Run",
-    "Gradle.IntelliJWOPlugin [buildDependents].executor": "Run",
-    "Gradle.IntelliJWOPlugin [build].executor": "Run",
-    "Gradle.IntelliJWOPlugin [clean].executor": "Run",
-    "Gradle.IntelliJWOPlugin [compileJava].executor": "Run",
-    "Gradle.IntelliJWOPlugin [jar].executor": "Run",
-    "Gradle.IntelliJWOPlugin [setupDependencies].executor": "Run",
-    "Gradle.Load Gradle Dependencies.executor": "Run",
-    "Gradle.Run Plugin.executor": "Run",
-    "Gradle.WOApplicationRunner [setupDependencies].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/Shared/Daten/GIT/IntelliJWOPlugin/gradle/wrapper",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "show.migrate.to.gradle.popup": "false"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.Build IntelliJWOPlugin.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.IntelliJWOPlugin [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.IntelliJWOPlugin [buildDependents].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.IntelliJWOPlugin [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.IntelliJWOPlugin [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.IntelliJWOPlugin [compileJava].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.IntelliJWOPlugin [jar].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.IntelliJWOPlugin [setupDependencies].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Load Gradle Dependencies.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Run Plugin.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.WOApplicationRunner [setupDependencies].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/Shared/Daten/GIT/IntelliJWOPlugin/gradle/wrapper&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.appearance&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="org.wocommunity.plugins.intellij" />
@@ -150,7 +144,7 @@
       <recent name="$PROJECT_DIR$/src/main/resources/META-INF" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.IntelliJWOPlugin [jar]">
+  <component name="RunManager" selected="Gradle.Run Plugin">
     <configuration name="IntelliJWOPlugin [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -271,11 +265,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.IntelliJWOPlugin [jar]" />
+        <item itemvalue="Gradle.IntelliJWOPlugin [assemble]" />
         <item itemvalue="Gradle.IntelliJWOPlugin [build]" />
+        <item itemvalue="Gradle.IntelliJWOPlugin [jar]" />
         <item itemvalue="Gradle.IntelliJWOPlugin [clean]" />
         <item itemvalue="Gradle.IntelliJWOPlugin [compileJava]" />
-        <item itemvalue="Gradle.IntelliJWOPlugin [assemble]" />
       </list>
     </recent_temporary>
   </component>
@@ -294,11 +288,6 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java</url>
-          <line>52</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/ui/ConfigurationModuleSelector.java</url>
           <line>55</line>
           <option name="timeStamp" value="6" />
@@ -314,11 +303,21 @@
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java</url>
-          <line>25</line>
-          <option name="timeStamp" value="29" />
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java</url>
+          <line>31</line>
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java</url>
+          <line>35</line>
+          <option name="timeStamp" value="41" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="org.jdom.Element" memberName="ctype" />
+      </pinned-members>
+    </pin-to-top-manager>
   </component>
 </project>

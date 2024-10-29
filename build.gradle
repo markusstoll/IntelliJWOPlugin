@@ -18,7 +18,7 @@ test {
 
 intellij {
     version = '2023.2.6'
-    plugins = ['com.intellij.java']
+    plugins = ['com.intellij.java','org.jetbrains.idea.maven']
 }
 
 patchPluginXml {
