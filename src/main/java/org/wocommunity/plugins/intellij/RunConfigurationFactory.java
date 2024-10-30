@@ -19,7 +19,9 @@ public class RunConfigurationFactory extends ConfigurationFactory {
     @NotNull
     @Override
     public RunConfiguration createTemplateConfiguration(@NotNull Project project) {
-        return new WOApplicationConfiguration("WebObjects", this, project);
+        WOApplicationConfiguration woApplicationConfiguration = new WOApplicationConfiguration("WebObjects", this, project);
+
+        return woApplicationConfiguration;
     }
 
     @Override

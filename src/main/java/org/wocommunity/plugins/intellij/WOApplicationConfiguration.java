@@ -21,22 +21,24 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
 
     public WOApplicationConfiguration(String name, ConfigurationFactory factory, Project project) {
         super(name, project, factory);
-
-        if(getBeforeRunTasks().isEmpty())
-        {
-            MavenBeforeRunTasksProvider mavenBeforeRunTasksProvider = new MavenBeforeRunTasksProvider(getProject());
-
-            MavenBeforeRunTask mavenTask = mavenBeforeRunTasksProvider.createTask(this);
-
-            mavenTask.setGoal("process-resources");
-            mavenTask.setProjectPath(getProject().getBasePath());
-            mavenTask.setEnabled(true);
-
-            ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>();
-            taskArrayList.add(mavenTask);
-            setBeforeRunTasks(taskArrayList);
-        }
     }
+
+//    public void addOnBeforeTask() {
+////        if(!getBeforeRunTasks().isEmpty())
+////            return;
+//
+//        MavenBeforeRunTasksProvider mavenBeforeRunTasksProvider = new MavenBeforeRunTasksProvider(getProject());
+//
+//        MavenBeforeRunTask mavenTask = mavenBeforeRunTasksProvider.createTask(this);
+//
+//        mavenTask.setGoal("process-resources");
+//        mavenTask.setProjectPath(getProject().getBasePath());
+//        mavenTask.setEnabled(true);
+//
+//        ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>(getBeforeRunTasks());
+//        taskArrayList.add(mavenTask);
+//        setBeforeRunTasks(taskArrayList);
+//    }
 
     @Override
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env) throws ExecutionException {

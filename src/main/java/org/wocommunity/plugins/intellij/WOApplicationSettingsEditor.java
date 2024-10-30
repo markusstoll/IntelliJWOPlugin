@@ -5,6 +5,7 @@ import com.intellij.execution.ui.*;
 import com.intellij.execution.application.ClassEditorField;
 import com.intellij.execution.application.JavaSettingsEditorBase;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.ui.EditorTextField;
 import com.intellij.util.ui.UIUtil;
@@ -19,6 +20,13 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
     public WOApplicationSettingsEditor(WOApplicationConfiguration configuration) {
         super(configuration);
     }
+
+//    @Override
+//    public void applyEditorTo(@NotNull WOApplicationConfiguration settings) throws ConfigurationException {
+//        super.applyEditorTo(settings);
+//
+//        settings.addOnBeforeTask();
+//    }
 
     @Override
     protected void customizeFragments(List<SettingsEditorFragment<WOApplicationConfiguration, ?>> fragments,
