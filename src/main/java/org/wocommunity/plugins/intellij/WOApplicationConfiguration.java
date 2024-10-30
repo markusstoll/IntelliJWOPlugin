@@ -23,22 +23,39 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
         super(name, project, factory);
     }
 
-//    public void addOnBeforeTask() {
-////        if(!getBeforeRunTasks().isEmpty())
-////            return;
-//
-//        MavenBeforeRunTasksProvider mavenBeforeRunTasksProvider = new MavenBeforeRunTasksProvider(getProject());
-//
-//        MavenBeforeRunTask mavenTask = mavenBeforeRunTasksProvider.createTask(this);
-//
-//        mavenTask.setGoal("process-resources");
-//        mavenTask.setProjectPath(getProject().getBasePath());
-//        mavenTask.setEnabled(true);
-//
-//        ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>(getBeforeRunTasks());
-//        taskArrayList.add(mavenTask);
-//        setBeforeRunTasks(taskArrayList);
-//    }
+    @Override
+    public void checkSettingsBeforeRun() throws RuntimeConfigurationException {
+        super.checkSettingsBeforeRun();
+
+        addOnBeforeTask();
+    }
+
+    public void addOnBeforeTask() {
+
+        ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>(getBeforeRunTasks());
+
+        if(taskArrayList
+                .stream()
+                .filter(brt -> brt instanceof MavenBeforeRunTask)
+                .map(brt -> (MavenBeforeRunTask)brt)
+                .filter(mbrt -> "process-resources".equals(mbrt.getGoal()))
+                .findAny()
+                .isEmpty())
+        {
+            Project project = getProject();
+            RunManager runManager = RunManager.getInstance(project);
+
+            MavenBeforeRunTasksProvider mavenBeforeRunTasksProvider = new MavenBeforeRunTasksProvider(project);
+            MavenBeforeRunTask mavenTask = mavenBeforeRunTasksProvider.createTask(this);
+
+            mavenTask.setGoal("process-resources");
+            mavenTask.setProjectPath(getProject().getBasePath() + "/pom.xml");
+            mavenTask.setEnabled(true);
+
+            taskArrayList.add(mavenTask);
+            setBeforeRunTasks(taskArrayList);
+        }
+    }
 
     @Override
     public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env) throws ExecutionException {
