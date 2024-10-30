@@ -6,10 +6,12 @@ import com.intellij.execution.configurations.JavaCommandLineState;
 import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
+import com.intellij.util.PathUtilRt;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +27,8 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         if(StringUtils.isEmpty(javaParameters.getWorkingDirectory())
             || javaParameters.getWorkingDirectory().equals(myConfiguration.getProject().getBasePath()))
         {
-            javaParameters.setWorkingDirectory(myConfiguration.getProject().getBasePath() + "/target/" + myConfiguration.getConfigurationModule().getModule().getName() + ".woa");
+            String modulePath = ModuleUtil.getModuleDirPath(myConfiguration.getConfigurationModule().getModule());
+            javaParameters.setWorkingDirectory(modulePath + "/target/" + myConfiguration.getConfigurationModule().getModule().getName() + ".woa");
         }
 
         ParametersList vmParametersList = javaParameters.getVMParametersList();

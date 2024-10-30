@@ -8,7 +8,10 @@ import com.intellij.execution.application.ApplicationConfiguration;
 import com.intellij.execution.configurations.*;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.util.PathUtilRt;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTask;
@@ -48,8 +51,9 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
             MavenBeforeRunTasksProvider mavenBeforeRunTasksProvider = new MavenBeforeRunTasksProvider(project);
             MavenBeforeRunTask mavenTask = mavenBeforeRunTasksProvider.createTask(this);
 
+            String modulePath = ModuleUtil.getModuleDirPath(getConfigurationModule().getModule());
             mavenTask.setGoal("process-resources");
-            mavenTask.setProjectPath(getProject().getBasePath() + "/pom.xml");
+            mavenTask.setProjectPath(modulePath + "/pom.xml");
             mavenTask.setEnabled(true);
 
             taskArrayList.add(mavenTask);
