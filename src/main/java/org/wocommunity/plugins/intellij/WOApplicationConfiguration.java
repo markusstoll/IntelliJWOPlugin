@@ -34,6 +34,8 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
     }
 
     public void addOnBeforeTask() {
+        String modulePath = ModuleUtil.getModuleDirPath(getConfigurationModule().getModule());
+        String mavenPomPath = modulePath + "/pom.xml";
 
         ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>(getBeforeRunTasks());
 
@@ -42,6 +44,7 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
                 .filter(brt -> brt instanceof MavenBeforeRunTask)
                 .map(brt -> (MavenBeforeRunTask)brt)
                 .filter(mbrt -> "process-resources".equals(mbrt.getGoal()))
+                .filter(mbrt -> mavenPomPath.equals(mbrt.getProjectPath()))
                 .findAny()
                 .isEmpty())
         {
@@ -51,9 +54,8 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
             MavenBeforeRunTasksProvider mavenBeforeRunTasksProvider = new MavenBeforeRunTasksProvider(project);
             MavenBeforeRunTask mavenTask = mavenBeforeRunTasksProvider.createTask(this);
 
-            String modulePath = ModuleUtil.getModuleDirPath(getConfigurationModule().getModule());
             mavenTask.setGoal("process-resources");
-            mavenTask.setProjectPath(modulePath + "/pom.xml");
+            mavenTask.setProjectPath(mavenPomPath);
             mavenTask.setEnabled(true);
 
             taskArrayList.add(mavenTask);
