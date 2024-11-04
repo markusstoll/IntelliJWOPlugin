@@ -15,6 +15,8 @@ import com.intellij.util.PathUtilRt;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+
 public class WOApplicationCommandLineState<T extends WOApplicationConfiguration> extends ApplicationConfiguration.JavaApplicationCommandLineState<T> {
     public WOApplicationCommandLineState(T configuration, @NotNull ExecutionEnvironment environment) {
         super(configuration, environment);
@@ -24,10 +26,11 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
     protected JavaParameters createJavaParameters() throws ExecutionException {
         JavaParameters javaParameters = super.createJavaParameters();
 
+        String modulePath = ProjectUtil.getModulePath(myConfiguration.getConfigurationModule().getModule());
+
         if(StringUtils.isEmpty(javaParameters.getWorkingDirectory())
             || javaParameters.getWorkingDirectory().equals(myConfiguration.getProject().getBasePath()))
         {
-            String modulePath = ModuleUtil.getModuleDirPath(myConfiguration.getConfigurationModule().getModule());
             javaParameters.setWorkingDirectory(modulePath + "/target/" + myConfiguration.getConfigurationModule().getModule().getName() + ".woa");
         }
 
@@ -87,6 +90,8 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         programParametersList.add("-WOWorkerThreadCount", "8");
         programParametersList.add("-WOWorkerThreadCountMax", "256");
         programParametersList.add("-WOWorkerThreadCountMin", "16");
+
+        new ProjectUtil().createOrUpdateProjectDescriptionFile(new File(modulePath));
 
         return javaParameters;
     }

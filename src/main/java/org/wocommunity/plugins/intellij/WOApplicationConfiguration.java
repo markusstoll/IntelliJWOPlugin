@@ -34,7 +34,7 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
     }
 
     public void addOnBeforeTask() {
-        String modulePath = ModuleUtil.getModuleDirPath(getConfigurationModule().getModule());
+        String modulePath = ProjectUtil.getModulePath(getConfigurationModule().getModule());
         String mavenPomPath = modulePath + "/pom.xml";
 
         ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>(getBeforeRunTasks());
