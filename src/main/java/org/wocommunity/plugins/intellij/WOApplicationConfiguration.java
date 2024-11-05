@@ -10,7 +10,6 @@ import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.util.PathUtilRt;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +33,7 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
     }
 
     public void addOnBeforeTask() {
-        String modulePath = ProjectUtil.getModulePath(getConfigurationModule().getModule());
+        String modulePath = WOProjectUtil.getModulePath(getConfigurationModule().getModule());
         String mavenPomPath = modulePath + "/pom.xml";
 
         ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>(getBeforeRunTasks());

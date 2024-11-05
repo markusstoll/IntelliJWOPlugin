@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class ProjectUtil {
+public class WOProjectUtil {
 
     public static final String ORG_MAVEN_IDE_ECLIPSE_MAVEN_2_NATURE = "org.maven.ide.eclipse.maven2Nature";
 
