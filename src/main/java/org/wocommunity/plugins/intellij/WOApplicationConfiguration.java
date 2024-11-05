@@ -1,29 +1,42 @@
 package org.wocommunity.plugins.intellij;
 
-import com.intellij.execution.BeforeRunTask;
-import com.intellij.execution.ExecutionException;
-import com.intellij.execution.Executor;
-import com.intellij.execution.RunManager;
+import com.intellij.diagnostic.logging.LogConfigurationPanel;
+import com.intellij.execution.*;
+import com.intellij.execution.application.ApplicationConfigurable;
 import com.intellij.execution.application.ApplicationConfiguration;
+import com.intellij.execution.application.JavaApplicationSettingsEditor;
 import com.intellij.execution.configurations.*;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.options.SettingsEditor;
+import com.intellij.openapi.options.SettingsEditorGroup;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
-import com.intellij.util.PathUtilRt;
-import org.jdom.Element;
+import com.intellij.openapi.util.registry.Registry;
+import com.intellij.util.xmlb.annotations.XCollection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTask;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTasksProvider;
 
-import javax.sound.midi.SysexMessage;
 import java.util.ArrayList;
+import java.util.List;
 
 public class WOApplicationConfiguration extends ApplicationConfiguration {
+    @XCollection(propertyElementName = "woOptions")
+    private List<KeyValueOption> woOptions = new ArrayList<>();
 
     public WOApplicationConfiguration(String name, ConfigurationFactory factory, Project project) {
         super(name, project, factory);
+
+        woOptions.add(new KeyValueOption(true, "-WOPort", "4040"));
+        woOptions.add(new KeyValueOption(false, "-WOXXX", "123"));
+    }
+
+    public List<KeyValueOption> getWOOptions() { return woOptions; }
+    public void setWOOptions(List<KeyValueOption> options) { this.woOptions = options; }
+
+    public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
+        return new WOApplicationSettingsEditor(this);
     }
 
     @Override

@@ -21,13 +21,6 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
         super(configuration);
     }
 
-//    @Override
-//    public void applyEditorTo(@NotNull WOApplicationConfiguration settings) throws ConfigurationException {
-//        super.applyEditorTo(settings);
-//
-//        settings.addOnBeforeTask();
-//    }
-
     @Override
     protected void customizeFragments(List<SettingsEditorFragment<WOApplicationConfiguration, ?>> fragments,
                                       SettingsEditorFragment<WOApplicationConfiguration, ModuleClasspathCombo> moduleClasspath,
@@ -46,6 +39,8 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
         SettingsEditorFragment<WOApplicationConfiguration, JrePathEditor> jrePath = CommonJavaFragments.createJrePath(jreSelector);
         fragments.add(jrePath);
         fragments.add(createShortenClasspath(moduleClasspath.component(), jrePath, true));
+
+        fragments.add(new KeyValueOptionsFragment(this.mySettings));
     }
 
     @NotNull
