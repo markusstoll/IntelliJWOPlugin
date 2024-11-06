@@ -137,11 +137,27 @@ public class WOProjectUtil {
         writeDocumentToFile(document, target);
     }
 
+    public static void removeWhitespaceNodes(Node node) {
+        NodeList childNodes = node.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node child = childNodes.item(i);
+            if (child.getNodeType() == Node.TEXT_NODE && child.getNodeValue().trim().isEmpty()) {
+                node.removeChild(child);
+                i--; // Decrement index to account for removed node
+            } else if (child.getNodeType() == Node.ELEMENT_NODE) {
+                removeWhitespaceNodes(child); // Recurse into child elements
+            }
+        }
+    }
+
+
     public static void writeDocumentToFile(Document document, File target) {
         try {
             // Set up a transformer for converting Document to XML
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+
+            removeWhitespaceNodes(document.getDocumentElement());
 
             // Set up the source and result
             DOMSource source = new DOMSource(document);
@@ -150,7 +166,8 @@ public class WOProjectUtil {
             // Transform the Document to the file, specifying output encoding and indenting
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "no");
+            transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_PUBLIC, "yes");
 
             // Transform the Document to the file
             transformer.transform(source, result);
