@@ -8,12 +8,15 @@
     <name>IntelliJWOPlugin</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="markus.stoll@junidas.de" url="https://www.junidas.de">Junidas GmbH</vendor>
+    <vendor email="markus.stoll@junidas.de" url="https://www.junidas.de">Markus Stoll</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description>Run WO / Wonder apps, supply an editor for required options</description>
+    <description>IntelliJ plugin for WebObjects / Wonder apps
+
+        First draft that only supports a run configuration
+    </description>
 
     <idea-version since-build="232" until-build="242.*" />
 
