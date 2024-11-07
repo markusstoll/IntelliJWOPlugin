@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -20,7 +21,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class ProjectUtil {
+public class WOProjectUtil {
 
     public static final String ORG_MAVEN_IDE_ECLIPSE_MAVEN_2_NATURE = "org.maven.ide.eclipse.maven2Nature";
 
@@ -38,12 +39,15 @@ public class ProjectUtil {
     public void createOrUpdateProjectDescriptionFile(File projectDir)  {
         File projectDescriptionFile = new File(projectDir, ".project");
 
+        File mavenStyleProperties = new File(projectDir, "src/main/resources/Properties");
+        boolean isMavenStyleProject = mavenStyleProperties.exists();
+
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
 
             Document document = builder.parse(projectDescriptionFile);
-            boolean mavenNatureFound = false;
+            Node natureElementWithEclipseNature = null;
 
             NodeList projectDescriptionList = document.getElementsByTagName("projectDescription");
             if(projectDescriptionList.getLength() == 1)
@@ -56,19 +60,34 @@ public class ProjectUtil {
                         Node natureElement = (Node) natureList.item(i);
                         if (natureElement.getNodeName().equals("nature")
                                 && ORG_MAVEN_IDE_ECLIPSE_MAVEN_2_NATURE.equals(natureElement.getTextContent())) {
-                            mavenNatureFound = true;
-
-                            return; // nothing to do
+                            natureElementWithEclipseNature = natureElement;
                         }
                     }
 
-                    Element newNatureElement = document.createElement("nature");
-                    newNatureElement.setTextContent(ORG_MAVEN_IDE_ECLIPSE_MAVEN_2_NATURE);
+                    if(!isMavenStyleProject)
+                    {
+                        if(natureElementWithEclipseNature != null)
+                        {
+                            // remove eclipse maven nature
+                            naturesElement.removeChild(natureElementWithEclipseNature);
 
-                    naturesElement.appendChild(newNatureElement);
+                            writeDocumentToFile(document, projectDescriptionFile);
+                        }
 
-                    writeDocumentToFile(document, projectDescriptionFile);
-                    return;
+                        return;
+                    }
+
+                    if(natureElementWithEclipseNature == null)
+                    {
+                        Element newNatureElement = document.createElement("nature");
+                        newNatureElement.setTextContent(ORG_MAVEN_IDE_ECLIPSE_MAVEN_2_NATURE);
+
+                        naturesElement.appendChild(newNatureElement);
+
+                        writeDocumentToFile(document, projectDescriptionFile);
+
+                        return;
+                    }
                 }
             }
 
@@ -77,8 +96,10 @@ public class ProjectUtil {
         }
 
         try {
-            // File does not exist, create it
-            createProjectDescriptionFile(projectDescriptionFile);
+            if(isMavenStyleProject) {
+                // File does not exist, create it
+                createProjectDescriptionFile(projectDescriptionFile);
+            }
         } catch (IOException |ParserConfigurationException ex) {
             throw new RuntimeException(ex);
         }
@@ -116,45 +137,42 @@ public class ProjectUtil {
         writeDocumentToFile(document, target);
     }
 
+    public static void removeWhitespaceNodes(Node node) {
+        NodeList childNodes = node.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node child = childNodes.item(i);
+            if (child.getNodeType() == Node.TEXT_NODE && child.getNodeValue().trim().isEmpty()) {
+                node.removeChild(child);
+                i--; // Decrement index to account for removed node
+            } else if (child.getNodeType() == Node.ELEMENT_NODE) {
+                removeWhitespaceNodes(child); // Recurse into child elements
+            }
+        }
+    }
+
+
     public static void writeDocumentToFile(Document document, File target) {
         try {
             // Set up a transformer for converting Document to XML
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
 
+            removeWhitespaceNodes(document.getDocumentElement());
+
             // Set up the source and result
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(target);
+
+            // Transform the Document to the file, specifying output encoding and indenting
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            transformer.setOutputProperty(javax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "no");
+            transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_PUBLIC, "yes");
 
             // Transform the Document to the file
             transformer.transform(source, result);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private String documentToString(Document document) {
-        StringBuilder builder = new StringBuilder();
-
-        if (document != null && document.getDocumentElement() != null) {
-            builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            Node root = document.getDocumentElement();
-            while (root != null) {
-                builder.append("<").append(root.getNodeName()).append(">");
-                NodeList children = root.getChildNodes();
-                for (int i = 0; i < children.getLength(); i++) {
-                    Node child = children.item(i);
-                    if (child instanceof Element) {
-                        builder.append(documentToString((Document) child.getOwnerDocument()));
-                    } else {
-                        builder.append(child.getNodeValue());
-                    }
-                }
-                builder.append("</").append(root.getNodeName()).append(">\n");
-                root = root.getNextSibling();
-            }
-        }
-
-        return builder.toString();
     }
 }

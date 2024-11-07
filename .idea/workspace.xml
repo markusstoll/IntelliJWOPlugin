@@ -5,10 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/ProjectUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOProjectUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +122,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Merging runConfigUI",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/Shared/Daten/GIT/IntelliJWOPlugin/gradle/wrapper",
     "project.structure.last.edited": "Modules",
@@ -285,6 +288,17 @@
       <updated>1729841436265</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

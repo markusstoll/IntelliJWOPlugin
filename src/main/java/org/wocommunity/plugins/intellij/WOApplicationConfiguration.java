@@ -12,8 +12,8 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.options.SettingsEditorGroup;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.registry.Registry;
-import com.intellij.util.xmlb.annotations.XCollection;
+import com.intellij.util.PathUtilRt;
+import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTask;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTasksProvider;
@@ -47,7 +47,7 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
     }
 
     public void addOnBeforeTask() {
-        String modulePath = ProjectUtil.getModulePath(getConfigurationModule().getModule());
+        String modulePath = WOProjectUtil.getModulePath(getConfigurationModule().getModule());
         String mavenPomPath = modulePath + "/pom.xml";
 
         ArrayList<BeforeRunTask<?>> taskArrayList = new ArrayList<>(getBeforeRunTasks());

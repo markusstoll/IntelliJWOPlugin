@@ -26,7 +26,7 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
     protected JavaParameters createJavaParameters() throws ExecutionException {
         JavaParameters javaParameters = super.createJavaParameters();
 
-        String modulePath = ProjectUtil.getModulePath(myConfiguration.getConfigurationModule().getModule());
+        String modulePath = WOProjectUtil.getModulePath(myConfiguration.getConfigurationModule().getModule());
 
         if(StringUtils.isEmpty(javaParameters.getWorkingDirectory())
             || javaParameters.getWorkingDirectory().equals(myConfiguration.getProject().getBasePath()))
@@ -91,7 +91,7 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         programParametersList.add("-WOWorkerThreadCountMax", "256");
         programParametersList.add("-WOWorkerThreadCountMin", "16");
 
-        new ProjectUtil().createOrUpdateProjectDescriptionFile(new File(modulePath));
+        new WOProjectUtil().createOrUpdateProjectDescriptionFile(new File(modulePath));
 
         return javaParameters;
     }
