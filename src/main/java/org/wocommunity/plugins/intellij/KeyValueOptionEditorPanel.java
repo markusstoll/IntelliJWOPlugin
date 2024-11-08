@@ -24,6 +24,8 @@ public class KeyValueOptionEditorPanel extends JPanel {
         table.getColumnModel().getColumn(1).setPreferredWidth(250); // Key column
         table.getColumnModel().getColumn(2).setPreferredWidth(150); // Value column
 
+        table.setVisibleRowCount(10);
+
         // Add table to a scroll pane and then to the panel
         JBScrollPane scrollPane = new JBScrollPane(table);
         add(scrollPane, BorderLayout.CENTER);
