@@ -12,12 +12,13 @@ import java.util.ArrayList;
 public class KeyValueOptionsFragment extends SettingsEditorFragment<WOApplicationConfiguration, KeyValueOptionEditorPanel> {
     public KeyValueOptionsFragment(WOApplicationConfiguration myConfig) {
         super("woOptions", "WebObjects Options", "Options",
-                new KeyValueOptionEditorPanel(myConfig.getWOOptions()),
+                new KeyValueOptionEditorPanel(myConfig.getOptions().getWoOptions()),
                 30,
                 (configuration, component) -> {
+                    component.setKeyValueOptions(myConfig.getOptions().getWoOptions());
                 },
                 (configuration, component) -> {
-                    configuration.setWOOptions(component.getEditedOptions());
+                    myConfig.getOptions().setWoOptions(component.getKeyValueOptions());
                 },
                 configuration -> {
                     return true;

@@ -5,13 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOptionTableModel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/ProjectUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOProjectUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOption.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOption.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOptionEditorPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOptionEditorPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOptionsFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOptionsFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationConfiguration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunConfigType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunConfigType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunConfigurationOptions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WORunConfigurationOptions.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +125,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "Merging runConfigUI",
+    "git-widget-placeholder": "runConfigUI",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/Shared/Daten/GIT/IntelliJWOPlugin/gradle/wrapper",
     "project.structure.last.edited": "Modules",
@@ -303,22 +306,22 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
+        <line-breakpoint type="java-line">
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/ui/ConfigurationModuleSelector.java</url>
           <line>55</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
+        <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java</url>
           <line>25</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
+        <line-breakpoint type="java-line">
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/execution/application/ApplicationConfiguration.java</url>
           <line>374</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
+        <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationSettingsEditor.java</url>
           <line>24</line>
           <option name="timeStamp" value="39" />
@@ -333,6 +336,29 @@
           <line>157</line>
           <option name="timeStamp" value="55" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/KeyValueOptionEditorPanel.java</url>
+          <line>47</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/WOApplicationCommandLineState.java</url>
+          <line>26</line>
+          <option name="timeStamp" value="59" />
+        </line-breakpoint>
+        <line-breakpoint type="java-method">
+          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/util/xmlb/annotations/OptionTag.java</url>
+          <line>26</line>
+          <properties class="com.intellij.util.xmlb.annotations.OptionTag" method="tag">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="61" />
+        </line-breakpoint>
+        <breakpoint type="java-exception">
+          <properties class="java.lang.NullPointerException" package="java.lang" />
+          <option name="timeStamp" value="70" />
+        </breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <pin-to-top-manager>

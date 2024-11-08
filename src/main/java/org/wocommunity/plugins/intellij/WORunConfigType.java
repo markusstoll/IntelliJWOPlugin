@@ -8,7 +8,7 @@ import com.intellij.util.ui.UIUtil;
 import javax.swing.*;
 
 public class WORunConfigType extends ConfigurationTypeBase {
-    static final String ID = "PageObjectEvaluator";
+    static final String ID = "WORunConfig";
 
     protected WORunConfigType() {
         super(ID, "WebObjects", "Enable Running of WebObjects Java applications", getDynamicIcon());

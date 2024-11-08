@@ -1,66 +1,48 @@
 package org.wocommunity.plugins.intellij;
 
-import com.intellij.ui.components.JBList;
-import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.table.JBTable;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
 import java.awt.*;
         import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class KeyValueOptionEditorPanel extends JPanel {
-    private final DefaultListModel<KeyValueOption> listModel = new DefaultListModel<>();
-    private final JBList<KeyValueOption> list;
+    KeyValueOptionTableModel tableModel;
 
     public KeyValueOptionEditorPanel(List<KeyValueOption> options) {
+        // Initialize with BorderLayout
         setLayout(new BorderLayout());
 
-        // Fill model with current options
-        options.forEach(listModel::addElement);
+        // Initialize the table with custom model
+        tableModel = new KeyValueOptionTableModel(options);
+        JBTable table = new JBTable(tableModel);
 
-        // Configure JBList
-        list = new JBList<>(listModel);
-        list.setCellRenderer((list, option, index, isSelected, cellHasFocus) -> {
-            JPanel panel = new JPanel(new BorderLayout());
-            JBCheckBox checkBox = new JBCheckBox("", option.isActive());
-            JBTextField keyField = new JBTextField(option.getKey());
-            keyField.setEnabled(true);
-            JBTextField valueField = new JBTextField(option.getValue());
+        // Customize column widths and renderers
+        table.getColumnModel().getColumn(0).setPreferredWidth(20);  // Enable Checkbox column
+        table.getColumnModel().getColumn(1).setPreferredWidth(250); // Key column
+        table.getColumnModel().getColumn(2).setPreferredWidth(150); // Value column
 
-            checkBox.addActionListener(e -> option.setActive(checkBox.isSelected()));
-            keyField.getDocument().addDocumentListener(new SimpleDocumentListener() {
-                @Override
-                public void update(DocumentEvent e) {
-                    option.setKey(keyField.getText());
-                }
-            });
-            valueField.getDocument().addDocumentListener(new SimpleDocumentListener() {
-                @Override
-                public void update(DocumentEvent e) {
-                    option.setValue(valueField.getText());
-                }
-            });
-
-            panel.add(checkBox, BorderLayout.WEST);
-            panel.add(keyField, BorderLayout.CENTER);
-            panel.add(valueField, BorderLayout.EAST);
-            return panel;
-        });
+        // Add table to a scroll pane and then to the panel
+        JBScrollPane scrollPane = new JBScrollPane(table);
+        add(scrollPane, BorderLayout.CENTER);
 
         // Add list to a toolbar decorator for add/remove buttons
-        ToolbarDecorator decorator = ToolbarDecorator.createDecorator(list)
-                .setAddAction(e -> listModel.addElement(new KeyValueOption(true, "", "")))
-                .setRemoveAction(e -> listModel.remove(list.getSelectedIndex()));
+        ToolbarDecorator decorator = ToolbarDecorator.createDecorator(table)
+                .setAddAction(e -> tableModel.addRow())
+                .setRemoveAction(e -> tableModel.remove(table.getSelectedRow()));
 
         add(decorator.createPanel(), BorderLayout.CENTER);
+        setMinimumSize(new Dimension(300, 80));
     }
 
-    public List<KeyValueOption> getEditedOptions() {
-        return IntStream.range(0,listModel.size()).mapToObj(listModel::get).collect(Collectors.toList());
+    public List<KeyValueOption> getKeyValueOptions() {
+        return tableModel.getEntries();
+    }
+
+    public void setKeyValueOptions(List<KeyValueOption> keyValueOptions) {
+        tableModel.replaceEntries(keyValueOptions);
     }
 }
 
