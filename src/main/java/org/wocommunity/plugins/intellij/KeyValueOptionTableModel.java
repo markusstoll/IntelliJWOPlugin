@@ -32,7 +32,7 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         KeyValueOption entry = entries.get(rowIndex);
         switch (columnIndex) {
-            case 0: return entry.isActive();
+            case 0: return entry.getActive();
             case 1: return entry.getKey();
             case 2: return entry.getValue();
             default: throw new IndexOutOfBoundsException("Column index out of range");

@@ -2,16 +2,13 @@ package org.wocommunity.plugins.intellij;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.application.ApplicationConfiguration;
-import com.intellij.execution.configurations.JavaCommandLineState;
 import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.configurations.ParametersList;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
-import com.intellij.util.PathUtilRt;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +46,7 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         ParametersList programParametersList = javaParameters.getProgramParametersList();
 
         for(KeyValueOption kvo : myConfiguration.getOptions().getWoOptions()) {
-            if(!kvo.isActive())
+            if(!kvo.getActive())
                 continue;
 
             if (kvo.key.startsWith("-D"))
