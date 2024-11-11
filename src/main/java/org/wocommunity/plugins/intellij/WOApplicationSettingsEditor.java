@@ -40,7 +40,7 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
         fragments.add(jrePath);
         fragments.add(createShortenClasspath(moduleClasspath.component(), jrePath, true));
 
-        KeyValueOptionsFragment woOptionsFragment = new KeyValueOptionsFragment(this.mySettings);
+        KeyValueOptionsFragment woOptionsFragment = new KeyValueOptionsFragment(new KeyValueOptionTableModel(mySettings.getOptions().getWoOptions()));
         setMinimumWidth(woOptionsFragment.getEditorComponent(), 300);
         fragments.add(woOptionsFragment);
     }

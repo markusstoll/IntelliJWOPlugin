@@ -12,19 +12,38 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class KeyValueOptionsFragment extends SettingsEditorFragment<WOApplicationConfiguration, LabeledComponent<KeyValueOptionEditorPanel>> {
-    public KeyValueOptionsFragment(WOApplicationConfiguration myConfig) {
+    private final KeyValueOptionTableModel tableModel;
+
+    public KeyValueOptionsFragment(KeyValueOptionTableModel tableModel)
+    {
         super("woOptions", "WebObjects Options", "Options",
-                LabeledComponent.create(new KeyValueOptionEditorPanel(myConfig.getOptions().getWoOptions()), "WebObjects Options:"),
+                LabeledComponent.create(new KeyValueOptionEditorPanel(tableModel), "WebObjects Options:"),
                 30,
                 (configuration, component) -> {
-                    component.getComponent().setKeyValueOptions(myConfig.getOptions().getWoOptions());
+//                    component.getComponent().setKeyValueOptions(myConfig.getOptions().getWoOptions());
                 },
                 (configuration, component) -> {
-                    myConfig.getOptions().setWoOptions(component.getComponent().getKeyValueOptions());
+//                    myConfig.getOptions().setWoOptions(component.getComponent().getKeyValueOptions());
                 },
                 configuration -> {
                     return true;
                 });
+
+        this.tableModel = tableModel;
+    }
+
+    @Override
+    protected void resetEditorFrom(@NotNull WOApplicationConfiguration c) {
+        super.resetEditorFrom(c);
+
+        tableModel.replaceEntries(c.getOptions().getWoOptions());
+    }
+
+    @Override
+    protected void applyEditorTo(@NotNull WOApplicationConfiguration c) {
+        super.applyEditorTo(c);
+
+        c.getOptions().setWoOptions(tableModel.getEntries());
     }
 }
 

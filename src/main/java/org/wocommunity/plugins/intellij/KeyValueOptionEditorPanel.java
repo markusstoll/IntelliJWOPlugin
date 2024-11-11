@@ -11,12 +11,12 @@ import java.awt.*;
 public class KeyValueOptionEditorPanel extends JPanel {
     KeyValueOptionTableModel tableModel;
 
-    public KeyValueOptionEditorPanel(List<KeyValueOption> options) {
+    public KeyValueOptionEditorPanel(KeyValueOptionTableModel tableModel) {
         // Initialize with BorderLayout
         setLayout(new BorderLayout());
 
         // Initialize the table with custom model
-        tableModel = new KeyValueOptionTableModel(options);
+        this.tableModel = tableModel;
         JBTable table = new JBTable(tableModel);
 
         // Customize column widths and renderers
@@ -47,4 +47,3 @@ public class KeyValueOptionEditorPanel extends JPanel {
         tableModel.replaceEntries(keyValueOptions);
     }
 }
-

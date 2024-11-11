@@ -3,6 +3,8 @@ package org.wocommunity.plugins.intellij;
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
 
+import java.util.Objects;
+
 @Tag("KeyValueOption")
 public class KeyValueOption {
     @Attribute
@@ -30,5 +32,14 @@ public class KeyValueOption {
 
     public String getValue() { return value; }
     public void setValue(String value) { this.value = value; }
+
+    public int hashCode() {
+        return Objects.hash(new Object[]{active, key, value});
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return hashCode() == obj.hashCode();
+    }
 }
 
