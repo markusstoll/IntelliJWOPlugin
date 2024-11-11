@@ -23,5 +23,27 @@ This plugin will only work with mavenized WebObjects/Wonder applications!
 After that the plugin is available. 
 For running your application, create a WebObjects run configuration, choose your main class and go for it!
 
+## Creating a Run Configuration
 
+Create a new run configuration from the Templates, choose "WebObjects" template
 
+Things work slightly different than using Eclipse:
+
+* The run configuration detects whether you have full maven layout or
+  a mavenized fluffy bunny layout. For full maven layout, the `nature` `org.maven.ide.eclipse.maven2Nature` is enforced in the `.project` file.
+  Otherwise it enforces the `nature` not being set
+* The working directory is automatically set to `./target/<appname>.woa`
+* A maven goal `process-resources` is enforced on starting your WO application.
+
+Additionally if starting with a JDK version higher than 8, these additional VM options are enforced:
+* `--add-exports=java.base/sun.security.action=ALL-UNNAMED`
+* `--add-exports=java.base/sun.util.calendar=ALL-UNNAMED`
+* `--add-opens=java.base/java.lang=ALL-UNNAMED`
+
+A future version will have a UI editor for these options, too
+
+## TODO list / Next steps
+* improve UI editor, fix change detection
+* add UI editor for additional higher JDK VM options
+* add shortcuts for switching between Java and HTML file for a WO component
+* start experimenting with custom editor for .wo folders
