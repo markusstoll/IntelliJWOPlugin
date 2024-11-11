@@ -18,20 +18,22 @@ public class WORunConfigurationOptions extends JvmMainMethodRunConfigurationOpti
 
     @OptionTag("woOptions")
     // A custom stored property to track changes in the list of options
-    private StoredProperty<List<KeyValueOption>> woOptionsProperty = list();
+    private StoredProperty<List<Object>> woOptionsProperty = list().provideDelegate(this, "woOptions");
 
     // Getter for the list of custom options
     public List<KeyValueOption> getWoOptions() {
-        return woOptionsProperty.getValue(this);
+        return (List)woOptionsProperty.getValue(this);
     }
 
     public void setWoOptions(List<KeyValueOption> woOptions) {
-        this.woOptionsProperty.setValue(this, woOptions);
+        this.woOptionsProperty.setValue(this, (List)woOptions);
     }
 
     public WORunConfigurationOptions() {
-        woOptionsProperty.setName("woOptions");
+        setWoOptions(getDefaultWoOptions());
+    }
 
+    private static @NotNull List<KeyValueOption> getDefaultWoOptions() {
         List<KeyValueOption> defaultsOptions = new ArrayList<>();
         defaultsOptions.add(new KeyValueOption(true, "-DNSProjectBundleEnabled", "true"));
         defaultsOptions.add(new KeyValueOption(true, "-DNSProjectSearchPath", "Automatic"));
@@ -75,7 +77,6 @@ public class WORunConfigurationOptions extends JvmMainMethodRunConfigurationOpti
         defaultsOptions.add(new KeyValueOption(true, "-WOWorkerThreadCount", "8"));
         defaultsOptions.add(new KeyValueOption(true, "-WOWorkerThreadCountMax", "256"));
         defaultsOptions.add(new KeyValueOption(true, "-WOWorkerThreadCountMin", "16"));
-
-        setWoOptions(defaultsOptions);
+        return defaultsOptions;
     }
 }
