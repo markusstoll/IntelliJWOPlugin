@@ -41,5 +41,10 @@ public class KeyValueOption {
     public boolean equals(Object obj) {
         return hashCode() == obj.hashCode();
     }
+
+    @Override
+    public KeyValueOption clone() {
+        return new KeyValueOption(active, key, value);
+    }
 }
 

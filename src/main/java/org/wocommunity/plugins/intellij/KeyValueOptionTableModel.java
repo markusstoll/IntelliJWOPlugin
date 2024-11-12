@@ -41,13 +41,15 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        KeyValueOption entry = entries.get(rowIndex);
+        KeyValueOption newEntry = entries.get(rowIndex).clone();
         switch (columnIndex) {
-            case 0: entry.setActive((Boolean) aValue); break;
-            case 1: entry.setKey((String) aValue); break;
-            case 2: entry.setValue((String) aValue); break;
+            case 0: newEntry.setActive((Boolean) aValue); break;
+            case 1: newEntry.setKey((String) aValue); break;
+            case 2: newEntry.setValue((String) aValue); break;
         }
-        fireTableCellUpdated(rowIndex, columnIndex);
+
+        entries.remove(rowIndex);
+        entries.add(rowIndex, newEntry);
     }
 
     @Override
@@ -69,7 +71,6 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
     public void addRow() {
         entries.add(new KeyValueOption(false, "", ""));
         int newRow = entries.size() - 1;
-        fireTableRowsInserted(newRow, newRow);
     }
 
     public void remove(int selectedRow) {
