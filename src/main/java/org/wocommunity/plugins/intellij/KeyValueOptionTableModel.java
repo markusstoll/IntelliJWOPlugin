@@ -75,7 +75,6 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
 
     public void remove(int selectedRow) {
         entries.remove(selectedRow);
-        fireTableRowsDeleted(selectedRow,selectedRow);
     }
 
     public List<KeyValueOption> getEntries() {
@@ -85,6 +84,5 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
     public void replaceEntries(List<KeyValueOption> keyValueOptions) {
         this.entries.clear();
         this.entries.addAll(keyValueOptions);
-        fireTableDataChanged();
     }
 }
