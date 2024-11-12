@@ -19,12 +19,8 @@ public class KeyValueOptionsFragment extends SettingsEditorFragment<WOApplicatio
         super("woOptions", "WebObjects Options", "Options",
                 LabeledComponent.create(new KeyValueOptionEditorPanel(tableModel), "WebObjects Options:"),
                 30,
-                (configuration, component) -> {
-//                    component.getComponent().setKeyValueOptions(myConfig.getOptions().getWoOptions());
-                },
-                (configuration, component) -> {
-//                    myConfig.getOptions().setWoOptions(component.getComponent().getKeyValueOptions());
-                },
+                (configuration, component) -> {},
+                (configuration, component) -> {},
                 configuration -> {
                     return true;
                 });
