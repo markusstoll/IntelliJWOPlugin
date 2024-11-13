@@ -43,7 +43,6 @@ Additionally if starting with a JDK version higher than 8, these additional VM o
 A future version will have a UI editor for these options, too
 
 ## TODO list / Next steps
-* improve UI editor, fix change detection
 * add UI editor for additional higher JDK VM options
 * add shortcuts for switching between Java and HTML file for a WO component
 * start experimenting with custom editor for .wo folders
