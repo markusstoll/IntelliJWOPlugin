@@ -4,13 +4,16 @@ import com.intellij.execution.ExecutionBundle;
 import com.intellij.execution.ui.*;
 import com.intellij.execution.application.ClassEditorField;
 import com.intellij.execution.application.JavaSettingsEditorBase;
+import com.intellij.ide.util.ClassFilter;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.module.Module;
 import com.intellij.psi.JavaCodeFragment;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.util.PsiMethodUtil;
 import com.intellij.ui.EditorTextField;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
 
 import static com.intellij.execution.ui.CommandLinePanel.setMinimumWidth;
@@ -45,10 +48,36 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
         fragments.add(woOptionsFragment);
     }
 
+    private static final ClassFilter WO_CLASS_FILTER =
+            aClass -> PsiMethodUtil.MAIN_CLASS.value(aClass)
+                    && ReadAction.compute(() -> PsiMethodUtil.findMainMethod(aClass)) != null
+                    && superClassIsWOApplication(aClass);
+
+    private static boolean superClassIsWOApplication(PsiClass aClass) {
+        PsiClass superClass = aClass.getSuperClass();
+        if(superClass != null)
+        {
+            if(superClass.getQualifiedName().equals("com.webobjects.appserver.WOApplication"))
+                return true;
+
+            return superClassIsWOApplication(superClass);
+        }
+
+        return false;
+    }
+
     @NotNull
     private SettingsEditorFragment<WOApplicationConfiguration, EditorTextField> createMainClass(ModuleClasspathCombo classpathCombo) {
-        EditorTextField mainClass = ClassEditorField.createClassField(getProject(), () -> classpathCombo.getSelectedModule(),
-                JavaCodeFragment.VisibilityChecker.PROJECT_SCOPE_VISIBLE, null);
+        EditorTextField mainClass = ClassEditorField.createClassField(getProject(),
+                () -> classpathCombo.getSelectedModule(),
+                JavaCodeFragment.VisibilityChecker.PROJECT_SCOPE_VISIBLE,
+                new ClassBrowser.AppClassBrowser<>(getProject(), () -> classpathCombo.getSelectedModule()) {
+                    @Override
+                    protected ClassFilter createFilter(Module module) {
+                        return WO_CLASS_FILTER;
+                    }
+                }
+                );
         mainClass.setBackground(UIUtil.getTextFieldBackground());
         mainClass.setShowPlaceholderWhenFocused(true);
         CommonParameterFragments.setMonospaced(mainClass);
