@@ -18,7 +18,7 @@
         First draft that only supports a run configuration
     </description>
 
-    <idea-version since-build="232" until-build="242.*" />
+    <idea-version since-build="232" until-build="243.*" />
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
