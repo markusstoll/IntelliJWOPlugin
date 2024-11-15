@@ -27,6 +27,16 @@
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.idea.maven</depends>
 
+    <actions>
+        <action id="org.wocommunity.plugins.intellij.actions.NewWOComponentAction"
+                class="org.wocommunity.plugins.intellij.actions.NewWOComponentAction"
+                text="WO Component"
+                description="Create a new WO Component"
+                icon="icons/componentIcon.svg">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
+        </action>
+    </actions>
+
     <extensions defaultExtensionNs="com.intellij">
         <configurationType
                 implementation="org.wocommunity.plugins.intellij.runconfig.WORunConfigType"/>
