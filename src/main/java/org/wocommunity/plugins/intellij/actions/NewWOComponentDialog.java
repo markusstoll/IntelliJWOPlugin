@@ -14,6 +14,7 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.util.Consumer;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -102,10 +103,12 @@ public class NewWOComponentDialog extends DialogWrapper {
 
     private void selectFolder() {
         FileChooserDescriptor descriptor = new FileChooserDescriptor(false, true, false, false, false, false);
-        VirtualFile file = FileChooser.chooseFile(descriptor, project, null);
-        if (file != null) {
-            folderSelector.setText(file.getPath());
-        }
+        FileChooser.chooseFile(descriptor, project, null, new Consumer<VirtualFile>() {
+            @Override
+            public void consume(VirtualFile virtualFile) {
+                folderSelector.setText(virtualFile.getPath());
+            }
+        });
     }
 
     private void selectPackage() {
