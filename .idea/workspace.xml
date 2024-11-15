@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/NewWOComponentAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/NewWOComponentAction.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,13 +112,13 @@
     "Gradle.IntelliJWOPlugin [jar].executor": "Run",
     "Gradle.IntelliJWOPlugin [setupDependencies].executor": "Run",
     "Gradle.Load Gradle Dependencies.executor": "Run",
-    "Gradle.Run Plugin.executor": "Debug",
+    "Gradle.Run Plugin.executor": "Run",
     "Gradle.WOApplicationRunner [setupDependencies].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "feature/newWOComponent",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/Shared/Daten/GIT/IntelliJWOPlugin/gradle/wrapper",
     "project.structure.last.edited": "Modules",
@@ -130,6 +130,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="org.wocommunity.plugins.intellij.actions" />
       <recent name="org.wocommunity.plugins.intellij" />
       <recent name="com.intellij.plugins.wo" />
       <recent name="er.plugin.intellij.runconfig" />
@@ -342,8 +343,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/NewWOComponentAction.java</url>
-          <line>14</line>
+          <line>17</line>
           <option name="timeStamp" value="71" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/NewWOComponentDialog.java</url>
+          <line>76</line>
+          <option name="timeStamp" value="74" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/NewWOComponentAction.java</url>
+          <line>31</line>
+          <option name="timeStamp" value="75" />
         </line-breakpoint>
         <line-breakpoint type="java-method">
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/util/xmlb/annotations/OptionTag.java</url>
@@ -363,6 +374,7 @@
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="java.util.concurrent.atomic.AtomicReference" memberName="value" />
+        <PinnedItemInfo parentTag="com.intellij.openapi.project.impl.ProjectImpl" memberName="pluginScopes" />
         <PinnedItemInfo parentTag="org.jdom.Element" memberName="ctype" />
       </pinned-members>
     </pin-to-top-manager>

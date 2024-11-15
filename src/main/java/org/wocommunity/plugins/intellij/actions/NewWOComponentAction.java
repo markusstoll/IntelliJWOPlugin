@@ -4,7 +4,10 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import org.jetbrains.annotations.Nullable;
 
 public class NewWOComponentAction extends AnAction {
 
@@ -23,8 +26,10 @@ public class NewWOComponentAction extends AnAction {
             return;
         }
 
-//        // Show a custom dialog or panel
-//        MyCustomDialog dialog = new MyCustomDialog(project);
-//        dialog.show();
+        @Nullable PsiElement element = e.getData(CommonDataKeys.PSI_ELEMENT);
+        @Nullable VirtualFile vf = e.getData(CommonDataKeys.VIRTUAL_FILE);
+        
+        NewWOComponentDialog dialog = new NewWOComponentDialog(project, element);
+        dialog.show();
     }
 }
