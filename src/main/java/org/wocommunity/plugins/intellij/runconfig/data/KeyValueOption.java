@@ -1,4 +1,4 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig.data;
 
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;

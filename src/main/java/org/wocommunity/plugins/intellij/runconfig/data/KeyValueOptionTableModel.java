@@ -1,4 +1,4 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig.data;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;

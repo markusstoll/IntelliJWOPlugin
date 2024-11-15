@@ -1,4 +1,4 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.application.BaseJavaApplicationCommandLineState;

@@ -1,10 +1,8 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig;
 
 import com.intellij.execution.ui.SettingsEditorFragment;
 import com.intellij.openapi.ui.LabeledComponent;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
+import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOptionTableModel;
 
 public class KeyValueOptionsFragment extends SettingsEditorFragment<WOApplicationConfiguration, LabeledComponent<KeyValueOptionEditorPanel>> {
     private final KeyValueOptionTableModel tableModel;

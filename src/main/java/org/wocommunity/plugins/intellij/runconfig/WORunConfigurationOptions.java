@@ -1,16 +1,11 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig;
 
 import com.intellij.execution.application.JvmMainMethodRunConfigurationOptions;
-import com.intellij.execution.configurations.ParametersList;
 import com.intellij.openapi.components.StoredProperty;
-import com.intellij.openapi.components.StoredPropertyBase;
-import com.intellij.openapi.observable.properties.PropertyGraph;
-import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.annotations.OptionTag;
-import com.intellij.util.xmlb.annotations.XCollection;
 import org.jetbrains.annotations.NotNull;
+import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOption;
 
-import javax.naming.ConfigurationException;
 import java.util.ArrayList;
 import java.util.List;
 

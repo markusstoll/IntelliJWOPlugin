@@ -29,7 +29,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType
-                implementation="org.wocommunity.plugins.intellij.WORunConfigType"/>
-        <runConfigurationProducer implementation="org.wocommunity.plugins.intellij.WORunConfigurationProducer"/>
+                implementation="org.wocommunity.plugins.intellij.runconfig.WORunConfigType"/>
+        <runConfigurationProducer implementation="org.wocommunity.plugins.intellij.runconfig.WORunConfigurationProducer"/>
     </extensions>
 </idea-plugin>

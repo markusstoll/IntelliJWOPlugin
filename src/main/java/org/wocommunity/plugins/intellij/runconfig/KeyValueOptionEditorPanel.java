@@ -1,8 +1,10 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig;
 
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.table.JBTable;
+import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOption;
+import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOptionTableModel;
 
 import javax.swing.*;
 import java.awt.*;

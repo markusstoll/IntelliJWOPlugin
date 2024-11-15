@@ -1,4 +1,4 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig;
 
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.execution.ui.*;
@@ -14,6 +14,8 @@ import com.intellij.psi.util.PsiMethodUtil;
 import com.intellij.ui.EditorTextField;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
+import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOptionTableModel;
+
 import java.util.List;
 
 import static com.intellij.execution.ui.CommandLinePanel.setMinimumWidth;

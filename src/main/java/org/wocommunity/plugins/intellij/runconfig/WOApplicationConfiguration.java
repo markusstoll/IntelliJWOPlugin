@@ -1,27 +1,17 @@
-package org.wocommunity.plugins.intellij;
+package org.wocommunity.plugins.intellij.runconfig;
 
-import com.intellij.diagnostic.logging.LogConfigurationPanel;
 import com.intellij.execution.*;
-import com.intellij.execution.application.ApplicationConfigurable;
 import com.intellij.execution.application.ApplicationConfiguration;
-import com.intellij.execution.application.JavaApplicationSettingsEditor;
-import com.intellij.execution.application.JvmMainMethodRunConfigurationOptions;
 import com.intellij.execution.configurations.*;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.options.SettingsEditor;
-import com.intellij.openapi.options.SettingsEditorGroup;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.PathUtilRt;
-import com.intellij.util.xmlb.annotations.XCollection;
-import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTask;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTasksProvider;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class WOApplicationConfiguration extends ApplicationConfiguration {
     public WOApplicationConfiguration(String name, ConfigurationFactory factory, Project project) {
