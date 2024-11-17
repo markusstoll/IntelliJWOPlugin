@@ -13,6 +13,7 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiManager;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class JavaFileCreator {
@@ -21,15 +22,22 @@ public class JavaFileCreator {
      * Creates a new Java file in the specified module with the given package, class name, and content.
      *
      * @param module      The module where the file should be created.
-     * @param packageName The package name for the class.
-     * @param className   The name of the Java class.
-     * @param fileContent The content to populate in the new file.
+     * @param javaPackage The package name for the class.
+     * @param componentName   The name of the Java class.
+     * @param superClass The content to populate in the new file.
      * @throws Exception if the file creation fails.
      */
-    public static void createJavaFile(Module module, String packageName, String className, String fileContent) throws Exception {
-        if (module == null || packageName == null || className == null || fileContent == null) {
+    public static void createJavaFile(Module module, String javaPackage, String componentName, String superClass) throws Exception {
+        if (module == null || javaPackage == null || componentName == null || superClass == null) {
             throw new IllegalArgumentException("Module, package name, class name, and file content must not be null.");
         }
+
+        String javaTemplate = IOUtils.toString(WOProjectUtil.class.getResource("/templates/WOComponent.java"), "UTF-8");
+        javaTemplate = javaTemplate.replace("{package}", javaPackage);
+        javaTemplate = javaTemplate.replace("{name}", componentName);
+        String[] parsedSuperClass = WOProjectUtil.parseClassName(superClass);
+        javaTemplate = javaTemplate.replace("{superClassPackage}", parsedSuperClass[0]);
+        javaTemplate = javaTemplate.replace("{superClass}", parsedSuperClass[1]);
 
         Project project = module.getProject();
 
@@ -63,18 +71,18 @@ public class JavaFileCreator {
             throw new Exception("Source root directory is not accessible.");
         }
 
-        PsiDirectory targetDirectory = StringUtils.isEmpty(packageName)
+        PsiDirectory targetDirectory = StringUtils.isEmpty(javaPackage)
                 ? sourceRootPsi
-                : createOrFindPackageDirectory(sourceRootPsi, packageName);
+                : createOrFindPackageDirectory(sourceRootPsi, javaPackage);
 
         // Check if the file already exists
-        String fileName = className.endsWith(".java") ? className : className + ".java";
+        String fileName = componentName.endsWith(".java") ? componentName : componentName + ".java";
 
         if (targetDirectory.findFile(fileName) != null) {
             throw new Exception("File already exists: " + fileName);
         }
 
-        PsiFile file = PsiFileFactory.getInstance(project).createFileFromText(fileName, fileContent);
+        PsiFile file = PsiFileFactory.getInstance(project).createFileFromText(fileName, javaTemplate);
         // Add the file to the target directory
         targetDirectory.add(file);
 

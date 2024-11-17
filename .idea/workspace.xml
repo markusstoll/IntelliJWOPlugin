@@ -5,18 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/tools/JavaFileCreator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/WOComponent.api" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/WOComponent.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/WOComponent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/WOComponent.woo" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/tools/WOComponentFileCreator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/NewWOComponentAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/wocomponent/NewWOComponentAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/NewWOComponentDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/wocomponent/NewWOComponentDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/runconfig/WOApplicationCommandLineState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/runconfig/WOApplicationCommandLineState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/runconfig/WOApplicationConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/runconfig/WOApplicationConfiguration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/runconfig/WOProjectUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/tools/WOProjectUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/wocomponent/NewWOComponentDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/wocomponent/NewWOComponentDialog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/tools/JavaFileCreator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/tools/JavaFileCreator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/tools/WOProjectUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/tools/WOProjectUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -359,7 +352,7 @@
         </line-breakpoint>
         <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/wocomponent/NewWOComponentDialog.java</url>
-          <line>59</line>
+          <line>58</line>
           <option name="timeStamp" value="76" />
         </line-breakpoint>
         <line-breakpoint type="java-method">

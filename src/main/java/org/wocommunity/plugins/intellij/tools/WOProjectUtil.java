@@ -78,20 +78,23 @@ public class WOProjectUtil {
                                             String componentName,
                                             @NotNull String javaPackage,
                                             @NotNull String superClass,
-                                            VirtualFile componentFolder) throws Exception {
-
-        String javaTemplate = IOUtils.toString(WOProjectUtil.class.getResource("/templates/WOComponent.java"), "UTF-8");
-        javaTemplate = javaTemplate.replace("{package}", javaPackage);
-        javaTemplate = javaTemplate.replace("{name}", componentName);
-        String[] parsedSuperClass = parseClassName(superClass);
-        javaTemplate = javaTemplate.replace("{superClassPackage}", parsedSuperClass[0]);
-        javaTemplate = javaTemplate.replace("{superClass}", parsedSuperClass[1]);
+                                            VirtualFile componentFolder,
+                                            boolean createHtmlContents,
+                                            boolean createApiFile) throws Exception {
 
         JavaFileCreator.createJavaFile(
                 module,
                 javaPackage,
                 componentName,
-                javaTemplate
+                superClass
+        );
+
+        WOComponentFileCreator.createWOComponent(
+                module,
+                componentName,
+                componentFolder,
+                createHtmlContents,
+                createApiFile
         );
     }
 

@@ -22,7 +22,6 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.wocommunity.plugins.intellij.tools.JavaFileCreator;
 import org.wocommunity.plugins.intellij.tools.WOProjectUtil;
 
 import javax.swing.*;
@@ -43,8 +42,8 @@ public class NewWOComponentDialog extends DialogWrapper {
     private TextFieldWithBrowseButton folderSelector;
     private TextFieldWithBrowseButton packageSelector;
     private TextFieldWithBrowseButton superclassSelector;
-    private JBCheckBox checkbox1;
-    private JBCheckBox checkbox2;
+    private JBCheckBox createContent;
+    private JBCheckBox createApi;
     private JTextField componentNameField;
 
     public NewWOComponentDialog(@Nullable Project project, @Nullable PsiElement selectedContext, @Nullable PsiFile virtualFile) {
@@ -125,10 +124,10 @@ public class NewWOComponentDialog extends DialogWrapper {
         panel.add(createLabeledComponent("Superclass:", superclassSelector));
 
         // Checkboxes
-        checkbox1 = new JBCheckBox("Enable feature X");
-        checkbox2 = new JBCheckBox("Enable feature Y");
-        panel.add(checkbox1);
-        panel.add(checkbox2);
+        createContent = new JBCheckBox("Create HTML contents X");
+        createApi = new JBCheckBox("Create API file");
+        panel.add(createContent);
+        panel.add(createApi);
 
         return panel;
     }
@@ -252,11 +251,11 @@ public class NewWOComponentDialog extends DialogWrapper {
     }
 
     public boolean isFeatureXEnabled() {
-        return checkbox1.isSelected();
+        return createContent.isSelected();
     }
 
     public boolean isFeatureYEnabled() {
-        return checkbox2.isSelected();
+        return createApi.isSelected();
     }
 
     @Override
@@ -291,7 +290,10 @@ public class NewWOComponentDialog extends DialogWrapper {
                                 componentNameField.getText(),
                                 packageSelector.getText(),
                                 superclassSelector.getText(),
-                                selectedFolder);
+                                selectedFolder,
+                                createContent.isSelected(),
+                                createApi.isSelected()
+                        );
 
 //                        JOptionPane.showMessageDialog(null, "File created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     } catch (Exception e) {
