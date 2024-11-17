@@ -28,8 +28,8 @@
     <depends>org.jetbrains.idea.maven</depends>
 
     <actions>
-        <action id="org.wocommunity.plugins.intellij.actions.NewWOComponentAction"
-                class="org.wocommunity.plugins.intellij.actions.NewWOComponentAction"
+        <action id="org.wocommunity.plugins.intellij.actions.wocomponent.NewWOComponentAction"
+                class="org.wocommunity.plugins.intellij.actions.wocomponent.NewWOComponentAction"
                 text="WO Component"
                 description="Create a new WO Component"
                 icon="icons/componentIcon.svg">

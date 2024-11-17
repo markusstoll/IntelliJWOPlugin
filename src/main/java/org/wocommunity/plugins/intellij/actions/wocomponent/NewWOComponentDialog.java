@@ -1,11 +1,16 @@
-package org.wocommunity.plugins.intellij.actions;
+package org.wocommunity.plugins.intellij.actions.wocomponent;
 
 import com.intellij.ide.util.PackageChooserDialog;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.NlsSafe;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
@@ -15,16 +20,24 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.Consumer;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.wocommunity.plugins.intellij.tools.JavaFileCreator;
+import org.wocommunity.plugins.intellij.tools.WOProjectUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Collection;
+import java.util.List;
 
 public class NewWOComponentDialog extends DialogWrapper {
 
     private final Project project;
     private final PsiElement selectedContext;
+    private final @Nullable Module module;
+    private final @Nullable PsiFile virtualFile;
 
     // Fields for inputs
     private TextFieldWithBrowseButton folderSelector;
@@ -32,13 +45,48 @@ public class NewWOComponentDialog extends DialogWrapper {
     private TextFieldWithBrowseButton superclassSelector;
     private JBCheckBox checkbox1;
     private JBCheckBox checkbox2;
+    private JTextField componentNameField;
 
-    public NewWOComponentDialog(@Nullable Project project, @Nullable PsiElement selectedContext) {
+    public NewWOComponentDialog(@Nullable Project project, @Nullable PsiElement selectedContext, @Nullable PsiFile virtualFile) {
         super(project);
         this.project = project;
         this.selectedContext = selectedContext;
+        this.virtualFile = virtualFile;
+
+        if(selectedContext != null)
+            module = ModuleUtilCore.findModuleForPsiElement(selectedContext);
+        else if(virtualFile != null)
+            module = ModuleUtilCore.findModuleForPsiElement(virtualFile);
+        else
+            module = null;
+
         setTitle("Create WO Component");
         init();
+
+        prefillParams();
+        validateAll();
+    }
+
+    private void prefillParams() {
+        // TODO restore from saved state
+        folderSelector.setText(getDefaultComponentsFolder());
+        packageSelector.setText(getPreselectedPackage());
+        componentNameField.setText("");
+        superclassSelector.setText("com.webobjects.appserver.WOComponent");
+    }
+
+    private @NlsSafe @Nullable String getDefaultComponentsFolder() {
+        if(module != null)
+        {
+            if(WOProjectUtil.isMavenStyleModule(module))
+            {
+                return "src/main/components";
+            } else {
+                return "Components";
+            }
+        }
+
+        return "src/main/components";
     }
 
     @Nullable
@@ -47,21 +95,32 @@ public class NewWOComponentDialog extends DialogWrapper {
         JPanel panel = new JBPanel<>(new GridLayout(6, 1, 10, 10));
         panel.setMinimumSize(new Dimension(500, 200)); // Set minimum width
 
+        // component name
+        componentNameField = new JTextField();
+        componentNameField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            @Override
+            public void keyPressed(KeyEvent e) {}
+            @Override
+            public void keyReleased(KeyEvent e) {
+                validateAll();
+            }
+        });
+        panel.add(createLabeledComponent("Name:", componentNameField));
+
         // Folder Selector
         folderSelector = new TextFieldWithBrowseButton();
-        folderSelector.setText("Select a folder");
         folderSelector.addActionListener(e -> selectFolder());
         panel.add(createLabeledComponent("Target Folder:", folderSelector));
 
         // Package Selector
         packageSelector = new TextFieldWithBrowseButton();
-        packageSelector.setText(getPreselectedPackage());
         packageSelector.addActionListener(e -> selectPackage());
         panel.add(createLabeledComponent("Target Package:", packageSelector));
 
         // Superclass Selector
         superclassSelector = new TextFieldWithBrowseButton();
-        superclassSelector.setText("com.webobjects.appserver.WOComponent");
         superclassSelector.addActionListener(e -> selectSuperclass());
         panel.add(createLabeledComponent("Superclass:", superclassSelector));
 
@@ -75,7 +134,7 @@ public class NewWOComponentDialog extends DialogWrapper {
     }
 
     private @NlsSafe @Nullable String getPreselectedPackage() {
-        if (selectedContext instanceof PsiClass) {
+            if (selectedContext instanceof PsiClass) {
             // Extract the package from the PsiClass
             PsiClass psiClass = (PsiClass) selectedContext;
             PsiJavaFile containingFile = (PsiJavaFile) psiClass.getContainingFile();
@@ -89,6 +148,11 @@ public class NewWOComponentDialog extends DialogWrapper {
             PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage((PsiDirectory) selectedContext);
             if(aPackage != null)
                 return aPackage.getQualifiedName();
+        } else if (selectedContext instanceof PsiFile)
+        {
+            PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(((PsiFile) selectedContext).getContainingDirectory());
+            if(aPackage != null)
+                return aPackage.getQualifiedName();
         }
 
         return ""; // Not a class or package
@@ -96,17 +160,31 @@ public class NewWOComponentDialog extends DialogWrapper {
 
     private JPanel createLabeledComponent(String label, JComponent component) {
         JPanel panel = new JBPanel<>(new BorderLayout());
-        panel.add(new JBLabel(label), BorderLayout.WEST);
+        panel.add(new JBLabel(label), BorderLayout.NORTH);
         panel.add(component, BorderLayout.CENTER);
         return panel;
     }
 
     private void selectFolder() {
+        VirtualFile preselectedFolder = WOProjectUtil.getVirtualFileForSubfolder(module, folderSelector.getText());
         FileChooserDescriptor descriptor = new FileChooserDescriptor(false, true, false, false, false, false);
-        FileChooser.chooseFile(descriptor, project, null, new Consumer<VirtualFile>() {
+        FileChooser.chooseFile(descriptor, project, preselectedFolder, new Consumer<VirtualFile>() {
             @Override
             public void consume(VirtualFile virtualFile) {
-                folderSelector.setText(virtualFile.getPath());
+                String selectedPath = virtualFile.getPath();
+                if(module != null)
+                {
+                    String modulePath = WOProjectUtil.getModulePath(module);
+                    if(selectedPath.startsWith(modulePath))
+                    {
+                        folderSelector.setText(selectedPath.substring(modulePath.length() + 1));
+                        validateAll();
+                        return;
+                    }
+                }
+
+                folderSelector.setText(selectedPath);
+                validateAll();
             }
         });
     }
@@ -158,7 +236,7 @@ public class NewWOComponentDialog extends DialogWrapper {
     @Nullable
     @Override
     public JComponent getPreferredFocusedComponent() {
-        return folderSelector;
+        return componentNameField;
     }
 
     public String getSelectedFolder() {
@@ -179,5 +257,51 @@ public class NewWOComponentDialog extends DialogWrapper {
 
     public boolean isFeatureYEnabled() {
         return checkbox2.isSelected();
+    }
+
+    @Override
+    protected @NotNull List<ValidationInfo> doValidateAll() {
+        return super.doValidateAll();
+    }
+
+    protected void validateAll()
+    {
+        boolean isEnabled = true;
+
+        isEnabled &= componentNameField.getText().length() > 0;
+
+        String componentPath = folderSelector.getText();
+        isEnabled &= !componentPath.startsWith("/");
+        isEnabled &= !componentPath.endsWith(".wo");
+
+        getOKAction().setEnabled(isEnabled);
+    }
+
+    @Override
+    protected void doOKAction() {
+        if (getOKAction().isEnabled()) {
+            VirtualFile selectedFolder = WOProjectUtil.getVirtualFileForSubfolder(module, folderSelector.getText());
+
+            // Use WriteCommandAction for PSI modifications
+            ApplicationManager.getApplication().invokeLater(() -> {
+                WriteCommandAction.runWriteCommandAction(module.getProject(), () -> {
+                    try {
+                        WOProjectUtil.createNewWOComponent(
+                                module,
+                                componentNameField.getText(),
+                                packageSelector.getText(),
+                                superclassSelector.getText(),
+                                selectedFolder);
+
+//                        JOptionPane.showMessageDialog(null, "File created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Error creating file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+            });
+
+            close(OK_EXIT_CODE);
+        }
     }
 }

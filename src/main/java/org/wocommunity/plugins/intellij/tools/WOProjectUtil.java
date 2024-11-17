@@ -1,7 +1,11 @@
-package org.wocommunity.plugins.intellij.runconfig;
+package org.wocommunity.plugins.intellij.tools;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,11 +39,66 @@ public class WOProjectUtil {
         return modulePath;
     }
 
+    public static VirtualFile getVirtualFileForSubfolder(Module module, String subfolderPath) {
+        if (module == null || subfolderPath == null || subfolderPath.isEmpty()) {
+            return null;
+        }
+
+        // Get the content roots for the module
+        VirtualFile[] contentRoots = ModuleRootManager.getInstance(module).getContentRoots();
+
+        for (VirtualFile contentRoot : contentRoots) {
+            // Construct the full path to the subfolder
+            String fullPath = contentRoot.getPath() + "/" + subfolderPath;
+
+            // Find the VirtualFile for the full path
+            VirtualFile subfolder = VirtualFileManager.getInstance().findFileByUrl("file://" + fullPath);
+
+            if (subfolder != null && subfolder.isDirectory()) {
+                return subfolder;
+            }
+        }
+
+        // Subfolder not found
+        return null;
+    }
+
+    public static boolean isMavenStyleProjectDir(File projectDir)
+    {
+        File mavenStyleProperties = new File(projectDir, "src/main/resources/Properties");
+        return mavenStyleProperties.exists();
+    }
+
+    public static boolean isMavenStyleModule(Module m)
+    {
+        return isMavenStyleProjectDir(new File(getModulePath(m)));
+    }
+
+    public static void createNewWOComponent(Module module,
+                                            String componentName,
+                                            @NotNull String javaPackage,
+                                            @NotNull String superClass,
+                                            VirtualFile componentFolder) throws Exception {
+
+        String javaTemplate = IOUtils.toString(WOProjectUtil.class.getResource("/templates/WOComponent.java"), "UTF-8");
+        javaTemplate = javaTemplate.replace("{package}", javaPackage);
+        javaTemplate = javaTemplate.replace("{name}", componentName);
+        String[] parsedSuperClass = parseClassName(superClass);
+        javaTemplate = javaTemplate.replace("{superClassPackage}", parsedSuperClass[0]);
+        javaTemplate = javaTemplate.replace("{superClass}", parsedSuperClass[1]);
+
+        JavaFileCreator.createJavaFile(
+                module,
+                javaPackage,
+                componentName,
+                javaTemplate
+        );
+    }
+
     public void createOrUpdateProjectDescriptionFile(File projectDir)  {
         File projectDescriptionFile = new File(projectDir, ".project");
 
-        File mavenStyleProperties = new File(projectDir, "src/main/resources/Properties");
-        boolean isMavenStyleProject = mavenStyleProperties.exists();
+        boolean isMavenStyleProject = isMavenStyleProjectDir(projectDir);
 
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -173,5 +232,23 @@ public class WOProjectUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static String[] parseClassName(String fullyQualifiedName) {
+        if (fullyQualifiedName == null || fullyQualifiedName.isEmpty()) {
+            throw new IllegalArgumentException("Fully qualified class name cannot be null or empty.");
+        }
+
+        int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
+
+        if (lastDotIndex == -1) {
+            // No dot means no package, return the class name as the simple name
+            return new String[]{"", fullyQualifiedName};
+        }
+
+        String packageName = fullyQualifiedName.substring(0, lastDotIndex);
+        String simpleClassName = fullyQualifiedName.substring(lastDotIndex + 1);
+
+        return new String[]{packageName, simpleClassName};
     }
 }

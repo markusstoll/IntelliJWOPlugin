@@ -1,4 +1,4 @@
-package org.wocommunity.plugins.intellij.actions;
+package org.wocommunity.plugins.intellij.actions.wocomponent;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -26,10 +26,11 @@ public class NewWOComponentAction extends AnAction {
             return;
         }
 
-        @Nullable PsiElement element = e.getData(CommonDataKeys.PSI_ELEMENT);
+        @Nullable PsiElement psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
         @Nullable VirtualFile vf = e.getData(CommonDataKeys.VIRTUAL_FILE);
+        @Nullable PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
         
-        NewWOComponentDialog dialog = new NewWOComponentDialog(project, element);
+        NewWOComponentDialog dialog = new NewWOComponentDialog(project, psiElement, psiFile);
         dialog.show();
     }
 }

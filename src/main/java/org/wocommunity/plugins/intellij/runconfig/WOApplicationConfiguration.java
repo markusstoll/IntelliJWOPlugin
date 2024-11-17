@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTask;
 import org.jetbrains.idea.maven.tasks.MavenBeforeRunTasksProvider;
+import org.wocommunity.plugins.intellij.tools.WOProjectUtil;
 
 import java.util.ArrayList;
 
