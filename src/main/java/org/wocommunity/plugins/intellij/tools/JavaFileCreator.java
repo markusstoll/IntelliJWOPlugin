@@ -39,8 +39,22 @@ public class JavaFileCreator {
             throw new Exception("No source roots found in the module.");
         }
 
+        VirtualFile sourceRoot = null;
+
+        for (VirtualFile file : sourceRoots) {
+            if(file.getName().contains("esources"))
+                continue;
+            if(file.getName().contains("test"))
+                continue;
+
+            sourceRoot = file;
+            break;
+        }
+
         // Use the first source root as the base directory
-        VirtualFile sourceRoot = sourceRoots[0];
+        if (sourceRoot == null) {
+            throw new Exception("No source roots found in the module.");
+        }
 
         // Get the target package directory, creating it if necessary
         PsiManager psiManager = PsiManager.getInstance(project);
