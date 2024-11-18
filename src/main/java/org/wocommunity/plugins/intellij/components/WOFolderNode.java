@@ -58,6 +58,9 @@ public class WOFolderNode extends ProjectViewNode<PsiDirectory> {
 
     @Override
     public void navigate(boolean requestFocus) {
+        FileEditorManager.getInstance(myProject).openFile(getValue().getVirtualFile(), true);
+    }
+    public void navigate_old(boolean requestFocus) {
         PsiDirectory folder = getValue();
 
         if (folder != null) {
