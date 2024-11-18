@@ -42,15 +42,7 @@ public class WOFolderEditor implements FileEditor {
 
                 // Tab 1: HTML Editor
         VirtualFile htmlFile = folder.findChild(componentName + ".html");
-        if(htmlFile == null)
-        {
-            htmlFile = folder.createChildData(null, componentName + ".html");
-        }
         VirtualFile wodFile = folder.findChild(componentName + ".wod");
-        if(wodFile == null)
-        {
-            wodFile = folder.createChildData(null, componentName + ".wod");
-        }
 
         if (!htmlFile.isDirectory()) {
             JComponent htmlEditor = createIntellijEditor(htmlFile);
@@ -67,9 +59,9 @@ public class WOFolderEditor implements FileEditor {
         VirtualFile apiFile = folder.getParent().findChild(componentName + ".api");
         if(apiFile == null)
         {
-            apiFile = folder.getParent().createChildData(null, componentName + ".api");
-        }
-        if (!apiFile.isDirectory()) {
+            //TODO
+//            apiFile = folder.getParent().createChildData(null, componentName + ".api");
+        } else if (!apiFile.isDirectory()) {
             JComponent apiFileEditor = createIntellijEditor(apiFile);
             tabbedPane.addTab("API", apiFileEditor);
         }
@@ -78,9 +70,8 @@ public class WOFolderEditor implements FileEditor {
         VirtualFile wooFile = folder.findChild(componentName + ".woo");
         if(wooFile == null)
         {
-            wooFile = folder.getParent().createChildData(null, componentName + ".woo");
-        }
-        if (wooFile != null && !wooFile.isDirectory()) {
+           // TODO wooFile = folder.getParent().createChildData(null, componentName + ".woo");
+        } else if (!wooFile.isDirectory()) {
             JComponent textEditor = createIntellijEditor(wooFile);
             tabbedPane.addTab("DisplayGroup", textEditor);
         }
