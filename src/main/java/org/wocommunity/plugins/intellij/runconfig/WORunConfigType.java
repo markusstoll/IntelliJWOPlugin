@@ -4,6 +4,7 @@ import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;
 import org.jetbrains.annotations.NotNull;
 import com.intellij.util.ui.UIUtil;
+import org.wocommunity.plugins.intellij.tools.WOIcons;
 
 import javax.swing.*;
 
