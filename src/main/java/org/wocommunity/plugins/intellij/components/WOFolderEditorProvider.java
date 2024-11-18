@@ -1,5 +1,8 @@
 package org.wocommunity.plugins.intellij.components;
 
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
@@ -7,6 +10,8 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 public class WOFolderEditorProvider implements FileEditorProvider, DumbAware {
 
@@ -18,7 +23,17 @@ public class WOFolderEditorProvider implements FileEditorProvider, DumbAware {
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new WOFolderEditor(project, file);
+        try {
+            return new WOFolderEditor(project, file);
+        } catch (IOException e) {
+            Notifications.Bus.notify(new Notification(
+                    "WOComponent", "File Not Found",
+                    file.getName() + " cannot be openend: " + e.getMessage(),
+                    NotificationType.WARNING
+            ));
+
+            return null;
+        }
     }
 
     @Override

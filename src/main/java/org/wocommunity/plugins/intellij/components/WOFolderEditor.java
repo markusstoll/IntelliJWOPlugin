@@ -7,6 +7,8 @@ import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.OnePixelSplitter;
+import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,26 +31,62 @@ public class WOFolderEditor implements FileEditor {
 
     private final Map<Key<?>, Object> userData = new HashMap<>();
 
-    public WOFolderEditor(@NotNull Project project, @NotNull VirtualFile folder) {
+    public WOFolderEditor(@NotNull Project project, @NotNull VirtualFile folder) throws IOException {
         this.project = project;
         this.folder = folder;
         this.changes = new HashMap<>();
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+        JBTabbedPane tabbedPane = new JBTabbedPane();
 
-        // Tab 1: HTML Editor
-        VirtualFile htmlFile = folder.findChild(folder.getName().replace(".wo", ".html"));
-        if (htmlFile != null && !htmlFile.isDirectory()) {
+        String componentName = folder.getName().replace(".wo", "");
+
+                // Tab 1: HTML Editor
+        VirtualFile htmlFile = folder.findChild(componentName + ".html");
+        if(htmlFile == null)
+        {
+            htmlFile = folder.createChildData(null, componentName + ".html");
+        }
+        VirtualFile wodFile = folder.findChild(componentName + ".wod");
+        if(wodFile == null)
+        {
+            wodFile = folder.createChildData(null, componentName + ".wod");
+        }
+
+        if (!htmlFile.isDirectory()) {
             JComponent htmlEditor = createIntellijEditor(htmlFile);
-            tabbedPane.addTab("Component", htmlEditor);
+            JComponent wodFileEditor = createIntellijEditor(wodFile);
+
+            // Create a splitter with 80:20 ratio
+            OnePixelSplitter splitter = new OnePixelSplitter(true, 0.8f);
+            splitter.setFirstComponent(htmlEditor);
+            splitter.setSecondComponent(wodFileEditor);
+
+            tabbedPane.addTab("Component", splitter);
+        }
+
+        VirtualFile apiFile = folder.getParent().findChild(componentName + ".api");
+        if(apiFile == null)
+        {
+            apiFile = folder.getParent().createChildData(null, componentName + ".api");
+        }
+        if (!apiFile.isDirectory()) {
+            JComponent apiFileEditor = createIntellijEditor(apiFile);
+            tabbedPane.addTab("API", apiFileEditor);
         }
 
         // Tab 2: Plain Text Editor
-        VirtualFile wooFile = folder.findChild(folder.getName().replace(".wo", ".woo"));
+        VirtualFile wooFile = folder.findChild(componentName + ".woo");
+        if(wooFile == null)
+        {
+            wooFile = folder.getParent().createChildData(null, componentName + ".woo");
+        }
         if (wooFile != null && !wooFile.isDirectory()) {
             JComponent textEditor = createIntellijEditor(wooFile);
             tabbedPane.addTab("DisplayGroup", textEditor);
         }
+
+        tabbedPane.setTabPlacement(JBTabbedPane.BOTTOM);
+        tabbedPane.setSelectedIndex(0);
 
         this.component = JBUI.Panels.simplePanel(tabbedPane);
     }
