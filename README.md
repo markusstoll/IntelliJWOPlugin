@@ -49,6 +49,7 @@ A future version will have a UI editor for these options, too
 ## TODO list / Next steps
 * add UI editor for additional higher JDK VM options
 * add shortcuts for switching between Java and HTML file for a WO component
+* add new project wizard
 * validator for wo components html content
 * validator for wo components wod files
 * start experimenting with custom editor for .wo folders
