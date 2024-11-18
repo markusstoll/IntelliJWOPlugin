@@ -52,3 +52,6 @@ A future version will have a UI editor for these options, too
 * validator for wo components html content
 * validator for wo components wod files
 * start experimenting with custom editor for .wo folders
+** add hooks for delete wo component (delete associated files)
+** add hook for renaming
+** create customer editor with tabs for .woo / .api

@@ -4,10 +4,16 @@ import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.projectView.ProjectViewNode;
 import com.intellij.ide.projectView.ViewSettings;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.tools.WOIcons;
 
 import java.util.Collection;
@@ -48,5 +54,33 @@ public class WOFolderNode extends ProjectViewNode<PsiDirectory> {
     @Override
     public boolean canNavigateToSource() {
         return true; // Enable navigation if needed
+    }
+
+    @Override
+    public void navigate(boolean requestFocus) {
+        PsiDirectory folder = getValue();
+
+        if (folder != null) {
+            // Specify the HTML file to open, for example, "index.html" inside the .wo folder
+            String htmlFileName = folder.getName().replace(".wo", ".html");
+
+            @Nullable PsiFile htmlFile = folder.findFile(htmlFileName);
+            if (htmlFile != null) {
+                openHtmlEditor(htmlFile);
+            } else {
+                // Optionally, show an error or feedback if the file is not found
+                Notifications.Bus.notify(new Notification(
+                        "WOFolder", "File Not Found",
+                        htmlFile + " was not found in " + folder.getName(),
+                        NotificationType.WARNING
+                ));
+            }
+        }
+    }
+
+    private void openHtmlEditor(PsiFile htmlFile) {
+        if (htmlFile != null && htmlFile.isValid()) {
+            FileEditorManager.getInstance(myProject).openFile(htmlFile.getVirtualFile(), true);
+        }
     }
 }
