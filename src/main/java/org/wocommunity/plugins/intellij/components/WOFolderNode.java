@@ -31,7 +31,8 @@ public class WOFolderNode extends ProjectViewNode<PsiDirectory> {
         PsiDirectory file = getValue();
         if (file != null) {
             // Set the name and custom icon for .wo folders
-            presentation.setPresentableText(file.getName());
+            String componentName = file.getName().replace(".wo", "");
+            presentation.setPresentableText(componentName + " WO");
             presentation.setIcon(WOIcons.WOCOMPONENT_ICON); // Use your custom icon here
         }
     }
@@ -59,31 +60,5 @@ public class WOFolderNode extends ProjectViewNode<PsiDirectory> {
     @Override
     public void navigate(boolean requestFocus) {
         FileEditorManager.getInstance(myProject).openFile(getValue().getVirtualFile(), true);
-    }
-    public void navigate_old(boolean requestFocus) {
-        PsiDirectory folder = getValue();
-
-        if (folder != null) {
-            // Specify the HTML file to open, for example, "index.html" inside the .wo folder
-            String htmlFileName = folder.getName().replace(".wo", ".html");
-
-            @Nullable PsiFile htmlFile = folder.findFile(htmlFileName);
-            if (htmlFile != null) {
-                openHtmlEditor(htmlFile);
-            } else {
-                // Optionally, show an error or feedback if the file is not found
-                Notifications.Bus.notify(new Notification(
-                        "WOFolder", "File Not Found",
-                        htmlFile + " was not found in " + folder.getName(),
-                        NotificationType.WARNING
-                ));
-            }
-        }
-    }
-
-    private void openHtmlEditor(PsiFile htmlFile) {
-        if (htmlFile != null && htmlFile.isValid()) {
-            FileEditorManager.getInstance(myProject).openFile(htmlFile.getVirtualFile(), true);
-        }
     }
 }
