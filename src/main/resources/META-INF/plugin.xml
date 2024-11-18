@@ -41,5 +41,6 @@
         <configurationType
                 implementation="org.wocommunity.plugins.intellij.runconfig.WORunConfigType"/>
         <runConfigurationProducer implementation="org.wocommunity.plugins.intellij.runconfig.WORunConfigurationProducer"/>
+        <treeStructureProvider implementation="org.wocommunity.plugins.intellij.components.WOFolderTreeStructureProvider"/>
     </extensions>
 </idea-plugin>

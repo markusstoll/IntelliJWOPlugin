@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="22d3c4ea-3cd7-459e-88ce-8ae37738a58b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/components/WOFolderNode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/components/WOFolderTreeStructureProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +114,7 @@
     "Gradle.IntelliJWOPlugin [jar].executor": "Run",
     "Gradle.IntelliJWOPlugin [setupDependencies].executor": "Run",
     "Gradle.Load Gradle Dependencies.executor": "Run",
-    "Gradle.Run Plugin.executor": "Run",
+    "Gradle.Run Plugin.executor": "Debug",
     "Gradle.WOApplicationRunner [setupDependencies].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -125,17 +126,17 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.customizations",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="org.wocommunity.plugins.intellij.components" />
+      <recent name="org.wocommunity.plugins.intellij.file" />
       <recent name="org.wocommunity.plugins.intellij.actions.wocomponent" />
       <recent name="org.wocommunity.plugins.intellij.actions" />
       <recent name="org.wocommunity.plugins.intellij" />
-      <recent name="com.intellij.plugins.wo" />
-      <recent name="er.plugin.intellij.runconfig" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/gradle/wrapper" />
@@ -149,7 +150,7 @@
       <recent name="org.wocommunity.plugins.intellij" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.IntelliJWOPlugin [build]">
+  <component name="RunManager" selected="Gradle.Run Plugin">
     <configuration name="IntelliJWOPlugin [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -352,6 +353,11 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/actions/wocomponent/NewWOComponentDialog.java</url>
           <line>60</line>
           <option name="timeStamp" value="76" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/wocommunity/plugins/intellij/components/WOFolderTreeStructureProvider.java</url>
+          <line>25</line>
+          <option name="timeStamp" value="82" />
         </line-breakpoint>
         <line-breakpoint type="java-method">
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2023.2.6/f9a8cbfa07e631d1615cc5096d6f84cf2522e27b/ideaIC-2023.2.6-sources.jar!/com/intellij/util/xmlb/annotations/OptionTag.java</url>
