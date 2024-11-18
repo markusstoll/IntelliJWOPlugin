@@ -5,6 +5,7 @@ import com.intellij.ide.projectView.ViewSettings;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +36,13 @@ public class WOFolderTreeStructureProvider implements TreeStructureProvider {
                     modified.add(new WOFolderNode(child.getProject(), file, settings));
                 } else {
                     // Keep other nodes as they are
+                    modified.add(child);
+                }
+            } else if (value instanceof PsiFile){
+                PsiFile file = (PsiFile) value;
+
+                if(!file.getName().endsWith(".api"))
+                {
                     modified.add(child);
                 }
             } else {
