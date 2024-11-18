@@ -25,6 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.tools.WOProjectUtil;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -91,8 +93,8 @@ public class NewWOComponentDialog extends DialogWrapper {
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
-        JPanel panel = new JBPanel<>(new GridLayout(6, 1, 10, 10));
-        panel.setMinimumSize(new Dimension(500, 200)); // Set minimum width
+        JPanel panel = new JBPanel<>(new GridLayout(0, 1));
+        panel.setMinimumSize(new Dimension(500, 0)); // Set minimum width
 
         // component name
         componentNameField = new JTextField();
@@ -124,9 +126,10 @@ public class NewWOComponentDialog extends DialogWrapper {
         panel.add(createLabeledComponent("Superclass:", superclassSelector));
 
         // Checkboxes
-        createContent = new JBCheckBox("Create HTML contents X");
-        createApi = new JBCheckBox("Create API file");
+        createContent = new JBCheckBox("Create HTML contents");
         panel.add(createContent);
+
+        createApi = new JBCheckBox("Create API file");
         panel.add(createApi);
 
         return panel;
