@@ -42,7 +42,13 @@ Additionally if starting with a JDK version higher than 8, these additional VM o
 
 A future version will have a UI editor for these options, too
 
+## Feature list
+* Run Configuration 
+* New WOComponent dialog
+
 ## TODO list / Next steps
 * add UI editor for additional higher JDK VM options
 * add shortcuts for switching between Java and HTML file for a WO component
+* validator for wo components html content
+* validator for wo components wod files
 * start experimenting with custom editor for .wo folders
