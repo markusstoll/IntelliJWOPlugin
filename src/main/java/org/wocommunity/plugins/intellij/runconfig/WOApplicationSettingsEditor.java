@@ -52,8 +52,8 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
 
     private static final ClassFilter WO_CLASS_FILTER =
             aClass -> PsiMethodUtil.MAIN_CLASS.value(aClass)
-                    && ReadAction.compute(() -> PsiMethodUtil.findMainMethod(aClass)) != null
-                    && superClassIsWOApplication(aClass);
+                    && superClassIsWOApplication(aClass)
+                    && ReadAction.compute(() -> PsiMethodUtil.findMainMethod(aClass)) != null;
 
     private static boolean superClassIsWOApplication(PsiClass aClass) {
         PsiClass superClass = aClass.getSuperClass();
