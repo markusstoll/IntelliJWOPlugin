@@ -40,9 +40,9 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         JavaSdk javaSdk = (JavaSdk) sdkType;
         if(javaSdk.isOfVersionOrHigher(jdk, JavaSdkVersion.JDK_11))
         {
-            vmParametersList.add("--add-exports=java.base/sun.security.action=ALL-UNNAMED");
-            vmParametersList.add("--add-exports=java.base/sun.util.calendar=ALL-UNNAMED");
-            vmParametersList.add("--add-opens=java.base/java.lang=ALL-UNNAMED");
+            for(String vmParameter : myConfiguration.getOptions().getHigherJdkVMParameters()) {
+                vmParametersList.add(vmParameter);
+            }
         }
 
         ParametersList programParametersList = javaParameters.getProgramParametersList();

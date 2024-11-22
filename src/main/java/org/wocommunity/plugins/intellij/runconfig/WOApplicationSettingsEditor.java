@@ -15,6 +15,7 @@ import com.intellij.ui.EditorTextField;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOptionTableModel;
+import org.wocommunity.plugins.intellij.runconfig.data.VMParametersTableModel;
 
 import java.util.List;
 
@@ -46,8 +47,12 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
         fragments.add(createShortenClasspath(moduleClasspath.component(), jrePath, true));
 
         KeyValueOptionsFragment woOptionsFragment = new KeyValueOptionsFragment(new KeyValueOptionTableModel(mySettings.getOptions().getWoOptions()));
-        setMinimumWidth(woOptionsFragment.getEditorComponent(), 300);
+        setMinimumWidth(woOptionsFragment.getEditorComponent(), 600);
         fragments.add(woOptionsFragment);
+
+        VMOptionsFragment vmOptionsFragment = new VMOptionsFragment(new VMParametersTableModel(mySettings.getOptions().getHigherJdkVMParameters()));
+        setMinimumWidth(vmOptionsFragment.getEditorComponent(), 600);
+        fragments.add(vmOptionsFragment);
     }
 
     private static final ClassFilter WO_CLASS_FILTER =

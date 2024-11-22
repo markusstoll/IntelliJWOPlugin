@@ -12,20 +12,42 @@ import java.util.List;
 public class WORunConfigurationOptions extends JvmMainMethodRunConfigurationOptions {
 
     @OptionTag("woOptions")
-    // A custom stored property to track changes in the list of options
+    // A custom stored property to track changes in the list of woOptions
     private StoredProperty<List<Object>> woOptionsProperty = list().provideDelegate(this, "woOptions");
+
+    @OptionTag("higherJdkVMParameters")
+    // A custom stored property to track changes in the list of higherJdkVMParameters
+    private StoredProperty<List<Object>> higherJdkVMParametersProperty = list().provideDelegate(this, "higherJdkVMParameters");
 
     // Getter for the list of custom options
     public List<KeyValueOption> getWoOptions() {
         return (List)woOptionsProperty.getValue(this);
     }
 
+    // Getter for the list of custom options
+    public List<String> getHigherJdkVMParameters() {
+        return (List) higherJdkVMParametersProperty.getValue(this);
+    }
+
     public void setWoOptions(List<KeyValueOption> woOptions) {
         this.woOptionsProperty.setValue(this, (List)woOptions);
     }
 
+    public void setHigherJdkVMParameters(List<String> higherJdkVMParameters) {
+        this.higherJdkVMParametersProperty.setValue(this, (List) higherJdkVMParameters);
+    }
+
     public WORunConfigurationOptions() {
         setWoOptions(getDefaultWoOptions());
+        setHigherJdkVMParameters(getDefaultHigherJdkVMParameters());
+    }
+
+    private static @NotNull List<String> getDefaultHigherJdkVMParameters() {
+        List<String> vmParametersList = new ArrayList<>();
+        vmParametersList.add("--add-exports=java.base/sun.security.action=ALL-UNNAMED");
+        vmParametersList.add("--add-exports=java.base/sun.util.calendar=ALL-UNNAMED");
+        vmParametersList.add("--add-opens=java.base/java.lang=ALL-UNNAMED");
+        return vmParametersList;
     }
 
     private static @NotNull List<KeyValueOption> getDefaultWoOptions() {
