@@ -35,7 +35,7 @@ Things work slightly different than using Eclipse:
 * The working directory is automatically set to `./target/<appname>.woa`
 * A maven goal `process-resources` is enforced on starting your WO application.
 
-Additionally if starting with a JDK version higher than 8, these additional VM options are enforced:
+Additionally if starting with a JDK version higher than 8, these additional VM options are enforced by default (you can change this in the run configuration):
 * `--add-exports=java.base/sun.security.action=ALL-UNNAMED`
 * `--add-exports=java.base/sun.util.calendar=ALL-UNNAMED`
 * `--add-opens=java.base/java.lang=ALL-UNNAMED`
@@ -47,7 +47,6 @@ A future version will have a UI editor for these options, too
 * New WOComponent dialog
 
 ## TODO list / Next steps
-* add UI editor for additional higher JDK VM options
 * add shortcuts for switching between Java and HTML file for a WO component
 * add new project wizard
 * validator for wo components html content
