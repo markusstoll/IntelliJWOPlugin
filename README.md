@@ -45,13 +45,14 @@ A future version will have a UI editor for these options, too
 ## Feature list
 * Run Configuration 
 * New WOComponent dialog
+* First draft of customer editor with tabs for .woo / .api (no syntax stuff yet!)
+* Switch actions CMD-ALT-1 and -2 for switching between WOComponent file and Java file
+
 
 ## TODO list / Next steps
-* add shortcuts for switching between Java and HTML file for a WO component
 * add new project wizard
 * validator for wo components html content
 * validator for wo components wod files
-* start experimenting with custom editor for .wo folders
+* work on custom editor for .wo folders
 ** add hooks for delete wo component (delete associated files)
 ** add hook for renaming
-** create customer editor with tabs for .woo / .api
