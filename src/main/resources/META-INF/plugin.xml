@@ -43,5 +43,7 @@
         <runConfigurationProducer implementation="org.wocommunity.plugins.intellij.runconfig.WORunConfigurationProducer"/>
         <treeStructureProvider implementation="org.wocommunity.plugins.intellij.components.WOFolderTreeStructureProvider"/>
         <fileEditorProvider implementation="org.wocommunity.plugins.intellij.components.WOFolderEditorProvider"/>
+        <iconProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentIconProvider"/>
+        <editorTabTitleProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorTabTitleProvider"/>
     </extensions>
 </idea-plugin>
