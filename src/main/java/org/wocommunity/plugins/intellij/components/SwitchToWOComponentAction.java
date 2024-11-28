@@ -44,9 +44,21 @@ public class SwitchToWOComponentAction extends AnAction {
 
         // Iterate through the content roots to find folders by name
         for (VirtualFile root : contentRoots) {
-            VirtualFile folder = findFolderByName(root, folderName);
-            if(folder != null)
-                return folder;
+            VirtualFile folder;
+
+            try {
+                folder = findFolderByName(root.findFileByRelativePath("src/main/components"), folderName);
+                if(folder != null)
+                    return folder;
+            } catch (Exception exception)
+            {}
+
+            try {
+                folder = findFolderByName(root.findFileByRelativePath("Components"), folderName);
+                if(folder != null)
+                    return folder;
+            } catch (Exception exception)
+            {}
         }
 
         return null;
