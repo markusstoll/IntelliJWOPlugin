@@ -3,12 +3,16 @@ package org.wocommunity.plugins.intellij.components;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.PsiShortNamesCache;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class SwitchToJavaAction extends AnAction {
     @Override
@@ -22,30 +26,20 @@ public class SwitchToJavaAction extends AnAction {
         VirtualFile currentFile = fileEditorManager.getSelectedFiles().length > 0 ? fileEditorManager.getSelectedFiles()[0] : null;
 
         if (currentFile != null) {
-            VirtualFile baseDir = project.getBaseDir();
-            if (baseDir == null) return;
+            // Find the module of the current file
+            @Nullable Module module = ModuleUtil.findModuleForFile(currentFile, project);
 
-            // Find the folder by name
-            VirtualFile targetFolder = findFileByName(baseDir, currentFile.getName().replace(".wo", ".java"));
+            // Search for the class by simple name in the module's scope
+            GlobalSearchScope moduleScope = GlobalSearchScope.moduleScope(module);
+            String simpleClassName = currentFile.getName().replace(".wo", "");
 
-            if (targetFolder != null) {
-                // Open the folder in the Project View (or handle it as needed)
-                FileEditorManager.getInstance(project).openFile(targetFolder, true);
+            PsiShortNamesCache cache = PsiShortNamesCache.getInstance(project);
+            PsiClass[] classes = cache.getClassesByName(simpleClassName, GlobalSearchScope.moduleScope(module));
+
+            // Handle the search results
+            if (classes.length > 0) {
+                FileEditorManager.getInstance(project).openFile(classes[0].getContainingFile().getVirtualFile(), true);
             }
         }
     }
-
-    private VirtualFile findFileByName(VirtualFile root, String filename) {
-        for (VirtualFile child : root.getChildren()) {
-            if (child.isDirectory()) {
-                VirtualFile found = findFileByName(child, filename);
-                if (found != null) return found;
-            } else if (child.getName().equals(filename))
-            {
-                return child;
-            }
-        }
-        return null;
-    }
-
 }
