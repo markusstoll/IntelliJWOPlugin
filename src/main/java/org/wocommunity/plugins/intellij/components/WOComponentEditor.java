@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WOFolderEditor implements FileEditor {
+public class WOComponentEditor implements FileEditor {
 
     private final VirtualFile folder;
     private final JComponent component;
@@ -29,7 +29,7 @@ public class WOFolderEditor implements FileEditor {
 
     private final Map<Key<?>, Object> userData = new HashMap<>();
 
-    public WOFolderEditor(@NotNull Project project, @NotNull VirtualFile folder) throws IOException {
+    public WOComponentEditor(@NotNull Project project, @NotNull VirtualFile folder) throws IOException {
         this.project = project;
         this.folder = folder;
         this.changes = new HashMap<>();

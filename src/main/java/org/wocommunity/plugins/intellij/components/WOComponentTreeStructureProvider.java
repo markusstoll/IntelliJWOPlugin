@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class WOFolderTreeStructureProvider implements TreeStructureProvider {
+public class WOComponentTreeStructureProvider implements TreeStructureProvider {
 
     @Override
     public @NotNull Collection<AbstractTreeNode<?>> modify(
@@ -31,7 +31,7 @@ public class WOFolderTreeStructureProvider implements TreeStructureProvider {
                 // Check for the .wo suffix and whether it's a directory
                 if (file.isDirectory() && file.getName().endsWith(".wo")) {
                     // Replace this folder node with a custom node
-                    modified.add(new WOFolderNode(child.getProject(), file, settings));
+                    modified.add(new WOComponentNode(child.getProject(), file, settings));
                 } else {
                     // Keep other nodes as they are
                     modified.add(child);

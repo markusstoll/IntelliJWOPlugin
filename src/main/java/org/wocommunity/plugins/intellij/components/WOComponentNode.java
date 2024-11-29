@@ -14,9 +14,9 @@ import org.wocommunity.plugins.intellij.tools.WOIcons;
 import java.util.Collection;
 import java.util.Collections;
 
-public class WOFolderNode extends ProjectViewNode<PsiDirectory> {
+public class WOComponentNode extends ProjectViewNode<PsiDirectory> {
 
-    public WOFolderNode(Project project, PsiDirectory value, ViewSettings viewSettings) {
+    public WOComponentNode(Project project, PsiDirectory value, ViewSettings viewSettings) {
         super(project, value, viewSettings);
     }
 
