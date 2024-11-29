@@ -85,14 +85,6 @@ public class WOFolderEditor implements FileEditor {
         return htmlEditor.getComponent(); // Get the Swing component of the HTML editor
     }
 
-    private String loadFileContents(@NotNull VirtualFile file) {
-        try {
-            return new String(file.contentsToByteArray(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            return "Error loading file: " + e.getMessage();
-        }
-    }
-
     @Override
     public @NotNull JComponent getComponent() {
         return component;
@@ -175,6 +167,6 @@ public class WOFolderEditor implements FileEditor {
 
     @Override
     public VirtualFile getFile() {
-        return FILE_KEY.get(this);
+        return folder;
     }
 }
