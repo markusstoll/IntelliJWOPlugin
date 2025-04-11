@@ -30,8 +30,10 @@ public class SwitchToJavaAction extends AnAction {
             @Nullable Module module = ModuleUtil.findModuleForFile(currentFile, project);
 
             // Search for the class by simple name in the module's scope
+            // enable for .wo folders as for .html files
             GlobalSearchScope moduleScope = GlobalSearchScope.moduleScope(module);
             String simpleClassName = currentFile.getName().replace(".wo", "");
+            simpleClassName = simpleClassName.replace(".html", "");
 
             PsiShortNamesCache cache = PsiShortNamesCache.getInstance(project);
             PsiClass[] classes = cache.getClassesByName(simpleClassName, GlobalSearchScope.moduleScope(module));
