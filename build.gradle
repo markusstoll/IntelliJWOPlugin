@@ -25,7 +25,7 @@ intellij {
 
 patchPluginXml {
     sinceBuild = "232"
-    untilBuild = "243.*"
+    untilBuild = "251.*"
 }
 
 dependencies {
