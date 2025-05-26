@@ -77,6 +77,7 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
 
     /**
      * This method determines the finalName of the current maven project.
+     * Support custom variables (which maven does, but IntelliJ does not take care of)
      * @param project
      * @param module
      * @return
@@ -85,6 +86,21 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
         MavenProject mavenProject = mavenProjectsManager.findProject(module);
 
-        return mavenProject.getFinalName();
+        String finalName = mavenProject.getFinalName();
+
+        org.jetbrains.idea.maven.model.MavenId mavenId = mavenProject.getMavenId();
+        String artifactId = mavenId.getArtifactId();
+        String version = mavenId.getVersion();
+        String groupId = mavenId.getGroupId();
+
+        if (finalName != null) {
+            finalName = finalName.replace("${project.artifactId}", artifactId)
+                    .replace("${project.version}", version)
+                    .replace("${project.name}", artifactId)
+                    .replace("${project.groupId}", groupId);
+            return finalName;
+        }
+
+        return null;
     }
 }
