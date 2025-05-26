@@ -77,8 +77,6 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
 
     /**
      * This method determines the finalName of the current maven project.
-     * This looks stupid, but unfortunately mavenProject.getFinalName() is using
-     * the projects parent artifactId, so the output would be wrong in some cases
      * @param project
      * @param module
      * @return
@@ -86,38 +84,7 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
     public String getProjectFinalName(Project project, com.intellij.openapi.module.Module module) {
         MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
         MavenProject mavenProject = mavenProjectsManager.findProject(module);
-        @NotNull Map<String, String> map = mavenProject.getModelMap();
-        if (mavenProject != null) {
-            org.jetbrains.idea.maven.model.MavenId mavenId = mavenProject.getMavenId();
-            String artifactId = mavenId.getArtifactId();
-            String version = mavenId.getVersion();
-            String groupId = mavenId.getGroupId();
 
-            com.intellij.openapi.vfs.VirtualFile pomFile = mavenProject.getFile();
-            if (pomFile != null && pomFile.exists()) {
-                try {
-                    String pomContent = new String(pomFile.contentsToByteArray());
-                    int finalNameStart = pomContent.indexOf("<finalName>");
-                    if (finalNameStart != -1) {
-                        finalNameStart += "<finalName>".length();
-                        int finalNameEnd = pomContent.indexOf("</finalName>", finalNameStart);
-                        if (finalNameEnd != -1) {
-                            String finalName = pomContent.substring(finalNameStart, finalNameEnd).trim();
-                            if (!finalName.isEmpty()) {
-                                finalName = finalName.replace("${project.artifactId}", artifactId)
-                                        .replace("${project.version}", version)
-                                        .replace("${project.name}", artifactId)
-                                        .replace("${project.groupId}", groupId);
-                                return finalName;
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    // Fehler beim Lesen der POM ignorieren
-                }
-            }
-            return artifactId + "-" + version;
-        }
-        return null;
+        return mavenProject.getFinalName();
     }
 }
