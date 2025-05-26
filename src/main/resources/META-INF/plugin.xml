@@ -35,9 +35,9 @@
                 icon="icons/componentIcon.svg">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
         </action>
-        <action id="SwitchToJavaAction"
-                class="org.wocommunity.plugins.intellij.components.SwitchToJavaAction"
-                text="Open Java file"
+        <action id="SwitchToSrcAction"
+                class="org.wocommunity.plugins.intellij.components.SwitchToSrcAction"
+                text="Open Source file"
                 description="Opens a file for the current opened WO Component">
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta alt 1"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 1"/>

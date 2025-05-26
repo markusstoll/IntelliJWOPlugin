@@ -8,13 +8,18 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SwitchToWOComponentAction extends AnAction {
+    static List<String> srcSuffixes = Arrays.asList(new  String[] {"java", "kt", "groovy"});
+    static String woTemplateSuffix = "wo";
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         // Get the project
@@ -28,12 +33,20 @@ public class SwitchToWOComponentAction extends AnAction {
         if (currentFile != null) {
             @Nullable Module module = ModuleUtil.findModuleForFile(currentFile, project);
 
-            // Find the folder by name
-            VirtualFile targetFolder = findResourceFolderByName(module, currentFile.getName().replace(".java", ".wo"));
+            String componentFilename = currentFile.getName();
+            String suffix = FilenameUtils.getExtension(componentFilename);
 
-            if (targetFolder != null) {
-                // Open the folder in the Project View (or handle it as needed)
-                FileEditorManager.getInstance(project).openFile(targetFolder, true);
+            if((srcSuffixes).contains(suffix))
+            {
+                String woTemplate = StringUtils.left(componentFilename, componentFilename.length() - suffix.length()) + woTemplateSuffix;
+
+                // Find the folder by name
+                VirtualFile targetFolder = findResourceFolderByName(module, woTemplate);
+
+                if (targetFolder != null) {
+                    // Open the folder in the Project View (or handle it as needed)
+                    FileEditorManager.getInstance(project).openFile(targetFolder, true);
+                }
             }
         }
     }
