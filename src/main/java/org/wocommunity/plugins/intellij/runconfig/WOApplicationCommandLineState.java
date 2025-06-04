@@ -157,7 +157,7 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
             // First add paths in desired order
             for (String desiredPath : desiredOrder) {
                 for (String mavenPath : mavenPaths) {
-                    if (mavenPath.endsWith(desiredPath)) {
+                    if (matchesWithSnapshotAwareness(mavenPath, desiredPath)) {
                         if (!processedPaths.contains(mavenPath)) {
                             sortedMavenPaths.add(mavenPath);
                             processedPaths.add(mavenPath);
@@ -205,5 +205,79 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         String userHome = System.getProperty("user.home");
         String defaultM2RepoPath = Paths.get(userHome, ".m2", "repository").toString();
         return path.startsWith(defaultM2RepoPath);
+    }
+
+    /**
+     * Matches Maven paths with SNAPSHOT-aware logic to handle timestamp variations
+     * 
+     * Examples:
+     * - classpath.txt: "wonder/core/ERPDFGeneration/7.3.0-BOSCH-20250603.151922-265/ERPDFGeneration-7.3.0-BOSCH-20250603.151922-265.jar"
+     * - actual path:   "wonder/core/ERPDFGeneration/7.3.0-BOSCH-SNAPSHOT/ERPDFGeneration-7.3.0-BOSCH-20250603.133829-264.jar"
+     * 
+     * Should match because they represent the same artifact with different SNAPSHOT timestamps
+     */
+    private boolean matchesWithSnapshotAwareness(String mavenPath, String desiredPath) {
+        // Simple exact match first (most common case)
+        if (mavenPath.endsWith(desiredPath)) {
+            return true;
+        }
+        
+        // Extract normalized paths for SNAPSHOT comparison
+        String normalizedMavenPath = normalizeSnapshotPath(extractRelativeRepositoryPath(mavenPath));
+        String normalizedDesiredPath = normalizeSnapshotPath(desiredPath);
+        
+        return normalizedMavenPath.equals(normalizedDesiredPath);
+    }
+    
+    /**
+     * Normalizes SNAPSHOT paths by replacing timestamp patterns with generic SNAPSHOT
+     * 
+     * Examples:
+     * - "wonder/core/ERPDFGeneration/7.3.0-BOSCH-20250603.151922-265/ERPDFGeneration-7.3.0-BOSCH-20250603.151922-265.jar"
+     *   becomes: "wonder/core/ERPDFGeneration/7.3.0-BOSCH-SNAPSHOT/ERPDFGeneration-7.3.0-BOSCH-SNAPSHOT.jar"
+     */
+    private String normalizeSnapshotPath(String path) {
+        if (path == null) {
+            return null;
+        }
+        
+        // Pattern for Maven SNAPSHOT timestamps: YYYYMMDD.HHMMSS-buildNumber
+        // e.g., "20250603.151922-265"
+        String timestampPattern = "\\d{8}\\.\\d{6}-\\d+";
+        
+        // Replace timestamp patterns with "SNAPSHOT"
+        // Handle both in directory names and file names
+        return path.replaceAll(timestampPattern, "SNAPSHOT");
+    }
+    
+    /**
+     * Extracts the relative repository path from a full Maven path
+     * 
+     * Example:
+     * - Input:  "/Users/user/.m2/repository/wonder/core/ERPDFGeneration/7.3.0-BOSCH-SNAPSHOT/ERPDFGeneration-7.3.0-BOSCH-20250603.133829-264.jar"
+     * - Output: "wonder/core/ERPDFGeneration/7.3.0-BOSCH-SNAPSHOT/ERPDFGeneration-7.3.0-BOSCH-20250603.133829-264.jar"
+     */
+    private String extractRelativeRepositoryPath(String fullPath) {
+        if (fullPath == null) {
+            return null;
+        }
+        
+        // Find the "repository" directory and extract everything after it
+        String[] pathParts = fullPath.split("[/\\\\]");
+        boolean foundRepository = false;
+        StringBuilder relativePath = new StringBuilder();
+        
+        for (String part : pathParts) {
+            if (foundRepository && !part.isEmpty()) {
+                if (relativePath.length() > 0) {
+                    relativePath.append("/");
+                }
+                relativePath.append(part);
+            } else if ("repository".equals(part)) {
+                foundRepository = true;
+            }
+        }
+        
+        return relativePath.length() > 0 ? relativePath.toString() : fullPath;
     }
 }
