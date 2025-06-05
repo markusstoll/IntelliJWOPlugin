@@ -209,22 +209,28 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
 
     /**
      * Matches Maven paths with SNAPSHOT-aware logic to handle timestamp variations
+     * and ignores filename differences (e.g., "json-lib-2.4jdk15.jar" vs "json-lib-2.4-jdk15.jar")
+     * 
+     * The method compares only the directory structure, not the actual filename.
      * 
      * Examples:
-     * - classpath.txt: "wonder/core/ERPDFGeneration/7.3.0-BOSCH-20250603.151922-265/ERPDFGeneration-7.3.0-BOSCH-20250603.151922-265.jar"
-     * - actual path:   "wonder/core/ERPDFGeneration/7.3.0-BOSCH-SNAPSHOT/ERPDFGeneration-7.3.0-BOSCH-20250603.133829-264.jar"
+     * - classpath.txt: "net/sf/json-lib/json-lib/2.4/json-lib-2.4jdk15.jar"
+     * - actual path:   "/Users/user/.m2/repository/net/sf/json-lib/json-lib/2.4/json-lib-2.4-jdk15.jar"
      * 
-     * Should match because they represent the same artifact with different SNAPSHOT timestamps
+     * Should match because they have the same directory structure: "net/sf/json-lib/json-lib/2.4/"
      */
     private boolean matchesWithSnapshotAwareness(String mavenPath, String desiredPath) {
-        // Simple exact match first (most common case)
-        if (mavenPath.endsWith(desiredPath)) {
-            return true;
+        // Extract directory paths (without filename) for comparison
+        String mavenDirectoryPath = getDirectoryPath(extractRelativeRepositoryPath(mavenPath));
+        String desiredDirectoryPath = getDirectoryPath(desiredPath);
+        
+        if (mavenDirectoryPath == null || desiredDirectoryPath == null) {
+            return false;
         }
         
-        // Extract normalized paths for SNAPSHOT comparison
-        String normalizedMavenPath = normalizeSnapshotPath(extractRelativeRepositoryPath(mavenPath));
-        String normalizedDesiredPath = normalizeSnapshotPath(desiredPath);
+        // Normalize SNAPSHOT paths for comparison
+        String normalizedMavenPath = normalizeSnapshotPath(mavenDirectoryPath);
+        String normalizedDesiredPath = normalizeSnapshotPath(desiredDirectoryPath);
         
         return normalizedMavenPath.equals(normalizedDesiredPath);
     }
@@ -279,5 +285,29 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         }
         
         return relativePath.length() > 0 ? relativePath.toString() : fullPath;
+    }
+
+    /**
+     * Extracts the directory path from a full path by removing the filename
+     * 
+     * Example:
+     * - Input:  "net/sf/json-lib/json-lib/2.4/json-lib-2.4-jdk15.jar"
+     * - Output: "net/sf/json-lib/json-lib/2.4/"
+     */
+    private String getDirectoryPath(String fullPath) {
+        if (fullPath == null || fullPath.isEmpty()) {
+            return null;
+        }
+        
+        // Find the last slash to separate directory from filename
+        int lastSlashIndex = Math.max(fullPath.lastIndexOf('/'), fullPath.lastIndexOf('\\'));
+        
+        if (lastSlashIndex == -1) {
+            // No directory separator found
+            return "";
+        }
+        
+        // Return directory path including trailing slash
+        return fullPath.substring(0, lastSlashIndex + 1);
     }
 }
