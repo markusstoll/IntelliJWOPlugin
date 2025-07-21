@@ -50,9 +50,12 @@ A future version will have a UI editor for these options, too
 
 
 ## TODO list / Next steps
+* support "Select opened filed" for opened WO component
 * add new project wizard
 * validator for wo components html content
 * validator for wo components wod files
 * work on custom editor for .wo folders
+* support for executing eogen files
+* Integrate EOF editor
 ** add hooks for delete wo component (delete associated files)
 ** add hook for renaming
