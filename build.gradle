@@ -16,7 +16,7 @@ test {
     useJUnitPlatform()
 }
 
-version = '0.3.10'
+version = '0.3.11'
 
 intellij {
     version = '2023.2.6'
@@ -25,7 +25,7 @@ intellij {
 
 patchPluginXml {
     sinceBuild = "232"
-    untilBuild = "251.*"
+    untilBuild = "252.*"
 }
 
 dependencies {
