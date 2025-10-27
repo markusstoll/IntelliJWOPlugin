@@ -1,35 +1,56 @@
 plugins {
-    id "org.jetbrains.intellij" version '1.17.4'
-}
-
-apply plugin: 'org.jetbrains.intellij'
-apply plugin: 'java'
-apply plugin: 'idea'
-
-repositories {
-    mavenCentral()
+    id("org.jetbrains.intellij.platform") version "2.10.2"
+    id("java")
+    id("idea")
 }
 
 group = 'com.intellij.plugin.wo'
+version = '0.4.1'
 
-test {
-    useJUnitPlatform()
+java {
+//    sourceCompatibility = JavaVersion.VERSION_21
+//    targetCompatibility = JavaVersion.VERSION_21
 }
 
-version = '0.3.11'
-
-intellij {
-    version = '2023.2.6'
-    plugins = ['com.intellij.java','org.jetbrains.idea.maven']
+repositories {
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-patchPluginXml {
-    sinceBuild = "232"
-    untilBuild = "252.*"
+// ─────────────────────────────────────────────────────────────
+// IntelliJ Platform Configuration (Top‑Level)
+// ─────────────────────────────────────────────────────────────
+intellijPlatform {
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "252"
+            untilBuild = "260.*"
+        }
+    }
 }
+
 
 dependencies {
-    implementation('org.jetbrains:annotations:24.0.0')
-    testImplementation('org.junit.jupiter:junit-jupiter:5.10.0')
-    implementation('org.seleniumhq.selenium:htmlunit3-driver:4.9.1')
+    // IntelliJ Platform + zusätzliche Plugins
+    intellijPlatform {
+        create("IC", "2025.2.3")
+        bundledPlugin("com.intellij.java")
+        bundledPlugin("org.jetbrains.idea.maven")
+
+        // Test Framework (bringt JUnit 4 + IntelliJ‑Test‑Infrastruktur)
+        //testFramework()
+    }
+
+    // Weitere Dependencies
+    implementation("org.jetbrains:annotations:24.0.0")
+    implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation("org.seleniumhq.selenium:htmlunit3-driver:4.9.1")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+}
+
+test {
+//    useJUnitPlatform()
 }
