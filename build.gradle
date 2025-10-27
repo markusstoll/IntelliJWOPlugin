@@ -7,11 +7,6 @@ plugins {
 group = 'com.intellij.plugin.wo'
 version = '0.4.1'
 
-java {
-//    sourceCompatibility = JavaVersion.VERSION_21
-//    targetCompatibility = JavaVersion.VERSION_21
-}
-
 repositories {
     mavenCentral()
     intellijPlatform {
@@ -19,18 +14,10 @@ repositories {
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-// IntelliJ Platform Configuration (Top‑Level)
-// ─────────────────────────────────────────────────────────────
-intellijPlatform {
-    pluginConfiguration {
-        ideaVersion {
-            sinceBuild = "252"
-            untilBuild = "260.*"
-        }
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
-
 
 dependencies {
     // IntelliJ Platform + zusätzliche Plugins
@@ -40,7 +27,7 @@ dependencies {
         bundledPlugin("org.jetbrains.idea.maven")
 
         // Test Framework (bringt JUnit 4 + IntelliJ‑Test‑Infrastruktur)
-        //testFramework()
+        // testFramework()
     }
 
     // Weitere Dependencies
@@ -48,9 +35,16 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.18.0")
     implementation("org.seleniumhq.selenium:htmlunit3-driver:4.9.1")
 
+    // JUnit Platform Launcher – nötig für Gradle Test‑Executor
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+
+    // JUnit 5
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    // JUnit 4 (nur für @Rule‑Schnittstelle, z. B. org.junit.rules.TestRule)
+    testImplementation("junit:junit:4.13.2")
 }
 
 test {
-//    useJUnitPlatform()
+    // JUnit 5 Test‑Runner aktivieren
+    useJUnitPlatform()
 }
