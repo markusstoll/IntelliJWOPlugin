@@ -11,7 +11,7 @@ import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SdkTypeId;
 import com.intellij.util.PathsList;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.wocommunity.plugins.intellij.tools.WOProjectUtil;
 import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOption;
