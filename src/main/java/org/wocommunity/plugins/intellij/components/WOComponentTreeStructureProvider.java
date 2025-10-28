@@ -50,11 +50,4 @@ public class WOComponentTreeStructureProvider implements TreeStructureProvider {
 
         return modified;
     }
-
-    @Override
-    public @Nullable Object getData(
-            @NotNull Collection<? extends AbstractTreeNode<?>> selected,
-            @NotNull String dataId) {
-        return null; // Handle additional data if needed
-    }
 }
