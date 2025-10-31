@@ -59,6 +59,5 @@
         <fileEditorProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorProvider"/>
         <iconProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentIconProvider"/>
         <editorTabTitleProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorTabTitleProvider"/>
-        <postStartupActivity implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorSelectionListener"/>
     </extensions>
 </idea-plugin>
