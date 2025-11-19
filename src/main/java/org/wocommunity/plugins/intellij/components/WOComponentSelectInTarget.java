@@ -6,6 +6,7 @@ import com.intellij.ide.projectView.ProjectView;
 import com.intellij.ide.projectView.impl.ProjectViewPane;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindowId;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiManager;
 import org.jetbrains.annotations.NotNull;
