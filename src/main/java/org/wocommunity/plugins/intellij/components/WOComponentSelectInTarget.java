@@ -42,14 +42,12 @@ public class WOComponentSelectInTarget implements SelectInTarget {
 
     @Override
     public @NotNull String getToolWindowId() {
-        // Der Kontext der Schaltfläche hat keine Tool‑Window‑ID → muss null sein
-        return null;
+        return ToolWindowId.PROJECT_VIEW;
     }
 
     @Override
     public @Nullable String getMinorViewId() {
-        // Gleicher Grund: kein Minor‑View‑ID im Kontext
-        return null;
+        return ProjectViewPane.ID; // ID des Standard-Project-Pane
     }
 
     @Override

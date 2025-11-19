@@ -22,7 +22,7 @@ java {
 dependencies {
     // IntelliJ Platform + zusätzliche Plugins
     intellijPlatform {
-        create("IC", "2025.2.3")
+        create("IC", "2025.2.4")
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
 
