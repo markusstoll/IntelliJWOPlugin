@@ -1,5 +1,8 @@
 package org.wocommunity.plugins.intellij.components;
 
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataSink;
+import com.intellij.openapi.actionSystem.UiDataProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
@@ -10,6 +13,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.util.ui.JBUI;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,7 +82,7 @@ public class WOComponentEditor implements FileEditor {
         tabbedPane.setTabPlacement(JBTabbedPane.BOTTOM);
         tabbedPane.setSelectedIndex(0);
 
-        this.component = JBUI.Panels.simplePanel(tabbedPane);
+        this.component = new WOComponentPanel(project, folder, tabbedPane);
     }
 
     private JComponent createIntellijEditor(@NotNull VirtualFile file) {
@@ -168,5 +173,24 @@ public class WOComponentEditor implements FileEditor {
     @Override
     public VirtualFile getFile() {
         return folder;
+    }
+
+    private static class WOComponentPanel extends JPanel implements UiDataProvider {
+        private final Project project;
+        private final VirtualFile folder;
+
+        WOComponentPanel(@NotNull Project project, @NotNull VirtualFile folder, @NotNull JComponent content) {
+            super(new java.awt.BorderLayout());
+            this.project = project;
+            this.folder = folder;
+            add(content, java.awt.BorderLayout.CENTER);
+        }
+
+        @Override
+        public void uiDataSnapshot(@NotNull DataSink sink) {
+            sink.set(CommonDataKeys.VIRTUAL_FILE, folder);
+            sink.lazy(CommonDataKeys.PSI_ELEMENT, () -> PsiManager.getInstance(project).findDirectory(folder));
+            sink.lazy(CommonDataKeys.NAVIGATABLE, () -> PsiManager.getInstance(project).findDirectory(folder));
+        }
     }
 }

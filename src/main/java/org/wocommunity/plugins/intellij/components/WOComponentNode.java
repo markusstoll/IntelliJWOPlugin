@@ -38,7 +38,27 @@ public class WOComponentNode extends ProjectViewNode<PsiDirectory> {
 
     @Override
     public boolean contains(@NotNull VirtualFile file) {
-        return false; // Prevent selection of nested files
+        PsiDirectory directory = getValue();
+        if (directory == null) {
+            return false;
+        }
+        VirtualFile woDirectory = directory.getVirtualFile();
+
+        // Das .wo Verzeichnis selbst
+        if (woDirectory.equals(file)) {
+            return true;
+        }
+
+        // Prüfen ob file ein Kind des .wo Verzeichnisses ist
+        VirtualFile parent = file.getParent();
+        while (parent != null) {
+            if (parent.equals(woDirectory)) {
+                return true;
+            }
+            parent = parent.getParent();
+        }
+
+        return false;
     }
 
     @Override
