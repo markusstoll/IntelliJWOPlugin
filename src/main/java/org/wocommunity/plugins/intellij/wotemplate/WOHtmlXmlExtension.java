@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.xml.XmlExtension;
+import com.intellij.xml.XmlTagNameProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +57,27 @@ public final class WOHtmlXmlExtension extends XmlExtension {
     @Override
     public @Nullable com.intellij.psi.impl.source.xml.SchemaPrefix getPrefixDeclaration(@NotNull XmlTag context, String namespacePrefix) {
         return null;
+    }
+
+    @Override
+    public boolean isCustomTagAllowed(final XmlTag tag) {
+        // Ensure inspections in HTML don't reject wo:* tags/attributes as "not allowed".
+        PsiFile file = tag.getContainingFile();
+        if (file == null) {
+            return false;
+        }
+        if (!isAvailable(file)) {
+            return false;
+        }
+        String prefix = tag.getNamespacePrefix();
+        if (prefix == null || prefix.isEmpty()) {
+            String qn = tag.getName();
+            int colon = qn.indexOf(':');
+            if (colon > 0) {
+                prefix = qn.substring(0, colon);
+            }
+        }
+        return "wo".equals(prefix);
     }
 
     private static @NotNull Set<String> collectWoInheritorNames(@NotNull XmlFile file) {

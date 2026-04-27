@@ -13,7 +13,6 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
-import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +36,7 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
                                                   @NotNull ProcessingContext context,
                                                   @NotNull CompletionResultSet result) {
                         PsiFile file = parameters.getOriginalFile();
-                        if (!isWoComponentHtml(file)) {
+                        if (!WOHtmlCompletionUtil.isWoComponentHtml(file)) {
                             return;
                         }
 
@@ -122,18 +121,6 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
             j--;
         }
         return null;
-    }
-
-    private static boolean isWoComponentHtml(@NotNull PsiFile file) {
-        var vFile = PsiUtilCore.getVirtualFile(file);
-        if (vFile == null) {
-            return false;
-        }
-        if (!vFile.getName().endsWith(".html")) {
-            return false;
-        }
-        var parent = vFile.getParent();
-        return parent != null && parent.getName().endsWith(".wo");
     }
 
     private static @NotNull Set<String> collectWoInheritorNames(@NotNull PsiFile file) {

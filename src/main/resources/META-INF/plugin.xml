@@ -65,9 +65,11 @@
         <editorTabTitleProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorTabTitleProvider"/>
         <selectInTarget implementation="org.wocommunity.plugins.intellij.components.WOComponentSelectInTarget"/>
         <xml.elementDescriptorProvider implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlElementDescriptorProvider"/>
+        <xml.attributeDescriptorsProvider implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlAttributeDescriptorsProvider"/>
         <xml.fileNSInfoProvider implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlFileNSInfoProvider"/>
         <xml.xmlExtension implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlXmlExtension"/>
         <completion.contributor language="HTML" implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlTagCompletionContributor"/>
+        <completion.contributor language="HTML" implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlAttributeCompletionContributor"/>
     </extensions>
 
     <!--
