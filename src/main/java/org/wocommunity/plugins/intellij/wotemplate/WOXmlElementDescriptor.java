@@ -1,6 +1,7 @@
 package org.wocommunity.plugins.intellij.wotemplate;
 
 import com.intellij.openapi.util.NlsSafe;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
@@ -10,6 +11,7 @@ import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.util.PropertyUtilBase;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.xml.XmlAttributeDescriptor;
 import com.intellij.xml.XmlElementDescriptor;
 import com.intellij.xml.XmlElementsGroup;
@@ -19,8 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 final class WOXmlElementDescriptor implements XmlElementDescriptor {
 
@@ -136,6 +140,20 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
             return Map.of();
         }
 
+        // 0) If we have system binding definitions, prefer them (these classes often don't expose public Java members).
+        String shortName = psiClass.getName();
+        if (shortName != null && !shortName.isBlank()) {
+            Set<String> defined = WOSystemBindingDefinitions.getBindingsForShortClassName(shortName);
+            if (!defined.isEmpty()) {
+                Map<String, XmlAttributeDescriptor> out = new LinkedHashMap<>();
+                for (String b : defined) {
+                    out.put(b, new WOXmlAttributeDescriptor(b, psiClass));
+                }
+                filterOutWOComponentBaseBindings(psiClass, out);
+                return out;
+            }
+        }
+
         Map<String, XmlAttributeDescriptor> out = new LinkedHashMap<>();
 
         // 1) public instance fields
@@ -191,6 +209,80 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
                 continue; // require getter + setter (as requested)
             }
             out.put(prop, new WOXmlAttributeDescriptor(prop, getter));
+        }
+
+        filterOutWOComponentBaseBindings(psiClass, out);
+        return out;
+    }
+
+    private static void filterOutWOComponentBaseBindings(@NotNull PsiClass psiClass,
+                                                         @NotNull Map<String, XmlAttributeDescriptor> out) {
+        // User requirement: ignore methods/attributes coming from WOComponent base class.
+        var project = psiClass.getProject();
+        GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+        PsiClass woComponent = JavaPsiFacade.getInstance(project)
+                .findClass("com.webobjects.appserver.WOComponent", scope);
+        if (woComponent == null) {
+            return;
+        }
+
+        Set<String> baseNames = collectPublicFieldsAndBeanProperties(woComponent);
+        if (baseNames.isEmpty()) {
+            return;
+        }
+        for (String n : baseNames) {
+            out.remove(n);
+        }
+    }
+
+    private static @NotNull Set<String> collectPublicFieldsAndBeanProperties(@NotNull PsiClass cls) {
+        Set<String> out = new LinkedHashSet<>();
+
+        for (PsiField f : cls.getAllFields()) {
+            if (!f.hasModifierProperty(PsiModifier.PUBLIC)) {
+                continue;
+            }
+            if (f.hasModifierProperty(PsiModifier.STATIC)) {
+                continue;
+            }
+            String fieldName = f.getName();
+            if (fieldName != null && !fieldName.isBlank()) {
+                out.add(fieldName);
+            }
+        }
+
+        Map<String, PsiMethod> getters = new LinkedHashMap<>();
+        Map<String, PsiMethod> setters = new LinkedHashMap<>();
+        for (PsiMethod m : cls.getAllMethods()) {
+            if (!m.hasModifierProperty(PsiModifier.PUBLIC)) {
+                continue;
+            }
+            if (m.hasModifierProperty(PsiModifier.STATIC)) {
+                continue;
+            }
+            String methodName = m.getName();
+            if (methodName == null) {
+                continue;
+            }
+
+            PsiParameterList params = m.getParameterList();
+            if (isGetterLike(methodName, params)) {
+                String prop = getterPropertyName(m);
+                if (prop != null && !prop.isBlank()) {
+                    getters.putIfAbsent(prop, m);
+                }
+            } else if (isSetterLike(methodName, params)) {
+                String prop = setterPropertyName(m);
+                if (prop != null && !prop.isBlank()) {
+                    setters.putIfAbsent(prop, m);
+                }
+            }
+        }
+
+        for (String prop : getters.keySet()) {
+            if (setters.containsKey(prop)) {
+                out.add(prop);
+            }
         }
 
         return out;
