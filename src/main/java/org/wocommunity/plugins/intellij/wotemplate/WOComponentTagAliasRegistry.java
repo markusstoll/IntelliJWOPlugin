@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,11 @@ final class WOComponentTagAliasRegistry {
         ensureLoaded();
         String mapped = ALIASES.get(rawLocalName);
         return mapped != null ? mapped : rawLocalName;
+    }
+
+    static @NotNull Map<String, String> getAliases() {
+        ensureLoaded();
+        return Collections.unmodifiableMap(ALIASES);
     }
 
     private static void ensureLoaded() {
