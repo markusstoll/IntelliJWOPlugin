@@ -9,6 +9,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
@@ -40,9 +41,8 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
                             return;
                         }
 
-                        // Only provide variants when user is likely typing a tag name starting with "wo:"
-                        String prefix = result.getPrefixMatcher().getPrefix();
-                        if (prefix == null || (!prefix.startsWith("wo") && !prefix.startsWith(WO_PREFIX_WITH_COLON))) {
+                        String localPrefix = getWoLocalPrefix(parameters, file);
+                        if (localPrefix == null) {
                             return;
                         }
 
@@ -52,7 +52,9 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
                             localNames.addAll(collectWoInheritorNames(file));
                         }
 
-                        CompletionResultSet woMatcher = result.withPrefixMatcher(result.getPrefixMatcher());
+                        // Match against full "wo:<localPrefix>" so completion works even if IntelliJ's computed prefix
+                        // is only the part after "wo:".
+                        CompletionResultSet woMatcher = result.withPrefixMatcher(WO_PREFIX_WITH_COLON + localPrefix);
                         for (String localName : localNames) {
                             woMatcher.addElement(
                                     LookupElementBuilder.create(WO_PREFIX_WITH_COLON + localName)
@@ -61,6 +63,65 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
                         }
                     }
                 });
+    }
+
+    /**
+     * @return the already typed prefix after "wo:" (may be empty), or null if caret is not in a WO tag-name context.
+     */
+    private static String getWoLocalPrefix(@NotNull CompletionParameters parameters, @NotNull PsiFile file) {
+        var doc = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+        if (doc == null) {
+            return null;
+        }
+        int offset = parameters.getOffset();
+        if (offset < 0 || offset > doc.getTextLength()) {
+            return null;
+        }
+
+        CharSequence text = doc.getCharsSequence();
+
+        // Find the start of the current token-ish segment (letters/digits/_/-) after "wo:"
+        int i = offset;
+        while (i > 0) {
+            char c = text.charAt(i - 1);
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '-') {
+                i--;
+                continue;
+            }
+            break;
+        }
+        String typedLocal = text.subSequence(i, offset).toString();
+
+        // Now check that immediately before that, we have "wo:" and that we're inside a tag name ("<wo:...").
+        int woEnd = i;
+        int woStart = woEnd - WO_PREFIX_WITH_COLON.length();
+        if (woStart < 0) {
+            return null;
+        }
+        if (!text.subSequence(woStart, woEnd).toString().equalsIgnoreCase(WO_PREFIX_WITH_COLON)) {
+            // Special case: caret is right after ":" with no local part typed yet.
+            if (offset >= WO_PREFIX_WITH_COLON.length()
+                    && text.subSequence(offset - WO_PREFIX_WITH_COLON.length(), offset).toString().equalsIgnoreCase(WO_PREFIX_WITH_COLON)) {
+                typedLocal = "";
+                woStart = offset - WO_PREFIX_WITH_COLON.length();
+            } else {
+                return null;
+            }
+        }
+
+        // Ensure there's a '<' before "wo:" without intervening whitespace or '>'
+        int j = woStart - 1;
+        while (j >= 0) {
+            char c = text.charAt(j);
+            if (c == '<') {
+                return typedLocal;
+            }
+            if (c == '>' || Character.isWhitespace(c)) {
+                return null;
+            }
+            j--;
+        }
+        return null;
     }
 
     private static boolean isWoComponentHtml(@NotNull PsiFile file) {
