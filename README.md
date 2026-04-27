@@ -1,61 +1,73 @@
 # IntelliJWOPlugin
 
-Eclipse with the WOLips plugin was the default IDE for WebObjects and Wonder applications for the last 10 years and still is.
-However since I migrated my applications to maven projects debugging using Eclipse became painful.
-My impression is that the issues are more Eclipse than WOLips related, so I am not hoping for improvement quite soon.
+Early-stage IntelliJ plugin for **mavenized WebObjects / WONDER** applications: run configurations, WO component workflow, and basic HTML template assistance inside `.wo` component folders.
 
-So I started this experimental plugin for IntelliJ. My first approach is a working run configuration so I can finally debug my applications again.
+> **Note:** This is an **early / experimental** release. APIs and behaviour may still change. Feedback and pull requests are welcome.
 
-This first version supplies a working run configuration that starts your WebObjects application with a default set of WO-Parameters (e. g. "-WOPort -1"). My next step is trying to add a UI component for these parameters in the run configuration.
+## Requirements
 
+- **IntelliJ IDEA** (Community or Ultimate) **2025.2+** (`since-build` 252 in `plugin.xml`).
+- **Java** and **Maven** support in the IDE (the plugin declares dependencies on the Java and Maven bundled plugins).
+- A **mavenized** WebObjects / WONDER project layout (the run configuration and tooling assume Maven integration).
 
-## Restrictions
+## Features (current)
 
-This plugin will only work with mavenized WebObjects/Wonder applications!
+- **WebObjects run configuration** — starts your WO app with sensible defaults (e.g. `-WOPort -1`), Maven `process-resources`, working directory under `./target/<appname>.woa`, and optional JDK 9+ VM flags (`--add-exports` / `--add-opens`) when needed.
+- **New WO Component** action — creates WO component scaffolding from the bundled templates.
+- **`.wo` folder editor** — opens the component folder with tabs (HTML + related files); embedded text editors with normal undo behaviour.
+- **Navigation shortcuts** — switch between the WO component and its Java source (default shortcuts: macOS **⌥⌘1** / **⌥⌘2**, others **Ctrl+Alt+1** / **Ctrl+Alt+2**).
+- **WO HTML templates (`*.wo/*.html`)** — `wo:*` tag awareness, tag name completion, and **binding / attribute** completion and validation:
+  - Reflects **public fields** and **public JavaBean properties** (getter + setter) on the resolved tag class.
+  - Ignores members that exist only on the **`WOComponent`** base class.
+  - For Apple **system dynamic elements**, uses binding names from bundled `WebObjectDefinitions.xml` when defined for the short class name (e.g. `WOForm`).
 
 ## Installation
 
-* Obtain the jar from releases and store on your disk
-* Open "Settings... in IntelliJ, choose "Plugins" and "Install plugin from disk..."
-* Choose the plugin jar from above
-* You will be asked to restart the IDE to activate
+### From the JetBrains Marketplace (when published)
 
-After that the plugin is available. 
-For running your application, create a WebObjects run configuration, choose your main class and go for it!
+Search for **IntelliJWOPlugin** in the IDE plugin manager and install from the Marketplace listing.
 
-## Creating a Run Configuration
+### From a distribution JAR
 
-Create a new run configuration from the Templates, choose "WebObjects" template
+1. Download the plugin ZIP/JAR from your **GitHub Releases** (or build output; see below).
+2. In the IDE: **Settings → Plugins → ⚙ → Install Plugin from Disk…**
+3. Restart the IDE when prompted.
 
-Things work slightly different than using Eclipse:
+### Build from source
 
-* The run configuration detects whether you have full maven layout or
-  a mavenized fluffy bunny layout. For full maven layout, the `nature` `org.maven.ide.eclipse.maven2Nature` is enforced in the `.project` file.
-  Otherwise it enforces the `nature` not being set
-* The working directory is automatically set to `./target/<appname>.woa`
-* A maven goal `process-resources` is enforced on starting your WO application.
+```bash
+./gradlew buildPlugin
+```
 
-Additionally if starting with a JDK version higher than 8, these additional VM options are enforced by default (you can change this in the run configuration):
-* `--add-exports=java.base/sun.security.action=ALL-UNNAMED`
-* `--add-exports=java.base/sun.util.calendar=ALL-UNNAMED`
-* `--add-opens=java.base/java.lang=ALL-UNNAMED`
+The packaged plugin is written under `build/distributions/`. Install that archive via **Install Plugin from Disk…**.
 
-A future version will have a UI editor for these options, too
+## WebObjects run configuration
 
-## Feature list
-* Run Configuration 
-* New WOComponent dialog
-* First draft of customer editor with tabs for .woo / .api (no syntax stuff yet!)
-* Switch actions CMD-ALT-1 and -2 for switching between WOComponent file and Java file
+Create a new run configuration from the templates and choose **WebObjects**.
 
+Compared to a plain Java application run configuration, this template:
 
-## TODO list / Next steps
-* support "Select opened filed" for opened WO component
-* add new project wizard
-* validator for wo components html content
-* validator for wo components wod files
-* work on custom editor for .wo folders
-* support for executing eogen files
-* Integrate EOF editor
-** add hooks for delete wo component (delete associated files)
-** add hook for renaming
+- Detects **full Maven layout** vs a **“fluffy bunny”** style layout and adjusts `.project` nature handling accordingly.
+- Sets the **working directory** to `./target/<appname>.woa`.
+- Runs Maven **`process-resources`** before launch.
+- On **JDK 9+**, adds default VM options (customizable in the run configuration):
+
+  - `--add-exports=java.base/sun.security.action=ALL-UNNAMED`
+  - `--add-exports=java.base/sun.util.calendar=ALL-UNNAMED`
+  - `--add-opens=java.base/java.lang=ALL-UNNAMED`
+
+## Roadmap / known gaps
+
+Examples of planned or incomplete work (non-exhaustive):
+
+- “Select opened file” behaviour for WO components opened via the custom editor.
+- Stronger validators for `.wod` and richer HTML / binding diagnostics.
+- Project wizard, EOGen / EOF tooling, rename/delete hooks for WO components.
+
+## License
+
+This project is licensed under the **MIT License** — see [`LICENSE`](LICENSE).
+
+## Author / contact
+
+**Markus Stoll** — [junidas.de](https://www.junidas.de) — markus.stoll@junidas.de
