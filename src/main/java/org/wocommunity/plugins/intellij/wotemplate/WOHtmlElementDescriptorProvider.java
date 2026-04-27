@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.InheritanceUtil;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.util.PsiUtilCore;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 public final class WOHtmlElementDescriptorProvider implements XmlElementDescriptorProvider {
 
     private static final String WO_PREFIX = "wo";
+    private static final String WO_COMPONENT_FQN = "com.webobjects.appserver.WOComponent";
 
     @Override
     public @Nullable XmlElementDescriptor getDescriptor(@NotNull XmlTag tag) {
@@ -46,7 +48,7 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
         }
 
         String localName = name.substring(colon + 1);
-        PsiClass resolved = resolveClass(tag.getProject(), localName);
+        PsiClass resolved = resolveWoComponentClass(tag.getProject(), localName);
         return new WOXmlElementDescriptor(name, resolved);
     }
 
@@ -66,22 +68,44 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
         return parent != null && parent.getName().endsWith(".wo");
     }
 
-    private static @Nullable PsiClass resolveClass(@NotNull Project project, @NotNull String localName) {
+    private static @Nullable PsiClass resolveWoComponentClass(@NotNull Project project, @NotNull String rawLocalName) {
         GlobalSearchScope all = GlobalSearchScope.allScope(project); // includes project + libraries
+        PsiClass woBase = JavaPsiFacade.getInstance(project).findClass(WO_COMPONENT_FQN, all);
+        if (woBase == null) {
+            return null;
+        }
+
+        String localName = WOComponentTagAliasRegistry.resolveAlias(rawLocalName);
 
         // Allow wo:com.example.Foo
         if (localName.indexOf('.') >= 0) {
-            return JavaPsiFacade.getInstance(project).findClass(localName, all);
+            PsiClass cls = JavaPsiFacade.getInstance(project).findClass(localName, all);
+            return cls != null && isInheritor(cls, woBase) ? cls : null;
         }
 
         // Prefer project classes if possible, then fall back to libraries.
         PsiShortNamesCache cache = PsiShortNamesCache.getInstance(project);
         PsiClass[] projectMatches = cache.getClassesByName(localName, GlobalSearchScope.projectScope(project));
-        if (projectMatches.length > 0) {
-            return projectMatches[0];
+        for (PsiClass c : projectMatches) {
+            if (isInheritor(c, woBase)) {
+                return c;
+            }
         }
         PsiClass[] allMatches = cache.getClassesByName(localName, all);
-        return allMatches.length > 0 ? allMatches[0] : null;
+        for (PsiClass c : allMatches) {
+            if (isInheritor(c, woBase)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isInheritor(@NotNull PsiClass candidate, @NotNull PsiClass woBase) {
+        // Handles both direct and indirect inheritance (and is safer than comparing qualified names).
+        if (candidate.isEquivalentTo(woBase)) {
+            return true;
+        }
+        return InheritanceUtil.isInheritorOrSelf(candidate, woBase, true);
     }
 }
 
