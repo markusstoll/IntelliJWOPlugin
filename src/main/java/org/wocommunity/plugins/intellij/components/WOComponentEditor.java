@@ -2,6 +2,7 @@ package org.wocommunity.plugins.intellij.components;
 
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataSink;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.UiDataProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +33,7 @@ public class WOComponentEditor implements FileEditor {
     private final JComponent component;
     private final Map<String, String> changes; // Centralized change tracker
     private final Project project;
+    private final Map<JComponent, FileEditor> embeddedEditorsByComponent;
 
     private final Map<Key<?>, Object> userData = new HashMap<>();
 
@@ -38,6 +41,7 @@ public class WOComponentEditor implements FileEditor {
         this.project = project;
         this.folder = folder;
         this.changes = new HashMap<>();
+        this.embeddedEditorsByComponent = new HashMap<>();
 
         JBTabbedPane tabbedPane = new JBTabbedPane();
 
@@ -47,14 +51,16 @@ public class WOComponentEditor implements FileEditor {
         VirtualFile htmlFile = folder.findChild(componentName + ".html");
         VirtualFile wodFile = folder.findChild(componentName + ".wod");
 
-        if (!htmlFile.isDirectory()) {
-            JComponent htmlEditor = createIntellijEditor(htmlFile);
-            JComponent wodFileEditor = createIntellijEditor(wodFile);
+        if (htmlFile != null && !htmlFile.isDirectory()) {
+            FileEditor htmlEditor = createIntellijFileEditor(htmlFile);
+            FileEditor wodFileEditor = (wodFile != null && !wodFile.isDirectory())
+                    ? createIntellijFileEditor(wodFile)
+                    : null;
 
             // Create a splitter with 80:20 ratio
             OnePixelSplitter splitter = new OnePixelSplitter(true, 0.8f);
-            splitter.setFirstComponent(htmlEditor);
-            splitter.setSecondComponent(wodFileEditor);
+            splitter.setFirstComponent(htmlEditor.getComponent());
+            splitter.setSecondComponent(wodFileEditor != null ? wodFileEditor.getComponent() : JBUI.Panels.simplePanel());
 
             tabbedPane.addTab("Component", splitter);
         }
@@ -65,8 +71,8 @@ public class WOComponentEditor implements FileEditor {
             //TODO
 //            apiFile = folder.getParent().createChildData(null, componentName + ".api");
         } else if (!apiFile.isDirectory()) {
-            JComponent apiFileEditor = createIntellijEditor(apiFile);
-            tabbedPane.addTab("API", apiFileEditor);
+            FileEditor apiFileEditor = createIntellijFileEditor(apiFile);
+            tabbedPane.addTab("API", apiFileEditor.getComponent());
         }
 
         // Tab 2: Plain Text Editor
@@ -75,19 +81,38 @@ public class WOComponentEditor implements FileEditor {
         {
            // TODO wooFile = folder.getParent().createChildData(null, componentName + ".woo");
         } else if (!wooFile.isDirectory()) {
-            JComponent textEditor = createIntellijEditor(wooFile);
-            tabbedPane.addTab("DisplayGroup", textEditor);
+            FileEditor textEditor = createIntellijFileEditor(wooFile);
+            tabbedPane.addTab("DisplayGroup", textEditor.getComponent());
         }
 
         tabbedPane.setTabPlacement(JBTabbedPane.BOTTOM);
         tabbedPane.setSelectedIndex(0);
 
-        this.component = new WOComponentPanel(project, folder, tabbedPane);
+        this.component = new WOComponentPanel(project, folder, tabbedPane, embeddedEditorsByComponent);
     }
 
-    private JComponent createIntellijEditor(@NotNull VirtualFile file) {
-        FileEditor htmlEditor = TextEditorProvider.getInstance().createEditor(project, file);
-        return htmlEditor.getComponent(); // Get the Swing component of the HTML editor
+    private FileEditor createIntellijFileEditor(@NotNull VirtualFile file) {
+        FileEditor editor = TextEditorProvider.getInstance().createEditor(project, file);
+        embeddedEditorsByComponent.put(editor.getComponent(), editor);
+        return editor;
+    }
+
+    private @Nullable FileEditor getFocusedEmbeddedEditor() {
+        Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        if (focusOwner == null) {
+            return null;
+        }
+        Component c = focusOwner;
+        while (c != null) {
+            if (c instanceof JComponent jc) {
+                FileEditor ed = embeddedEditorsByComponent.get(jc);
+                if (ed != null) {
+                    return ed;
+                }
+            }
+            c = c.getParent();
+        }
+        return null;
     }
 
     @Override
@@ -97,6 +122,16 @@ public class WOComponentEditor implements FileEditor {
 
     @Override
     public @Nullable JComponent getPreferredFocusedComponent() {
+        FileEditor focused = getFocusedEmbeddedEditor();
+        if (focused != null && focused.getPreferredFocusedComponent() != null) {
+            return focused.getPreferredFocusedComponent();
+        }
+        for (FileEditor ed : embeddedEditorsByComponent.values()) {
+            JComponent preferred = ed.getPreferredFocusedComponent();
+            if (preferred != null) {
+                return preferred;
+            }
+        }
         return component;
     }
 
@@ -107,7 +142,10 @@ public class WOComponentEditor implements FileEditor {
 
     @Override
     public void dispose() {
-        // Dispose of resources if needed
+        for (FileEditor ed : embeddedEditorsByComponent.values()) {
+            ed.dispose();
+        }
+        embeddedEditorsByComponent.clear();
     }
 
     @Override
@@ -178,11 +216,16 @@ public class WOComponentEditor implements FileEditor {
     private static class WOComponentPanel extends JPanel implements UiDataProvider {
         private final Project project;
         private final VirtualFile folder;
+        private final Map<JComponent, FileEditor> embeddedEditorsByComponent;
 
-        WOComponentPanel(@NotNull Project project, @NotNull VirtualFile folder, @NotNull JComponent content) {
-            super(new java.awt.BorderLayout());
+        WOComponentPanel(@NotNull Project project,
+                         @NotNull VirtualFile folder,
+                         @NotNull JComponent content,
+                         @NotNull Map<JComponent, FileEditor> embeddedEditorsByComponent) {
+            super(new BorderLayout());
             this.project = project;
             this.folder = folder;
+            this.embeddedEditorsByComponent = embeddedEditorsByComponent;
             add(content, java.awt.BorderLayout.CENTER);
         }
 
@@ -191,6 +234,32 @@ public class WOComponentEditor implements FileEditor {
             sink.set(CommonDataKeys.VIRTUAL_FILE, folder);
             sink.lazy(CommonDataKeys.PSI_ELEMENT, () -> PsiManager.getInstance(project).findDirectory(folder));
             sink.lazy(CommonDataKeys.NAVIGATABLE, () -> PsiManager.getInstance(project).findDirectory(folder));
+            sink.lazy(CommonDataKeys.EDITOR, () -> {
+                FileEditor focused = getFocusedEmbeddedEditor(embeddedEditorsByComponent);
+                if (focused instanceof com.intellij.openapi.fileEditor.TextEditor te) {
+                    return te.getEditor();
+                }
+                return null;
+            });
+            sink.lazy(PlatformDataKeys.FILE_EDITOR, () -> getFocusedEmbeddedEditor(embeddedEditorsByComponent));
+        }
+
+        private static @Nullable FileEditor getFocusedEmbeddedEditor(@NotNull Map<JComponent, FileEditor> embeddedEditorsByComponent) {
+            Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            if (focusOwner == null) {
+                return null;
+            }
+            Component c = focusOwner;
+            while (c != null) {
+                if (c instanceof JComponent jc) {
+                    FileEditor ed = embeddedEditorsByComponent.get(jc);
+                    if (ed != null) {
+                        return ed;
+                    }
+                }
+                c = c.getParent();
+            }
+            return null;
         }
     }
 }
