@@ -25,6 +25,7 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.xml</depends>
     <depends>org.jetbrains.idea.maven</depends>
 
     <actions>
@@ -63,6 +64,8 @@
         <iconProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentIconProvider"/>
         <editorTabTitleProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorTabTitleProvider"/>
         <selectInTarget implementation="org.wocommunity.plugins.intellij.components.WOComponentSelectInTarget"/>
+        <xml.elementDescriptorProvider implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlElementDescriptorProvider"/>
+        <xml.fileNSInfoProvider implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlFileNSInfoProvider"/>
     </extensions>
 
     <!--
