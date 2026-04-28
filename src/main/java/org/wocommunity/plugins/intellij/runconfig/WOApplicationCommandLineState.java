@@ -15,11 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.wocommunity.plugins.intellij.tools.WOProjectUtil;
 import org.wocommunity.plugins.intellij.runconfig.data.KeyValueOption;
-import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jetbrains.idea.maven.project.MavenProject;
-import org.jetbrains.idea.maven.model.MavenModel;
-import org.jetbrains.idea.maven.model.MavenId;
-import com.intellij.openapi.vfs.VirtualFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class WOApplicationCommandLineState<T extends WOApplicationConfiguration> extends ApplicationConfiguration.JavaApplicationCommandLineState<T> {
     public WOApplicationCommandLineState(T configuration, @NotNull ExecutionEnvironment environment) {
@@ -46,7 +42,8 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         if(StringUtils.isEmpty(javaParameters.getWorkingDirectory())
             || javaParameters.getWorkingDirectory().equals(project.getBasePath()))
         {
-            javaParameters.setWorkingDirectory(modulePath + "/target/" + getProjectFinalName(project, module) + ".woa");
+            String finalName = getProjectFinalName(modulePath, module);
+            javaParameters.setWorkingDirectory(modulePath + "/target/" + finalName + ".woa");
         }
 
         ParametersList vmParametersList = javaParameters.getVMParametersList();
@@ -85,32 +82,120 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
     }
 
     /**
-     * This method determines the finalName of the current maven project.
-     * Support custom variables (which maven does, but IntelliJ does not take care of)
-     * @param project
-     * @param module
-     * @return
+     * Determine the finalName of the current project without depending on the Maven plugin.
+     *
+     * Uses {@code pom.xml} if present:
+     * - {@code <build><finalName>} if set (supports common ${project.*} substitutions)
+     * - otherwise {@code <artifactId>}
+     *
+     * Falls back to {@code module.getName()}.
      */
-    public String getProjectFinalName(Project project, com.intellij.openapi.module.Module module) {
-        MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
-        MavenProject mavenProject = mavenProjectsManager.findProject(module);
-
-        String finalName = mavenProject.getFinalName();
-
-        org.jetbrains.idea.maven.model.MavenId mavenId = mavenProject.getMavenId();
-        String artifactId = mavenId.getArtifactId();
-        String version = mavenId.getVersion();
-        String groupId = mavenId.getGroupId();
-
-        if (finalName != null) {
-            finalName = finalName.replace("${project.artifactId}", artifactId)
-                    .replace("${project.version}", version)
-                    .replace("${project.name}", artifactId)
-                    .replace("${project.groupId}", groupId);
-            return finalName;
+    public @NotNull String getProjectFinalName(@NotNull String modulePath, @NotNull com.intellij.openapi.module.Module module) {
+        String pomPath = Paths.get(modulePath, "pom.xml").toString();
+        try {
+            Path pom = Paths.get(pomPath);
+            if (Files.exists(pom)) {
+                PomInfo info = readPomInfo(pom);
+                if (info != null) {
+                    String base = info.finalName != null && !info.finalName.isBlank() ? info.finalName : info.artifactId;
+                    if (base != null && !base.isBlank()) {
+                        return substitutePomVars(base, info);
+                    }
+                }
+            }
+        } catch (Exception ignored) {
         }
+        return module.getName();
+    }
 
-        return null;
+    private static final class PomInfo {
+        final String groupId;
+        final String artifactId;
+        final String version;
+        final String finalName;
+
+        private PomInfo(String groupId, String artifactId, String version, String finalName) {
+            this.groupId = groupId;
+            this.artifactId = artifactId;
+            this.version = version;
+            this.finalName = finalName;
+        }
+    }
+
+    private static PomInfo readPomInfo(@NotNull Path pom) {
+        try (var in = Files.newInputStream(pom)) {
+            var dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(false);
+            try {
+                dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+                dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            } catch (Exception ignored) {
+            }
+
+            var doc = dbf.newDocumentBuilder().parse(in);
+            var root = doc.getDocumentElement();
+            if (root == null) {
+                return null;
+            }
+
+            String groupId = firstText(root, "groupId");
+            String artifactId = firstText(root, "artifactId");
+            String version = firstText(root, "version");
+
+            // If groupId/version are inherited from <parent>, try parent nodes.
+            var parents = root.getElementsByTagName("parent");
+            if ((groupId == null || groupId.isBlank()) && parents.getLength() > 0 && parents.item(0) instanceof org.w3c.dom.Element pe) {
+                groupId = firstText(pe, "groupId");
+            }
+            if ((version == null || version.isBlank()) && parents.getLength() > 0 && parents.item(0) instanceof org.w3c.dom.Element pe) {
+                version = firstText(pe, "version");
+            }
+
+            String finalName = null;
+            var build = root.getElementsByTagName("build");
+            if (build.getLength() > 0 && build.item(0) instanceof org.w3c.dom.Element be) {
+                finalName = firstText(be, "finalName");
+            }
+
+            if (artifactId == null || artifactId.isBlank()) {
+                return null;
+            }
+            return new PomInfo(groupId, artifactId, version, finalName);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String firstText(@NotNull org.w3c.dom.Element parent, @NotNull String tag) {
+        var nodes = parent.getElementsByTagName(tag);
+        if (nodes.getLength() == 0) {
+            return null;
+        }
+        var n = nodes.item(0);
+        if (n == null) {
+            return null;
+        }
+        String t = n.getTextContent();
+        return t != null ? t.trim() : null;
+    }
+
+    private static @NotNull String substitutePomVars(@NotNull String s, @NotNull PomInfo info) {
+        String out = s;
+        if (info.artifactId != null) {
+            out = out.replace("${project.artifactId}", info.artifactId)
+                     .replace("${artifactId}", info.artifactId)
+                     .replace("${project.name}", info.artifactId);
+        }
+        if (info.groupId != null) {
+            out = out.replace("${project.groupId}", info.groupId)
+                     .replace("${groupId}", info.groupId);
+        }
+        if (info.version != null) {
+            out = out.replace("${project.version}", info.version)
+                     .replace("${version}", info.version);
+        }
+        return out;
     }
 
     private void modifyClasspath(JavaParameters params) {

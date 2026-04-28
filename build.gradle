@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'de.junidas.webobjects.ijplugin'
-version = '0.7.2'
+version = '0.7.3'
 
 repositories {
     mavenCentral()
@@ -24,7 +24,6 @@ dependencies {
     intellijPlatform {
         create("IC", "2025.2.4")
         bundledPlugin("com.intellij.java")
-        bundledPlugin("org.jetbrains.idea.maven")
 
         // Test Framework (bringt JUnit 4 + IntelliJ‑Test‑Infrastruktur)
         // testFramework()

@@ -5,13 +5,10 @@ import com.intellij.execution.ui.*;
 import com.intellij.execution.application.ClassEditorField;
 import com.intellij.execution.application.JavaSettingsEditorBase;
 import com.intellij.ide.util.ClassFilter;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.util.Computable;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiMethodUtil;
 import com.intellij.ui.EditorTextField;
 import com.intellij.util.ui.UIUtil;
@@ -60,7 +57,7 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
     private static final ClassFilter WO_CLASS_FILTER =
             aClass -> PsiMethodUtil.MAIN_CLASS.value(aClass)
                     && superClassIsWOApplication(aClass)
-                    && ReadAction.compute((Computable<PsiMethod>) () -> PsiMethodUtil.findMainMethod(aClass)) != null;
+                    && PsiMethodUtil.findMainMethod(aClass) != null;
 
     private static boolean superClassIsWOApplication(PsiClass aClass) {
         PsiClass superClass = aClass.getSuperClass();

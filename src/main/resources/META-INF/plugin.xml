@@ -30,7 +30,6 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.modules.xml</depends>
-    <depends>org.jetbrains.idea.maven</depends>
 
     <actions>
         <action id="org.wocommunity.plugins.intellij.actions.wocomponent.NewWOComponentAction"
