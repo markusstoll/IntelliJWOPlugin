@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
@@ -82,7 +83,7 @@ public class JavaFileCreator {
             throw new Exception("File already exists: " + fileName);
         }
 
-        PsiFile file = PsiFileFactory.getInstance(project).createFileFromText(fileName, javaTemplate);
+        PsiFile file = PsiFileFactory.getInstance(project).createFileFromText(fileName, JavaFileType.INSTANCE, javaTemplate);
         // Add the file to the target directory
         targetDirectory.add(file);
 
