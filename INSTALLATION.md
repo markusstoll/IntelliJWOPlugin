@@ -6,7 +6,7 @@ This document describes how to install **IntelliJWOPlugin** starting with **v0.7
 
 1. Open **Settings / Preferences → Plugins**.
 2. Go to the **Marketplace** tab.
-3. Search for the plugin and click **Install**.
+3. Search for the plugin (it is named "WebObjects / WONDER") and click **Install**.
 4. Restart the IDE when prompted.
 
 ## Install from GitHub Releases (v0.7.0+)

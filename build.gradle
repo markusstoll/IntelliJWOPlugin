@@ -4,8 +4,8 @@ plugins {
     id("idea")
 }
 
-group = 'de.junidas.intellij.woplugin'
-version = '0.7.1'
+group = 'de.junidas.webobjects.ijplugin'
+version = '0.7.2'
 
 repositories {
     mavenCentral()
