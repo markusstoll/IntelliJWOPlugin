@@ -2,9 +2,7 @@ package org.wocommunity.plugins.intellij.runconfig;
 
 import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;
-import com.intellij.util.ui.StartupUiUtil;
 import org.jetbrains.annotations.NotNull;
-import com.intellij.util.ui.UIUtil;
 import org.wocommunity.plugins.intellij.tools.WOIcons;
 
 import javax.swing.*;
@@ -18,7 +16,8 @@ public class WORunConfigType extends ConfigurationTypeBase {
     }
 
     private static Icon getDynamicIcon() {
-        return StartupUiUtil.INSTANCE.isDarkTheme() ? WOIcons.PLUGIN_ICON_DARK : WOIcons.PLUGIN_ICON;
+        // IconLoader automatically selects the _dark.svg variant when available.
+        return WOIcons.PLUGIN_ICON;
     }
 
     @NotNull
