@@ -42,6 +42,9 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         if(StringUtils.isEmpty(javaParameters.getWorkingDirectory())
             || javaParameters.getWorkingDirectory().equals(project.getBasePath()))
         {
+            if (modulePath == null || modulePath.isBlank()) {
+                return javaParameters;
+            }
             String finalName = getProjectFinalName(modulePath, module);
             javaParameters.setWorkingDirectory(modulePath + "/target/" + finalName + ".woa");
         }
@@ -139,23 +142,25 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
                 return null;
             }
 
-            String groupId = firstText(root, "groupId");
-            String artifactId = firstText(root, "artifactId");
-            String version = firstText(root, "version");
+            // IMPORTANT: do not use getElementsByTagName() here, as it searches recursively and would
+            // often return values from <parent> instead of the project's own coordinates.
+            String groupId = directChildText(root, "groupId");
+            String artifactId = directChildText(root, "artifactId");
+            String version = directChildText(root, "version");
 
             // If groupId/version are inherited from <parent>, try parent nodes.
-            var parents = root.getElementsByTagName("parent");
-            if ((groupId == null || groupId.isBlank()) && parents.getLength() > 0 && parents.item(0) instanceof org.w3c.dom.Element pe) {
-                groupId = firstText(pe, "groupId");
+            org.w3c.dom.Element parentEl = directChildElement(root, "parent");
+            if ((groupId == null || groupId.isBlank()) && parentEl != null) {
+                groupId = directChildText(parentEl, "groupId");
             }
-            if ((version == null || version.isBlank()) && parents.getLength() > 0 && parents.item(0) instanceof org.w3c.dom.Element pe) {
-                version = firstText(pe, "version");
+            if ((version == null || version.isBlank()) && parentEl != null) {
+                version = directChildText(parentEl, "version");
             }
 
             String finalName = null;
-            var build = root.getElementsByTagName("build");
-            if (build.getLength() > 0 && build.item(0) instanceof org.w3c.dom.Element be) {
-                finalName = firstText(be, "finalName");
+            org.w3c.dom.Element buildEl = directChildElement(root, "build");
+            if (buildEl != null) {
+                finalName = directChildText(buildEl, "finalName");
             }
 
             if (artifactId == null || artifactId.isBlank()) {
@@ -167,16 +172,23 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         }
     }
 
-    private static String firstText(@NotNull org.w3c.dom.Element parent, @NotNull String tag) {
-        var nodes = parent.getElementsByTagName(tag);
-        if (nodes.getLength() == 0) {
+    private static org.w3c.dom.Element directChildElement(@NotNull org.w3c.dom.Element parent, @NotNull String tagName) {
+        var n = parent.getFirstChild();
+        while (n != null) {
+            if (n instanceof org.w3c.dom.Element e && tagName.equals(e.getTagName())) {
+                return e;
+            }
+            n = n.getNextSibling();
+        }
+        return null;
+    }
+
+    private static String directChildText(@NotNull org.w3c.dom.Element parent, @NotNull String tagName) {
+        org.w3c.dom.Element el = directChildElement(parent, tagName);
+        if (el == null) {
             return null;
         }
-        var n = nodes.item(0);
-        if (n == null) {
-            return null;
-        }
-        String t = n.getTextContent();
+        String t = el.getTextContent();
         return t != null ? t.trim() : null;
     }
 
@@ -185,15 +197,18 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         if (info.artifactId != null) {
             out = out.replace("${project.artifactId}", info.artifactId)
                      .replace("${artifactId}", info.artifactId)
+                     .replace("${pom.artifactId}", info.artifactId)
                      .replace("${project.name}", info.artifactId);
         }
         if (info.groupId != null) {
             out = out.replace("${project.groupId}", info.groupId)
-                     .replace("${groupId}", info.groupId);
+                     .replace("${groupId}", info.groupId)
+                     .replace("${pom.groupId}", info.groupId);
         }
         if (info.version != null) {
             out = out.replace("${project.version}", info.version)
-                     .replace("${version}", info.version);
+                     .replace("${version}", info.version)
+                     .replace("${pom.version}", info.version);
         }
         return out;
     }
