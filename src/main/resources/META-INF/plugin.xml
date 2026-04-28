@@ -13,10 +13,14 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description>IntelliJ plugin for WebObjects / Wonder apps
-
-        First draft that only supports a run configuration
-    </description>
+    <description><![CDATA[
+      <p>Early-stage plugin for <b>mavenized WebObjects / WONDER</b> projects.</p>
+      <ul>
+        <li><b>WebObjects run configuration</b> with sensible defaults (Maven process-resources, working directory under target, optional JDK 9+ flags).</li>
+        <li><b>WOComponent workflow</b>: new component action and a <b>.wo folder editor</b> (tabs for HTML and related files).</li>
+        <li><b>WO HTML templates</b> (<code>*.wo/*.html</code>): <code>wo:*</code> tag awareness, tag name completion, and <b>binding/attribute completion + validation</b>.</li>
+      </ul>
+    ]]></description>
 
     <idea-version since-build="252" />
 
