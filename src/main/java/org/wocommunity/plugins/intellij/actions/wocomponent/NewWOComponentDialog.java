@@ -16,6 +16,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
+import com.intellij.util.Processor;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
@@ -209,11 +210,15 @@ public class NewWOComponentDialog extends DialogWrapper {
         @Nullable PsiClass woComponentClass = JavaPsiFacade.getInstance(project).findClass("com.webobjects.appserver.WOComponent",
                 GlobalSearchScope.allScope(project));
 
-        // Search for classes matching the query
-        Collection<PsiClass> classes = ClassInheritorsSearch.search(
-                woComponentClass, true
-        ).findAll();
-        classes.add(woComponentClass);
+        // Search for classes matching the query. Avoid Query.iterator() (scheduled for removal) by using Query.forEach().
+        Collection<PsiClass> classes = new java.util.ArrayList<>();
+        if (woComponentClass != null) {
+            ClassInheritorsSearch.search(woComponentClass, true).forEach((Processor<PsiClass>) c -> {
+                classes.add(c);
+                return true;
+            });
+            classes.add(woComponentClass);
+        }
 
         String[] classNames = classes.stream()
                 .map(PsiClass::getQualifiedName)

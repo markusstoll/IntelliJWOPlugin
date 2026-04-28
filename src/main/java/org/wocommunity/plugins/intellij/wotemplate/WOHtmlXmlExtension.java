@@ -9,6 +9,7 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
+import com.intellij.util.Processor;
 import com.intellij.xml.XmlExtension;
 import com.intellij.xml.XmlTagNameProvider;
 import org.jetbrains.annotations.NotNull;
@@ -100,12 +101,14 @@ public final class WOHtmlXmlExtension extends XmlExtension {
         if (base == null) {
             return;
         }
-        for (PsiClass c : ClassInheritorsSearch.search(base, scope, true)) {
+        // Avoid Query.iterator() (scheduled for removal) by using Query.forEach().
+        ClassInheritorsSearch.search(base, scope, true).forEach((Processor<PsiClass>) c -> {
             String name = c.getName();
             if (name != null && !name.isBlank()) {
                 out.add(name);
             }
-        }
+            return true;
+        });
     }
 }
 

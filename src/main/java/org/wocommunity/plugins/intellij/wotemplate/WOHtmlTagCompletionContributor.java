@@ -13,6 +13,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
+import com.intellij.util.Processor;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -143,12 +144,14 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
         if (base == null) {
             return;
         }
-        for (PsiClass c : ClassInheritorsSearch.search(base, scope, true)) {
+        // Avoid Query.iterator() (scheduled for removal) by using Query.forEach().
+        ClassInheritorsSearch.search(base, scope, true).forEach((Processor<PsiClass>) c -> {
             String name = c.getName();
             if (name != null && !name.isBlank()) {
                 out.add(name);
             }
-        }
+            return true;
+        });
     }
 }
 
