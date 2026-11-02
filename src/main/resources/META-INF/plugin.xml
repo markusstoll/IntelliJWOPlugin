@@ -87,7 +87,6 @@
         <runConfigurationProducer implementation="org.wocommunity.plugins.intellij.runconfig.WORunConfigurationProducer"/>
         <treeStructureProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentTreeStructureProvider"/>
         <fileEditorProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorProvider"/>
-        <fileEditorProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentHtmlRedirectEditorProvider"/>
         <iconProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentIconProvider"/>
         <editorTabTitleProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorTabTitleProvider"/>
         <selectInTarget implementation="org.wocommunity.plugins.intellij.components.WOComponentSelectInTarget"/>
