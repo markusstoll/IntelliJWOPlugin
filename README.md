@@ -152,8 +152,10 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.1)
+## Recent Highlights (v0.9.2)
 
+- **Inspection Registration & Component API Stability**:
+  - Fixed duplicate `shortName` collision (`WORequiredBindings`) across HTML and XHTML inspection registrations that caused a `PluginException` when switching to the Component API tab.
 - **Robust WebObjects Syntax Support**:
   - Full support for unquoted `<webobject>` name attributes (e.g. `<webobject name=ShortTermLoginButton/>`) across gutter navigation, ⌘-Click declaration lookups, element references, and bidirectional template conversion.
   - Full support for optional trailing semicolons on WOD declarations (`Declaration : Component { ... };`).
