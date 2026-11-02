@@ -55,18 +55,4 @@ public final class WODComponentReference extends PsiPolyVariantReferenceBase<WOD
 
         return results.toArray(new ResolveResult[0]);
     }
-
-    @Override
-    public @Nullable PsiElement resolve() {
-        ResolveResult[] results = multiResolve(false);
-        if (results.length == 0) {
-            return null;
-        }
-        for (ResolveResult result : results) {
-            if (result.getElement() instanceof PsiClass) {
-                return result.getElement();
-            }
-        }
-        return results[0].getElement();
-    }
 }

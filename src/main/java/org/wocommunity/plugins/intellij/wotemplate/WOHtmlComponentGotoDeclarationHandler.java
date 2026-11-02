@@ -3,26 +3,33 @@ package org.wocommunity.plugins.intellij.wotemplate;
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlToken;
 import com.intellij.psi.xml.XmlTokenType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.wocommunity.plugins.intellij.tools.WOFileUtil;
 import org.wocommunity.plugins.intellij.tools.WOPsiUtil;
+import org.wocommunity.plugins.intellij.wod.CreateWodElementPlaceholder;
+import org.wocommunity.plugins.intellij.wod.WodElement;
+import org.wocommunity.plugins.intellij.wod.WodModel;
+import org.wocommunity.plugins.intellij.wod.WodParser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Handles Go to Declaration (Cmd-click / Ctrl-click / Ctrl+B) on inline WebObjects component tags.
- * When both a Java code class and a component (.wo) folder exist, returns both targets,
- * allowing the user to choose between opening Code or Component.
+ * Handles Go to Declaration (Cmd-click / Ctrl-click / Ctrl+B) on WebObjects tags in template HTML files:
+ * 1. Inline component tags (&lt;wo:MyComponent&gt;): returns both code (PsiClass) and component folder (PsiDirectory),
+ *    allowing the user to choose between opening Code or Component.
+ * 2. WebObject tags (&lt;webobject name="xxx"&gt;): navigates directly to the declaration in the .wod file,
+ *    switching to the WOD tab and selecting the element (identical to gutter icon behavior).
  */
 public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarationHandler {
 
@@ -39,7 +46,17 @@ public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarat
             return null;
         }
 
-        // Do not intercept if cursor is inside an XML attribute
+        XmlTag tag = PsiTreeUtil.getParentOfType(sourceElement, XmlTag.class);
+        if (tag == null) {
+            return null;
+        }
+
+        // 1. Check <webobject name="..."> tag
+        if ("webobject".equalsIgnoreCase(tag.getLocalName())) {
+            return resolveWebObjectGotoTargets(tag, sourceElement);
+        }
+
+        // 2. For inline <wo:...> tags: do not intercept if cursor is inside an XML attribute
         if (PsiTreeUtil.getParentOfType(sourceElement, XmlAttribute.class) != null) {
             return null;
         }
@@ -51,7 +68,7 @@ public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarat
         if (tokenType != XmlTokenType.XML_NAME && tokenType != XmlTokenType.XML_TAG_NAME) {
             return null;
         }
-        if (!(token.getParent() instanceof XmlTag tag)) {
+        if (!(token.getParent() instanceof XmlTag)) {
             return null;
         }
 
@@ -105,6 +122,66 @@ public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarat
         }
 
         return targets.toArray(PsiElement.EMPTY_ARRAY);
+    }
+
+    private static PsiElement @Nullable [] resolveWebObjectGotoTargets(@NotNull XmlTag tag, @NotNull PsiElement sourceElement) {
+        String name = tag.getAttributeValue("name");
+        if (name == null || name.isBlank()) {
+            name = tag.getAttributeValue("NAME");
+        }
+        if (name == null || name.isBlank()) {
+            return null;
+        }
+
+        Project project = tag.getProject();
+        PsiFile psiFile = tag.getContainingFile();
+        if (psiFile == null) {
+            return null;
+        }
+        VirtualFile vFile = PsiUtilCore.getVirtualFile(psiFile);
+        if (vFile == null && psiFile.getOriginalFile() != null) {
+            vFile = PsiUtilCore.getVirtualFile(psiFile.getOriginalFile());
+        }
+        if (vFile == null) {
+            vFile = psiFile.getViewProvider().getVirtualFile();
+        }
+        if (vFile == null) {
+            return null;
+        }
+
+        VirtualFile componentDir = WOFileUtil.getComponent(vFile);
+        if (componentDir == null) {
+            componentDir = vFile.getParent();
+        }
+        if (componentDir == null) {
+            return null;
+        }
+
+        String componentName = componentDir.getName().endsWith(".wo")
+                ? componentDir.getName().substring(0, componentDir.getName().length() - 3)
+                : vFile.getNameWithoutExtension();
+        VirtualFile wodFile = componentDir.findChild(componentName + ".wod");
+        if (wodFile == null || !wodFile.isValid()) {
+            return null;
+        }
+
+        WodModel model = WodParser.getModel(wodFile);
+        WodElement element = model.getElement(name);
+        if (element != null && element.getNameRange() != null) {
+            PsiFile wodPsiFile = PsiManager.getInstance(project).findFile(wodFile);
+            if (wodPsiFile != null) {
+                PsiElement target = wodPsiFile.findElementAt(element.getNameRange().getStartOffset());
+                if (target != null) {
+                    return new PsiElement[] {
+                            new WODNavigatableElement(target, wodFile, element.getNameRange().getStartOffset(), element.getNameRange().getEndOffset())
+                    };
+                }
+            }
+        }
+
+        return new PsiElement[] {
+                new CreateWodElementPlaceholder(tag, wodFile, componentDir, name)
+        };
     }
 }
 

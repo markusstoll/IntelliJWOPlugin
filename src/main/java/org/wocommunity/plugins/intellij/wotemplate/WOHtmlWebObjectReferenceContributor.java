@@ -1,15 +1,10 @@
 package org.wocommunity.plugins.intellij.wotemplate;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
-import com.intellij.psi.ElementManipulators;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.PsiReferenceBase;
-import com.intellij.psi.PsiReferenceContributor;
-import com.intellij.psi.PsiReferenceProvider;
-import com.intellij.psi.PsiReferenceRegistrar;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlTag;
@@ -20,6 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.psi.wod.WODElement;
 import org.wocommunity.plugins.intellij.psi.wod.WODFile;
+import org.wocommunity.plugins.intellij.tools.WOFileUtil;
+import org.wocommunity.plugins.intellij.wod.WodModel;
+import org.wocommunity.plugins.intellij.wod.WodParser;
 
 /** Resolves {@code <webobject name="...">} names to their WOD declarations. */
 public final class WOHtmlWebObjectReferenceContributor extends PsiReferenceContributor {
@@ -54,19 +52,60 @@ public final class WOHtmlWebObjectReferenceContributor extends PsiReferenceContr
 
         @Override
         public @Nullable PsiElement resolve() {
-            String name = stripQuotes(myElement.getText());
+            String name = null;
+            if (myElement instanceof XmlAttributeValue val) {
+                name = val.getValue();
+            }
+            if (name == null || name.isBlank()) {
+                name = stripQuotes(myElement.getText());
+            }
             if (name == null || name.isBlank()) {
                 return null;
             }
+            final String finalName = name;
 
-            var htmlFile = myElement.getContainingFile().getVirtualFile();
-            if (htmlFile == null || htmlFile.getParent() == null) {
+            PsiFile psiFile = myElement.getContainingFile();
+            if (psiFile == null) {
                 return null;
             }
-            var componentDirectory = htmlFile.getParent();
-            var wodVirtualFile = componentDirectory.findChild(htmlFile.getNameWithoutExtension() + ".wod");
-            if (wodVirtualFile == null) {
+            VirtualFile htmlFile = PsiUtilCore.getVirtualFile(psiFile);
+            if (htmlFile == null && psiFile.getOriginalFile() != null) {
+                htmlFile = PsiUtilCore.getVirtualFile(psiFile.getOriginalFile());
+            }
+            if (htmlFile == null) {
+                htmlFile = psiFile.getViewProvider().getVirtualFile();
+            }
+            if (htmlFile == null) {
                 return null;
+            }
+
+            VirtualFile componentDirectory = WOFileUtil.getComponent(htmlFile);
+            if (componentDirectory == null) {
+                componentDirectory = htmlFile.getParent();
+            }
+            if (componentDirectory == null) {
+                return null;
+            }
+
+            String componentName = componentDirectory.getName().endsWith(".wo")
+                    ? componentDirectory.getName().substring(0, componentDirectory.getName().length() - 3)
+                    : htmlFile.getNameWithoutExtension();
+            VirtualFile wodVirtualFile = componentDirectory.findChild(componentName + ".wod");
+            if (wodVirtualFile == null || !wodVirtualFile.isValid()) {
+                return null;
+            }
+
+            WodModel model = WodParser.getModel(wodVirtualFile);
+            org.wocommunity.plugins.intellij.wod.WodElement element = model.getElement(name);
+            if (element != null && element.getNameRange() != null) {
+                PsiFile wodPsiFile = PsiManager.getInstance(myElement.getProject()).findFile(wodVirtualFile);
+                if (wodPsiFile != null) {
+                    PsiElement target = wodPsiFile.findElementAt(element.getNameRange().getStartOffset());
+                    if (target != null) {
+                        return new WODNavigatableElement(target, wodVirtualFile,
+                                element.getNameRange().getStartOffset(), element.getNameRange().getEndOffset());
+                    }
+                }
             }
 
             PsiElement file = PsiManager.getInstance(myElement.getProject()).findFile(wodVirtualFile);
@@ -74,7 +113,7 @@ public final class WOHtmlWebObjectReferenceContributor extends PsiReferenceContr
                 return null;
             }
             return PsiTreeUtil.findChildrenOfType(wod, WODElement.class).stream()
-                    .filter(element -> name.equals(element.getIdentifier().getText()))
+                    .filter(el -> finalName.equals(el.getIdentifier().getText()))
                     .findFirst()
                     .orElse(null);
         }
