@@ -17,21 +17,20 @@ public class WOComponentSelectInTarget implements SelectInTarget {
     @Override
     public boolean canSelect(@NotNull SelectInContext context) {
         VirtualFile file = context.getVirtualFile();
-        // Unterstützt .wo Verzeichnisse
-        return file != null && file.isDirectory() && file.getName().endsWith(".wo");
+        return getComponentDirectory(file) != null;
     }
 
     @Override
     public void selectIn(@NotNull SelectInContext context, boolean requestFocus) {
         Project project = context.getProject();
         VirtualFile file = context.getVirtualFile();
-
-        if (file == null || !file.isDirectory() || !file.getName().endsWith(".wo")) {
+        VirtualFile woDir = getComponentDirectory(file);
+        if (woDir == null) {
             return;
         }
 
         PsiManager psiManager = PsiManager.getInstance(project);
-        PsiDirectory directory = psiManager.findDirectory(file);
+        PsiDirectory directory = psiManager.findDirectory(woDir);
 
         if (directory != null) {
             ProjectView projectView = ProjectView.getInstance(project);
@@ -39,6 +38,34 @@ public class WOComponentSelectInTarget implements SelectInTarget {
                 projectView.selectPsiElement(directory, requestFocus);
             }
         }
+    }
+
+    @Nullable
+    private VirtualFile getComponentDirectory(@Nullable VirtualFile file) {
+        if (file == null) {
+            return null;
+        }
+        if (file.isDirectory() && file.getName().endsWith(".wo")) {
+            return file;
+        }
+        VirtualFile parent = file.getParent();
+        while (parent != null) {
+            if (parent.isDirectory() && parent.getName().endsWith(".wo")) {
+                return parent;
+            }
+            parent = parent.getParent();
+        }
+        if (file.getName().endsWith(".api")) {
+            VirtualFile parentDir = file.getParent();
+            if (parentDir != null) {
+                String componentName = file.getName().substring(0, file.getName().length() - ".api".length());
+                VirtualFile woDir = parentDir.findChild(componentName + ".wo");
+                if (woDir != null && woDir.isDirectory()) {
+                    return woDir;
+                }
+            }
+        }
+        return null;
     }
 
     @Override

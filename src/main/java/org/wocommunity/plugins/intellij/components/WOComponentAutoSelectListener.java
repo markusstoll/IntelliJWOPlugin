@@ -20,7 +20,7 @@ public class WOComponentAutoSelectListener implements FileEditorManagerListener 
 
         VirtualFile vf;
         if (editor instanceof WOComponentEditor) {
-            vf = ((WOComponentEditor) editor).getFile();
+            vf = ((WOComponentEditor) editor).getFolder();
         } else {
             vf = event.getNewFile();
         }
