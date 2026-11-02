@@ -38,6 +38,15 @@ public final class WODComponentReference extends PsiPolyVariantReferenceBase<WOD
             System.out.println("Error resolving Java Class for component: " + componentName);
         }
 
+        // If not found via WOPsiUtil, also check WOHtmlElementDescriptorProvider.resolveWoTagClass
+        if (results.isEmpty()) {
+            PsiClass clazz = org.wocommunity.plugins.intellij.wotemplate.WOHtmlElementDescriptorProvider
+                    .resolveWoTagClass(myElement.getProject(), componentName);
+            if (clazz != null) {
+                results.add(new PsiElementResolveResult(clazz));
+            }
+        }
+
         // Find matching .wo Folders
         PsiDirectory directory = WOPsiUtil.getComponentFolderForComponentName(componentName, myElement.getProject());
         if (directory != null) {
@@ -45,5 +54,19 @@ public final class WODComponentReference extends PsiPolyVariantReferenceBase<WOD
         }
 
         return results.toArray(new ResolveResult[0]);
+    }
+
+    @Override
+    public @Nullable PsiElement resolve() {
+        ResolveResult[] results = multiResolve(false);
+        if (results.length == 0) {
+            return null;
+        }
+        for (ResolveResult result : results) {
+            if (result.getElement() instanceof PsiClass) {
+                return result.getElement();
+            }
+        }
+        return results[0].getElement();
     }
 }

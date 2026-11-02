@@ -134,9 +134,15 @@ final class WODAnnotator implements Annotator {
         PsiReference[] references = component.getReferences();
 
         for (PsiReference reference : references) {
-            PsiElement target = reference.resolve();
-            if (target == null) {
-                holder.newAnnotation(HighlightSeverity.ERROR, "e.getMessage()")
+            boolean resolved;
+            if (reference instanceof PsiPolyVariantReference poly) {
+                resolved = poly.multiResolve(false).length > 0;
+            } else {
+                resolved = reference.resolve() != null;
+            }
+            if (!resolved) {
+                String componentName = component.getIdentifier() != null ? component.getIdentifier().getText() : component.getText();
+                holder.newAnnotation(HighlightSeverity.ERROR, "Cannot resolve component '" + componentName + "'")
                         .range(component)
                         .create();
             }
@@ -184,6 +190,21 @@ final class WODAnnotator implements Annotator {
                 APIFile apiFile = WOPsiUtil.getApiFile(componentFolder);
                 if (apiFile != null) {
                     found = apiFile.getBindingNames().contains(bindingName);
+                }
+            }
+            if (!found) {
+                PsiClass compClass = null;
+                try {
+                    compClass = WOPsiUtil.getPsiClassForComponentName(componentName, component.getProject());
+                } catch (Exception ignored) {
+                }
+                if (compClass == null) {
+                    compClass = org.wocommunity.plugins.intellij.wotemplate.WOHtmlElementDescriptorProvider
+                            .resolveWoTagClass(component.getProject(), componentName);
+                }
+                if (compClass != null) {
+                    found = !org.wocommunity.plugins.intellij.wotemplate.WOComponentClassResolver
+                            .findSingleKeyTargets(compClass, bindingName).isEmpty();
                 }
             }
         }
