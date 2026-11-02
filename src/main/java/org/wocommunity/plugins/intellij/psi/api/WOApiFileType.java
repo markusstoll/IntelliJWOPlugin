@@ -34,3 +34,4 @@ public final class WOApiFileType extends LanguageFileType {
         return WOIcons.WOCOMPONENT_ICON;
     }
 }
+

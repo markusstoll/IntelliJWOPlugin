@@ -18,7 +18,8 @@ public final class WOHtmlInspectionSuppressor extends XmlInspectionSuppressor {
 
     private static final Set<String> SUPPRESSED_TOOL_IDS = Set.of(
             "CheckEmptyScriptTag",
-            "HtmlExtraClosingTag"
+            "HtmlExtraClosingTag",
+            "XmlUnboundNsPrefix"
     );
 
     @Override

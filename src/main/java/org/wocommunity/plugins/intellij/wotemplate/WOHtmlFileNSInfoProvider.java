@@ -1,6 +1,5 @@
 package org.wocommunity.plugins.intellij.wotemplate;
 
-import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlFileNSInfoProvider;
 import org.jetbrains.annotations.NonNls;
@@ -20,15 +19,7 @@ public final class WOHtmlFileNSInfoProvider implements XmlFileNSInfoProvider {
 
     @Override
     public @NonNls String[] @Nullable [] getDefaultNamespaces(@NotNull XmlFile file) {
-        var vFile = PsiUtilCore.getVirtualFile(file);
-        if (vFile == null) {
-            return null;
-        }
-        if (!vFile.getName().endsWith(".html")) {
-            return null;
-        }
-        var parent = vFile.getParent();
-        if (parent == null || !parent.getName().endsWith(".wo")) {
+        if (!WOHtmlCompletionUtil.isWoComponentHtml(file)) {
             return null;
         }
 
@@ -42,4 +33,3 @@ public final class WOHtmlFileNSInfoProvider implements XmlFileNSInfoProvider {
         return false;
     }
 }
-
