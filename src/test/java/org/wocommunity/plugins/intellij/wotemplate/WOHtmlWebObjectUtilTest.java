@@ -36,3 +36,4 @@ public class WOHtmlWebObjectUtilTest {
         assertNull(WOHtmlWebObjectUtil.cleanWebObjectName("''"));
     }
 }
+

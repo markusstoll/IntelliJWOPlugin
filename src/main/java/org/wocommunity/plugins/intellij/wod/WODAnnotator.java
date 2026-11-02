@@ -210,7 +210,7 @@ final class WODAnnotator implements Annotator {
         }
         // binding not found
         if (!found) {
-            holder.newAnnotation(HighlightSeverity.ERROR, "Binding '" + binding.getIdentifier().getText() + "' is not defined for component '" + component.getIdentifier().getText() + "'")
+            holder.newAnnotation(HighlightSeverity.WARNING, "Binding '" + binding.getIdentifier().getText() + "' is not defined for component '" + component.getIdentifier().getText() + "'")
                     .range(binding)
                     .create();
         }
@@ -253,7 +253,7 @@ final class WODAnnotator implements Annotator {
         String bindingName = parentBinding.getIdentifier().getText();
 
         if (apiFile == null || !apiFile.getBindingNames().contains(bindingName)) {
-            holder.newAnnotation(HighlightSeverity.ERROR,
+            holder.newAnnotation(HighlightSeverity.WARNING,
                             "Parent binding '" + bindingName + "' is not declared in this component's .api file")
                     .range(parentBinding)
                     .create();
