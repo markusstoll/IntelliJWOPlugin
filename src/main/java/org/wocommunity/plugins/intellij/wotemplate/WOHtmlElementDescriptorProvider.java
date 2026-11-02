@@ -125,7 +125,7 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
         return new CreateWodElementPlaceholder(tag, wodFile, woDir, name);
     }
 
-    private static @Nullable PsiClass resolveWoTagClass(@NotNull Project project, @NotNull String rawLocalName) {
+    public static @Nullable PsiClass resolveWoTagClass(@NotNull Project project, @NotNull String rawLocalName) {
         GlobalSearchScope all = GlobalSearchScope.allScope(project); // includes project + libraries
         if (DumbService.isDumb(project)) {
             return null;

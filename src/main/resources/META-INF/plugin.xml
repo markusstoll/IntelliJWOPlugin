@@ -98,6 +98,8 @@
                 implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlXmlExtension"/>
         <xml.fileNSInfoProvider
                 implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlFileNSInfoProvider"/>
+        <gotoDeclarationHandler
+                implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlComponentGotoDeclarationHandler"/>
 
         <completion.contributor language="HTML"
                                 implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlTagCompletionContributor"/>

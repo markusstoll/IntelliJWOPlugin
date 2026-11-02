@@ -31,7 +31,9 @@ public final class WODComponentReference extends PsiPolyVariantReferenceBase<WOD
         // Find matching Java Classes
         try {
             PsiClass clazz = WOPsiUtil.getPsiClassForComponentName(componentName, myElement.getProject());
-            results.add(new PsiElementResolveResult(clazz));
+            if (clazz != null) {
+                results.add(new PsiElementResolveResult(clazz));
+            }
         } catch (Exception ignored) {
             System.out.println("Error resolving Java Class for component: " + componentName);
         }

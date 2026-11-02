@@ -1,10 +1,13 @@
 package org.wocommunity.plugins.intellij.tools;
 
 import com.intellij.ide.highlighter.XmlFileType;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -12,12 +15,14 @@ import com.intellij.psi.xml.XmlFile;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.wocommunity.plugins.intellij.components.SwitchToWOComponentAction;
 import org.wocommunity.plugins.intellij.psi.api.APIFile;
 import org.wocommunity.plugins.intellij.psi.wod.*;
 import org.wocommunity.plugins.intellij.wotemplate.WOComponentClassResolver;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -269,15 +274,19 @@ public class WOPsiUtil {
                 toReport.stream().map(c -> c.getQualifiedName() != null ? c.getQualifiedName() : c.getName()).collect(Collectors.joining(", ")) + ")");
     }
 
-    public static @Nullable PsiDirectory getComponentFolderForComponentName(@NotNull String componentName, @NotNull Project project) {
+    public static @Nullable PsiDirectory getComponentFolderForClass(@NotNull PsiClass componentClass) {
         try {
-            PsiClass componentClass = getPsiClassForComponentName(componentName, project);
+            Project project = componentClass.getProject();
+            PsiFile containingFile = componentClass.getContainingFile();
+            if (containingFile == null) return null;
+            VirtualFile classFile = containingFile.getVirtualFile();
+            if (classFile == null) return null;
 
-            VirtualFile classFile = componentClass.getContainingFile().getVirtualFile();
+            String className = componentClass.getName();
+            if (className == null) return null;
+            String folderName = className + "." + WOFileUtil.COMPONENT_EXTENSION;
 
-            // Find main dir
-            // FIXME:This probably needs to work with oldschool directory structures and localized? directory structures as well
-            // Unfortunately we cant just search for the file unless the component dirs are defined as content root... Maybe we can force that from the plugin?
+            // 1. Check parent hierarchy for 'main' dir
             VirtualFile current = classFile.getParent();
             VirtualFile mainDir = null;
             while (current != null) {
@@ -287,21 +296,61 @@ public class WOPsiUtil {
                 }
                 current = current.getParent();
             }
-            if (mainDir == null) {
-                return null;
+            if (mainDir != null) {
+                VirtualFile componentsDir = mainDir.findChild("components");
+                if (componentsDir != null) {
+                    VirtualFile componentFolder = componentsDir.findChild(folderName);
+                    if (componentFolder != null && componentFolder.isDirectory()) {
+                        return PsiManager.getInstance(project).findDirectory(componentFolder);
+                    }
+                }
+                VirtualFile resourcesDir = mainDir.findChild("resources");
+                if (resourcesDir != null) {
+                    VirtualFile componentFolder = resourcesDir.findChild(folderName);
+                    if (componentFolder != null && componentFolder.isDirectory()) {
+                        return PsiManager.getInstance(project).findDirectory(componentFolder);
+                    }
+                }
             }
 
-            // Go into components dir and check for api file
-            VirtualFile componentsDir = mainDir.findChild("components");
-            if (componentsDir == null) {
-                return null;
+            // 2. Check module using SwitchToWOComponentAction.findResourceFolderByName
+            Module module = ModuleUtilCore.findModuleForFile(classFile, project);
+            VirtualFile targetFolder = SwitchToWOComponentAction.findResourceFolderByName(project, module, classFile, folderName);
+            if (targetFolder != null && targetFolder.isDirectory()) {
+                return PsiManager.getInstance(project).findDirectory(targetFolder);
             }
-            VirtualFile componentFolder = componentsDir.findChild(componentName + "." + WOFileUtil.COMPONENT_EXTENSION);
-            if (componentFolder == null || !componentFolder.isDirectory()) {
-                return null;
-            }
-            return PsiManager.getInstance(project).findDirectory(componentFolder);
 
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static @Nullable PsiDirectory getComponentFolderForComponentName(@NotNull String componentName, @NotNull Project project) {
+        try {
+            PsiClass componentClass = null;
+            try {
+                componentClass = getPsiClassForComponentName(componentName, project);
+            } catch (Exception ignored) {
+            }
+
+            if (componentClass != null) {
+                PsiDirectory dir = getComponentFolderForClass(componentClass);
+                if (dir != null) {
+                    return dir;
+                }
+            }
+
+            // Fallback: search project for componentName.wo directly
+            String simpleName = componentName.contains(".") ? componentName.substring(componentName.lastIndexOf('.') + 1) : componentName;
+            String folderName = simpleName + "." + WOFileUtil.COMPONENT_EXTENSION;
+            Collection<VirtualFile> matches = FilenameIndex.getVirtualFilesByName(folderName, GlobalSearchScope.projectScope(project));
+            for (VirtualFile match : matches) {
+                if (WOComponentClassResolver.isValidComponentFolder(project, match)) {
+                    return PsiManager.getInstance(project).findDirectory(match);
+                }
+            }
+            return null;
         } catch (Exception e) {
             return null;
         }
