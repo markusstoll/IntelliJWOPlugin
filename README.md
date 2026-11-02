@@ -152,8 +152,13 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.0)
+## Recent Highlights (v0.9.1)
 
+- **Robust WebObjects Syntax Support**:
+  - Full support for unquoted `<webobject>` name attributes (e.g. `<webobject name=ShortTermLoginButton/>`) across gutter navigation, ⌘-Click declaration lookups, element references, and bidirectional template conversion.
+  - Full support for optional trailing semicolons on WOD declarations (`Declaration : Component { ... };`).
+  - Native support for Cocoa/WebObjects boolean literals (`YES` and `NO`, `true` and `false` case-insensitively) without false-positive key-path resolution errors.
+  - Demoted undefined binding annotations from errors to warnings (yellow underline), gracefully accommodating dynamic pass-through attributes and unlisted component bindings.
 - **Interactive Component vs. Code Navigation (Target Chooser Popup)**: ⌘-Clicking a component type in `.wod` or inline HTML presents a selector popup to open either the Java/Kotlin controller source file or directly open and focus the `.wo` Component Editor tab.
 - **Direct Focus & Immediate Shortcut Switching**: Switching back to code via **⌥⌘1** / **Ctrl+Alt+1** works instantly when the WOComponent tab is active without requiring a prior mouse click into the editor.
 - **Unified Grammar-Kit & JFlex PSI Architecture**: Full IntelliJ PSI AST for `.wod` files (`WODDeclaration`, `WODComponent`, `WODBinding`, `WODKeyPath`, `WODValue`, etc.) contributed by Kai Lochbaum, enabling deep refactoring, find-usages, and type safety.
