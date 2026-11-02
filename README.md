@@ -37,13 +37,15 @@ Define and manage component binding specifications in an intuitive visual editor
 ### 4. Multi-Language Component & Source Switching
 Seamlessly jump back and forth between a WO component template and its backing controller class:
 - **Supported Languages**: Works with **Java** (`.java`) and **Kotlin** (`.kt`) implementations.
-- **Template → Source**: Press **⌥⌘1** (macOS) or **Ctrl+Alt+1** (Windows/Linux) from inside a `.wo` folder, `.html`, `.wod`, or `.woo` file to open its backing class.
+- **Template → Source**: Press **⌥⌘1** (macOS) or **Ctrl+Alt+1** (Windows/Linux) from inside a `.wo` folder, `.html`, `.wod`, or `.woo` file to open its backing class. Works immediately from the active component tab without requiring a prior click into the editor.
 - **Source → Template**: Press **⌥⌘2** (macOS) or **Ctrl+Alt+2** (Windows/Linux) from any Java or Kotlin component class to open its `.wo` component folder.
-- **Strict Multi-Module Scoping**: In multi-module Maven projects where multiple components share the same name (e.g. `Main.wo` across different modules), navigation is strictly bounded to the same IntelliJ module. It never accidentally jumps across module boundaries.
-- **Build Artifact Exclusion**: Navigation and class resolution completely ignore build artifacts (`target/`, `build/`, `out/`, `/.gradle/`, and compiled `.class` files), ensuring you always land on the editable source files.
+- **Interactive Component vs. Code Chooser**: When **⌘-Click**ing (or **Ctrl-Click**ing) on any component type in `.wod` or inline `<wo:...>` templates, a chooser popup lets you choose whether to open the Java/Kotlin controller source file or directly open and focus the `.wo` Component Editor tab.
+- **Strict Multi-Module Scoping & Ambiguity Resolution**: In multi-module Maven projects where multiple components share the same name (e.g. `Main.wo` across different modules), navigation is strictly bounded to the same IntelliJ module. It verifies `WOComponent`/`ERXComponent` inheritance before ambiguity checks to ensure common names (like `Main`) resolve cleanly without false-positive errors.
+- **Build Artifact Exclusion**: Navigation and class resolution completely ignore build artifacts (`target/`, `build/`, `out/`, `/.gradle/`, and compiled `.class` files), ensuring you always land on editable source files.
 
 ### 5. HTML Template Assistance (`wo:*` Tags) & API-Driven Bindings
 - **Tag Name Completion**: Code completion for dynamic WebObjects elements using the `wo:` namespace (e.g. `<wo:WOString>`, `<wo:WOConditional>`, `<wo:WOSubmitButton>`) as well as custom WO components.
+- **Built-in Namespace Provider**: Automatically binds the `wo:` namespace to eliminate annoying "Namespace 'wo' is not bound" inspection warnings in HTML templates.
 - **Tag Attribute Completion**: Suggests valid bindings for system elements (backed by `WebObjectDefinitions.xml`) and custom components (backed by their `.api` definitions).
 - **Required Bindings Prioritization**: Required bindings are shown in bold with `(required)` label and sorted to the top of completion suggestions.
 - **Missing Required Binding Inspection**: In-editor warning highlighting `<wo:...>` tags missing required bindings with an **"Add missing binding"** quick-fix.
@@ -78,16 +80,18 @@ Full language, navigation, and editing support for classic WebObjects `.wod` fil
   - Automatically pops up existing `.wod` element names upon attribute insertion.
   - Full self-closing support (`<webobject name="..." />`) with browser empty-tag warnings cleanly suppressed for server-side templates.
 - **Bidirectional Gutter & Click Navigation**:
-  - Gutter icon and **⌘-Click** on `<webobject name="xxx">` in the HTML editor instantly scroll and center the corresponding `xxx : Type { ... }` declaration in the WOD editor within the same split view, selecting the element name.
+  - Gutter icon and **⌘-Click** on `<webobject name="xxx">` in the HTML editor instantly scroll and center the corresponding `xxx : Type { ... }` declaration in the WOD editor within the same split view, selecting the element name. The split ratio is preserved, only auto-expanding if the target editor was virtually collapsed (< 10%).
   - **Instant Element Scaffolding**: If a `<webobject name="xxx">` has no definition in `.wod`, clicking the gutter icon or **⌘-Click** immediately creates `xxx : WOComponent {\n}\n` in the `.wod` file, scrolls to it, and selects `WOComponent` for immediate typing.
   - Gutter icon next to `xxx : Type` in the WOD editor jumps directly back to the matching `<webobject name="xxx">` tag in the HTML template.
 - **Go to Declaration (⌘-Click / ⌘B)**:
   - `name="xxx"` in HTML resolves to the WOD declaration.
-  - Component types (e.g. `WOString`, `WOConditional`, `WORepetition`, `Main`, `ERXLocalizedString`, etc.) jump directly to the underlying Java or Kotlin class (including `com.webobjects.appserver._private.*` dynamic elements).
+  - Component types (e.g. `WOString`, `WOConditional`, `WORepetition`, `Main`, `ERXLocalizedString`, etc.) trigger an interactive chooser popup allowing you to open either the controller class or the `.wo` Component Editor tab.
   - Code bindings (without `$`, e.g. `condition = hasExtraLargeLoginFields;` or nested keypaths `user.address`) jump directly to the controller's property or method.
+- **Parent Bindings (`^bindingName`)**:
+  - Full syntax, parsing, and autocompletion for parent bindings (`^binding`) in `.wod` files with validation against the component's `.api` specification.
 - **Context-Aware Autocompletion**:
   - Typing `<webobject name="<caret>"` in HTML suggests all element definitions defined in `.wod`.
-  - In `.wod`, autocompletion is available for component types (after `:`), binding keys from system definitions and `.api` files (inside `{}`), and controller properties/methods (after `=`).
+  - In `.wod`, autocompletion is available for component types (after `:`), binding keys from system definitions and `.api` files (inside `{}`), parent bindings (`^`), and controller properties/methods (after `=`).
 - **Missing Required Binding Inspection in `.wod`**:
   - Highlights element declarations missing required bindings (as defined in `WebObjectDefinitions.xml` or the component's `.api` file) with quick-fixes to insert the missing bindings.
 
@@ -148,18 +152,23 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.8.x)
+## Recent Highlights (v0.9.0)
 
+- **Interactive Component vs. Code Navigation (Target Chooser Popup)**: ⌘-Clicking a component type in `.wod` or inline HTML presents a selector popup to open either the Java/Kotlin controller source file or directly open and focus the `.wo` Component Editor tab.
+- **Direct Focus & Immediate Shortcut Switching**: Switching back to code via **⌥⌘1** / **Ctrl+Alt+1** works instantly when the WOComponent tab is active without requiring a prior mouse click into the editor.
 - **Unified Grammar-Kit & JFlex PSI Architecture**: Full IntelliJ PSI AST for `.wod` files (`WODDeclaration`, `WODComponent`, `WODBinding`, `WODKeyPath`, `WODValue`, etc.) enabling deep refactoring, find-usages, and type safety.
 - **WOD Code Formatter**: Dedicated code formatting model (`Reformat Code` / `⌥⌘L` / `Ctrl+Alt+L`) with custom spacing rules for WOD declarations, assignments, braces, and semicolons.
 - **Java ↔ WOD Gutter Markers**: WebObjects gutter icons in Java controller classes on fields and methods navigating directly to referencing WOD key paths.
 - **KVC Key Path Resolution & Validation**: Validates WOD key paths against backing Java component members with smart completion, type inference, and `// valid` comment suppression.
+- **Parent Bindings Support**: Full syntax, completion, and validation for parent bindings (`^bindingName`) in `.wod` files against component `.api` specifications.
+- **Non-Disruptive Split View Sizing**: Gutter navigation between HTML and WOD preserves user-adjusted split ratios; only auto-expands when the target pane is nearly collapsed (< 10%).
+- **Unbound Namespace Resolution**: Built-in XML namespace provider completely eliminates "Namespace 'wo' is not bound" warnings in HTML templates.
 - **Two-Way Template Conversion**: One-click conversion between modern inline `<wo:*>` tags and classic `.wod` declarations with automatic tag alias resolution (`wo:if` $\rightarrow$ `WOConditional`, `wo:str` $\rightarrow$ `WOString`, etc.) and element numbering.
 - **Full `.wod` Language Support**: Dedicated syntax highlighter, brace matching, quote handler, comment toggling, and smart `Enter` indentation.
 - **Bidirectional HTML ↔ WOD Navigation**: Gutter icons and **⌘-Click** jump and scroll directly between HTML tags and WOD declarations; instant element scaffolding on click for undefined tags.
 - **`<webobject>` & WOD Completion**: Intelligent autocompletion for `<webobject name="...">`, WOD component types, binding keys (from definitions and `.api`), and controller methods.
 - **Diagnostics & Quick-Fixes**: Missing required binding inspections for both inline `<wo:...>` tags and `.wod` declarations with quick-fixes to insert missing bindings.
-- **Multi-Module Isolated Switching**: Bounded navigation between components and Java/Kotlin classes (`⌥⌘1` / `⌥⌘2`) strictly within the same IntelliJ module, with complete exclusion of build artifacts (`target/`, `build/`, `out/`).
+- **Multi-Module Isolated Switching**: Bounded navigation between components and Java/Kotlin classes (`⌥⌘1` / `⌥⌘2`) strictly within the same IntelliJ module, with intelligent class disambiguation (e.g. for common names like `Main`) and complete exclusion of build artifacts (`target/`, `build/`, `out/`).
 
 ---
 
