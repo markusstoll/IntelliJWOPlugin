@@ -59,8 +59,8 @@ class WODLexerTest {
         lexer.advance();
         // whitespace (\n)
         lexer.advance();
-        // // next line -> COMMENT
-        assertEquals(COMMENT, lexer.getTokenType());
+        // // next line -> ASSIGNMENT_COMMENT
+        assertEquals(ASSIGNMENT_COMMENT, lexer.getTokenType());
         assertEquals("// next line", lexer.getTokenText());
     }
 

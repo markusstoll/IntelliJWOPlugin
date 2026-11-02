@@ -25,12 +25,10 @@ import static org.wocommunity.plugins.intellij.psi.wod.WODTypes.*;
 EOL=\R
 WHITE_SPACE=\s+
 
-WS=[ \t\n\x0B\f\r]+
 IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_\-]*
 NUMBER=[0-9]+
 BOOLEAN=true|false
 STRING=\"([^\\\"\r\n]|\\[^\r\n])*\"
-COMMENT="//".*|"/"\*([^*]|\*+[^*/])*\*+"/"
 ASSIGNMENT_COMMENT="//".*|"/"\*([^*]|\*+[^*/])*\*+"/"
 
 %%
@@ -45,12 +43,10 @@ ASSIGNMENT_COMMENT="//".*|"/"\*([^*]|\*+[^*/])*\*+"/"
   "}"                        { return RBRACE; }
   "."                        { return DOT; }
 
-  {WS}                       { return WS; }
+  {BOOLEAN}                  { return BOOLEAN; }
   {IDENTIFIER}               { return IDENTIFIER; }
   {NUMBER}                   { return NUMBER; }
-  {BOOLEAN}                  { return BOOLEAN; }
   {STRING}                   { return STRING; }
-  {COMMENT}                  { return COMMENT; }
   {ASSIGNMENT_COMMENT}       { return ASSIGNMENT_COMMENT; }
 
 }

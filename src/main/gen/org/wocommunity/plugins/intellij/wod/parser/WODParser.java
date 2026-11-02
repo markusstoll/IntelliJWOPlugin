@@ -78,6 +78,7 @@ public class WODParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, WOD_ASSIGNMENT_LIST, "<wod assignment list>");
     while (true) {
       int c = current_position_(b);
+      if (consumeToken(b, ASSIGNMENT_COMMENT)) continue;
       if (!WODAssignment(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "WODAssignmentList", c)) break;
     }
@@ -145,6 +146,7 @@ public class WODParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(b, l, "WODFile")) return false;
     while (true) {
       int c = current_position_(b);
+      if (consumeToken(b, ASSIGNMENT_COMMENT)) continue;
       if (!WODDeclaration(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "WODFile", c)) break;
     }
