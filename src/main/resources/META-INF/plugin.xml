@@ -132,13 +132,6 @@
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="org.wocommunity.plugins.intellij.wotemplate.WORequiredBindingsInspection"/>
-        <localInspection language="XHTML"
-                         shortName="WORequiredBindings"
-                         displayName="Missing required WebObjects binding"
-                         groupName="WebObjects"
-                         enabledByDefault="true"
-                         level="WARNING"
-                         implementationClass="org.wocommunity.plugins.intellij.wotemplate.WORequiredBindingsInspection"/>
 
         <fileType name="WebObjects API" implementationClass="org.wocommunity.plugins.intellij.psi.api.WOApiFileType" fieldName="INSTANCE" language="XML" extensions="api"/>
 
