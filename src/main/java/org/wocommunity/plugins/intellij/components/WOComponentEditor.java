@@ -283,8 +283,12 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
             return false;
         }
         Runnable scrollAction = () -> {
-            if (componentSplitter != null && componentSplitter.getProportion() > 0.65f) {
-                componentSplitter.setProportion(0.5f);
+            if (componentSplitter != null) {
+                if (fileEditor == wodFileEditor && componentSplitter.getProportion() > 0.90f) {
+                    componentSplitter.setProportion(0.5f);
+                } else if (fileEditor == htmlEditor && componentSplitter.getProportion() < 0.10f) {
+                    componentSplitter.setProportion(0.5f);
+                }
             }
             if (te.getEditor() != null) {
                 com.intellij.openapi.editor.Editor ed = te.getEditor();
