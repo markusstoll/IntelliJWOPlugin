@@ -86,3 +86,4 @@ public class WODNavigatableElement extends FakePsiElement {
         WOHtmlToWodNavigationUtil.navigateToWodAndSelect(getProject(), wodFile, startOffset, endOffset);
     }
 }
+

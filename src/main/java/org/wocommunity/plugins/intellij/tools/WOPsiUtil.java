@@ -301,14 +301,14 @@ public class WOPsiUtil {
                 if (componentsDir != null) {
                     VirtualFile componentFolder = componentsDir.findChild(folderName);
                     if (componentFolder != null && componentFolder.isDirectory()) {
-                        return PsiManager.getInstance(project).findDirectory(componentFolder);
+                        return wrapComponentFolder(PsiManager.getInstance(project).findDirectory(componentFolder));
                     }
                 }
                 VirtualFile resourcesDir = mainDir.findChild("resources");
                 if (resourcesDir != null) {
                     VirtualFile componentFolder = resourcesDir.findChild(folderName);
                     if (componentFolder != null && componentFolder.isDirectory()) {
-                        return PsiManager.getInstance(project).findDirectory(componentFolder);
+                        return wrapComponentFolder(PsiManager.getInstance(project).findDirectory(componentFolder));
                     }
                 }
             }
@@ -317,13 +317,23 @@ public class WOPsiUtil {
             Module module = ModuleUtilCore.findModuleForFile(classFile, project);
             VirtualFile targetFolder = SwitchToWOComponentAction.findResourceFolderByName(project, module, classFile, folderName);
             if (targetFolder != null && targetFolder.isDirectory()) {
-                return PsiManager.getInstance(project).findDirectory(targetFolder);
+                return wrapComponentFolder(PsiManager.getInstance(project).findDirectory(targetFolder));
             }
 
             return null;
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static @Nullable PsiDirectory wrapComponentFolder(@Nullable PsiDirectory directory) {
+        if (directory == null) {
+            return null;
+        }
+        if (directory instanceof org.wocommunity.plugins.intellij.components.WOComponentNavigatableDirectory) {
+            return directory;
+        }
+        return new org.wocommunity.plugins.intellij.components.WOComponentNavigatableDirectory(directory);
     }
 
     public static @Nullable PsiDirectory getComponentFolderForComponentName(@NotNull String componentName, @NotNull Project project) {
@@ -337,7 +347,7 @@ public class WOPsiUtil {
             if (componentClass != null) {
                 PsiDirectory dir = getComponentFolderForClass(componentClass);
                 if (dir != null) {
-                    return dir;
+                    return wrapComponentFolder(dir);
                 }
             }
 
@@ -347,7 +357,7 @@ public class WOPsiUtil {
             Collection<VirtualFile> matches = FilenameIndex.getVirtualFilesByName(folderName, GlobalSearchScope.projectScope(project));
             for (VirtualFile match : matches) {
                 if (WOComponentClassResolver.isValidComponentFolder(project, match)) {
-                    return PsiManager.getInstance(project).findDirectory(match);
+                    return wrapComponentFolder(PsiManager.getInstance(project).findDirectory(match));
                 }
             }
             return null;
