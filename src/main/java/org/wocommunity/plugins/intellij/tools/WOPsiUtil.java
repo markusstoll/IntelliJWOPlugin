@@ -14,8 +14,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.psi.api.APIFile;
 import org.wocommunity.plugins.intellij.psi.wod.*;
+import org.wocommunity.plugins.intellij.wotemplate.WOComponentClassResolver;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 // TODO: Components may also be in a Language.lproj folder inside the components folder.
 //       The .api file however is in the components folder even in that case...
@@ -187,12 +191,21 @@ public class WOPsiUtil {
     // Find other Components
 
     public static PsiClass getPsiClass(@NotNull PsiElement item) {
+        PsiFile containingFile = item.getContainingFile();
+        if (containingFile != null) {
+            PsiClass resolved = WOComponentClassResolver.findComponentClass(containingFile);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+
         String componentName = getComponentName(item);
         if (componentName != null) {
             try {
                 return getPsiClassForComponentName(componentName, item.getProject());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (Exception ignored) {
+                // Return null when unresolvable to avoid breaking annotators / completion
+                return null;
             }
         }
         return null;
@@ -204,6 +217,9 @@ public class WOPsiUtil {
 
         PsiClass baseClass = facade.findClass(WO_ELEMENT_FQN, scope);
         if (baseClass == null) {
+            baseClass = facade.findClass("com.webobjects.appserver.WOComponent", scope);
+        }
+        if (baseClass == null) {
             throw new Exception(WO_ELEMENT_FQN + " not found in project classpath");
         }
 
@@ -213,19 +229,44 @@ public class WOPsiUtil {
         if (candidateClasses.length == 0) {
             throw new Exception("The class for '" + className + "' is missing");
         }
-        if (candidateClasses.length > 1) {
-            throw new Exception("The class for '" + className + "' is ambiguous (more than 1)");
-        }
 
+        List<PsiClass> matchingClasses = new ArrayList<>();
         for (PsiClass candidateClass : candidateClasses) {
             if (candidateClass.isInheritor(baseClass, true)) {
-                // Found component :-)
-                return candidateClass;
+                matchingClasses.add(candidateClass);
             }
         }
 
-        // We found classes but none of them extends WOElement
-        throw new Exception("The class for '" + className + "' does not extend WOElement");
+        if (matchingClasses.isEmpty()) {
+            throw new Exception("The class for '" + className + "' does not extend " + baseClass.getName());
+        }
+
+        if (matchingClasses.size() == 1) {
+            return matchingClasses.get(0);
+        }
+
+        // If multiple classes inherit from WOElement/WOComponent:
+        // Filter out build artifacts (target/, build/, out/) and prefer project source classes
+        List<PsiClass> sourceCandidates = new ArrayList<>();
+        for (PsiClass candidate : matchingClasses) {
+            if (candidate.getContainingFile() != null) {
+                VirtualFile vf = candidate.getContainingFile().getVirtualFile();
+                if (vf != null) {
+                    String path = vf.getPath();
+                    if (!path.contains("/target/") && !path.contains("/build/") && !path.contains("/out/") && !path.contains("/.gradle/")) {
+                        sourceCandidates.add(candidate);
+                    }
+                }
+            }
+        }
+
+        if (sourceCandidates.size() == 1) {
+            return sourceCandidates.get(0);
+        }
+
+        List<PsiClass> toReport = sourceCandidates.isEmpty() ? matchingClasses : sourceCandidates;
+        throw new Exception("The class for '" + className + "' is ambiguous (more than 1: " +
+                toReport.stream().map(c -> c.getQualifiedName() != null ? c.getQualifiedName() : c.getName()).collect(Collectors.joining(", ")) + ")");
     }
 
     public static @Nullable PsiDirectory getComponentFolderForComponentName(@NotNull String componentName, @NotNull Project project) {

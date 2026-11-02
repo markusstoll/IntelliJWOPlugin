@@ -21,6 +21,11 @@ public class WodToHtmlLineMarkerProvider implements LineMarkerProvider {
 
     @Override
     public LineMarkerInfo<?> getLineMarkerInfo(@NotNull PsiElement element) {
+        // IntelliJ LineMarkerInfo must only be returned for leaf elements
+        if (element.getFirstChild() != null) {
+            return null;
+        }
+
         PsiFile containingFile = element.getContainingFile();
         if (containingFile == null || (!(containingFile instanceof WODFile) && !containingFile.getName().endsWith(".wod"))) {
             return null;
