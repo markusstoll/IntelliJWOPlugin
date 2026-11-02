@@ -156,7 +156,7 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 - **Interactive Component vs. Code Navigation (Target Chooser Popup)**: ⌘-Clicking a component type in `.wod` or inline HTML presents a selector popup to open either the Java/Kotlin controller source file or directly open and focus the `.wo` Component Editor tab.
 - **Direct Focus & Immediate Shortcut Switching**: Switching back to code via **⌥⌘1** / **Ctrl+Alt+1** works instantly when the WOComponent tab is active without requiring a prior mouse click into the editor.
-- **Unified Grammar-Kit & JFlex PSI Architecture**: Full IntelliJ PSI AST for `.wod` files (`WODDeclaration`, `WODComponent`, `WODBinding`, `WODKeyPath`, `WODValue`, etc.) enabling deep refactoring, find-usages, and type safety.
+- **Unified Grammar-Kit & JFlex PSI Architecture**: Full IntelliJ PSI AST for `.wod` files (`WODDeclaration`, `WODComponent`, `WODBinding`, `WODKeyPath`, `WODValue`, etc.) contributed by Kai Lochbaum, enabling deep refactoring, find-usages, and type safety.
 - **WOD Code Formatter**: Dedicated code formatting model (`Reformat Code` / `⌥⌘L` / `Ctrl+Alt+L`) with custom spacing rules for WOD declarations, assignments, braces, and semicolons.
 - **Java ↔ WOD Gutter Markers**: WebObjects gutter icons in Java controller classes on fields and methods navigating directly to referencing WOD key paths.
 - **KVC Key Path Resolution & Validation**: Validates WOD key paths against backing Java component members with smart completion, type inference, and `// valid` comment suppression.
@@ -187,6 +187,7 @@ This project is licensed under the **MIT License** — see [`LICENSE`](LICENSE).
 
 ---
 
-## Author & Contact
+## Authors & Contributors
 
-**Markus Stoll** — [junidas.de](https://www.junidas.de) — markus.stoll@junidas.de
+- **Markus Stoll** ([junidas.de](https://www.junidas.de) — markus.stoll@junidas.de) — Project creator, plugin architecture, WOComponent split editor, project wizard, multi-module template/source navigation, visual Component API editor, run configurations, two-way template conversion (`wo:` $\leftrightarrow$ `.wod`), and release management.
+- **Kai Lochbaum** ([salient-doremus.de](https://www.salient-doremus.de) — lochbaum@salient-doremus.de) — WOD language support contribution: Grammar-Kit BNF grammar, JFlex lexer, WOD PSI architecture, KVC key path validation, parent bindings, and `<webobject>` cross-references.
