@@ -137,7 +137,7 @@
                          level="WARNING"
                          implementationClass="org.wocommunity.plugins.intellij.wotemplate.WORequiredBindingsInspection"/>
 
-        <fileType name="WebObjects API" implementationClass="com.intellij.ide.highlighter.XmlFileType" fieldName="INSTANCE" language="XML" extensions="api"/>
+        <fileType name="WebObjects API" implementationClass="org.wocommunity.plugins.intellij.psi.api.WOApiFileType" fieldName="INSTANCE" language="XML" extensions="api"/>
 
         <lang.inspectionSuppressor language="HTML"
                                    implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlInspectionSuppressor"/>
