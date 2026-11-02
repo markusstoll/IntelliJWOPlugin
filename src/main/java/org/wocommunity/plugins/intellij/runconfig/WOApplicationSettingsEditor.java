@@ -4,10 +4,15 @@ import com.intellij.execution.ui.*;
 import com.intellij.execution.application.ClassEditorField;
 import com.intellij.execution.application.JavaSettingsEditorBase;
 import com.intellij.ide.util.ClassFilter;
+import com.intellij.ide.util.TreeClassChooser;
+import com.intellij.ide.util.TreeClassChooserFactory;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaCodeFragment;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiMethodUtil;
 import com.intellij.ui.EditorTextField;
 import com.intellij.util.ui.UIUtil;
@@ -37,6 +42,24 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
         fragments.add(commonParameterFragments.programArguments());
 //        fragments.add(new TargetPathFragment<>());
 //        fragments.add(commonParameterFragments.createRedirectFragment());
+        moduleClasspath.component().addActionListener(e -> {
+            Module selectedModule = moduleClasspath.component().getSelectedModule();
+            if (mySettings != null) {
+                if (selectedModule != null) {
+                    mySettings.setModule(selectedModule);
+                } else {
+                    mySettings.getConfigurationModule().setModule(null);
+                    mySettings.getConfigurationModule().setModuleName(null);
+                }
+                if (mySettings.isGeneratedName()) {
+                    String newName = mySettings.suggestedName();
+                    if (newName != null && !newName.isBlank()) {
+                        mySettings.setName(newName);
+                    }
+                }
+            }
+            fireEditorStateChanged();
+        });
         SettingsEditorFragment<WOApplicationConfiguration, EditorTextField> mainClassFragment = createMainClass(moduleClasspath.component());
         fragments.add(mainClassFragment);
         DefaultJreSelector jreSelector = DefaultJreSelector.fromSourceRootsDependencies(moduleClasspath.component(), mainClassFragment.component());
@@ -53,23 +76,7 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
         fragments.add(vmOptionsFragment);
     }
 
-    private static final ClassFilter WO_CLASS_FILTER =
-            aClass -> PsiMethodUtil.MAIN_CLASS.value(aClass)
-                    && superClassIsWOApplication(aClass)
-                    && PsiMethodUtil.findMainMethod(aClass) != null;
-
-    private static boolean superClassIsWOApplication(PsiClass aClass) {
-        PsiClass superClass = aClass.getSuperClass();
-        if(superClass != null)
-        {
-            if(superClass.getQualifiedName().equals("com.webobjects.appserver.WOApplication"))
-                return true;
-
-            return superClassIsWOApplication(superClass);
-        }
-
-        return false;
-    }
+    private static final ClassFilter WO_CLASS_FILTER = WOApplicationClassUtil::isCandidateMainClass;
 
     @NotNull
     private SettingsEditorFragment<WOApplicationConfiguration, EditorTextField> createMainClass(ModuleClasspathCombo classpathCombo) {
@@ -80,6 +87,25 @@ public class WOApplicationSettingsEditor extends JavaSettingsEditorBase<WOApplic
                     @Override
                     protected ClassFilter createFilter(Module module) {
                         return WO_CLASS_FILTER;
+                    }
+
+                    @Override
+                    protected TreeClassChooser createClassChooser(ClassFilter.ClassFilterWithScope filterWithScope) {
+                        Project project = getProject();
+                        GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+                        return TreeClassChooserFactory.getInstance(project)
+                                .createWithInnerClassesScopeChooser(myTitle, scope, WO_CLASS_FILTER, null);
+                    }
+
+                    @Override
+                    protected void onClassChosen(PsiClass aClass) {
+                        super.onClassChosen(aClass);
+                        if (aClass != null) {
+                            Module module = ModuleUtilCore.findModuleForPsiElement(aClass);
+                            if (module != null) {
+                                classpathCombo.setSelectedModule(module);
+                            }
+                        }
                     }
                 }
                 );

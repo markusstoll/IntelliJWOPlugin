@@ -35,9 +35,14 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         JavaParameters javaParameters = super.createJavaParameters();
 
         com.intellij.openapi.module.Module module = myConfiguration.getConfigurationModule().getModule();
-        String modulePath = WOProjectUtil.getModulePath(module);
-
         Project project = myConfiguration.getProject();
+
+        String resolvedMain = WOApplicationClassUtil.resolveExecutableMainClassName(project, module, javaParameters.getMainClass());
+        if (resolvedMain != null && !resolvedMain.equals(javaParameters.getMainClass())) {
+            javaParameters.setMainClass(resolvedMain);
+        }
+
+        String modulePath = WOProjectUtil.getModulePath(module);
 
         if(StringUtils.isEmpty(javaParameters.getWorkingDirectory())
             || javaParameters.getWorkingDirectory().equals(project.getBasePath()))
@@ -45,8 +50,8 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
             if (modulePath == null || modulePath.isBlank()) {
                 return javaParameters;
             }
-            String finalName = getProjectFinalName(modulePath, module);
-            javaParameters.setWorkingDirectory(modulePath + "/target/" + finalName + ".woa");
+            String woaPath = resolveWoaDirectory(modulePath, module);
+            javaParameters.setWorkingDirectory(woaPath);
         }
 
         ParametersList vmParametersList = javaParameters.getVMParametersList();
@@ -85,47 +90,148 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
     }
 
     /**
+     * Resolve the absolute path to the .woa directory in target.
+     *
+     * Prefers existing .woa directories in target/ if available, otherwise computes
+     * the expected target/<finalName>.woa path.
+     */
+    public @NotNull String resolveWoaDirectory(@NotNull String modulePath, @NotNull com.intellij.openapi.module.Module module) {
+        String finalName = getProjectFinalName(modulePath, module);
+        Path targetDir = Paths.get(modulePath, "target");
+
+        Path expectedWoa = targetDir.resolve(finalName + ".woa");
+        if (Files.isDirectory(expectedWoa)) {
+            return expectedWoa.toString();
+        }
+
+        if (Files.isDirectory(targetDir)) {
+            try (var stream = Files.list(targetDir)) {
+                List<Path> woaDirs = stream
+                        .filter(Files::isDirectory)
+                        .filter(p -> p.getFileName().toString().endsWith(".woa"))
+                        .toList();
+
+                if (woaDirs.size() == 1) {
+                    return woaDirs.get(0).toString();
+                } else if (woaDirs.size() > 1) {
+                    Path best = findBestMatchingWoa(woaDirs, finalName);
+                    if (best != null) {
+                        return best.toString();
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return expectedWoa.toString();
+    }
+
+    /**
      * Determine the finalName of the current project without depending on the Maven plugin.
      *
      * Uses {@code pom.xml} if present:
-     * - {@code <build><finalName>} if set (supports common ${project.*} substitutions)
-     * - otherwise {@code <artifactId>}
+     * - {@code <build><finalName>} if set (supports ${project.*}, ${pom.*}, and custom property substitutions)
+     * - otherwise Maven default: {@code ${project.artifactId}-${project.version}} (or {@code <artifactId>} if version omitted)
      *
+     * Also checks existing {@code target/*.woa} bundles if present.
      * Falls back to {@code module.getName()}.
      */
     public @NotNull String getProjectFinalName(@NotNull String modulePath, @NotNull com.intellij.openapi.module.Module module) {
+        Path targetDir = Paths.get(modulePath, "target");
         String pomPath = Paths.get(modulePath, "pom.xml").toString();
+        PomInfo info = null;
         try {
             Path pom = Paths.get(pomPath);
             if (Files.exists(pom)) {
-                PomInfo info = readPomInfo(pom);
-                if (info != null) {
-                    String base = info.finalName != null && !info.finalName.isBlank() ? info.finalName : info.artifactId;
-                    if (base != null && !base.isBlank()) {
-                        return substitutePomVars(base, info);
-                    }
-                }
+                info = readPomInfo(pom);
             }
         } catch (Exception ignored) {
         }
-        return module.getName();
+
+        String computedName = null;
+        if (info != null) {
+            String base;
+            if (info.finalName != null && !info.finalName.isBlank()) {
+                base = info.finalName;
+            } else if (info.version != null && !info.version.isBlank()) {
+                base = info.artifactId + "-" + info.version;
+            } else {
+                base = info.artifactId;
+            }
+            if (base != null && !base.isBlank()) {
+                computedName = substitutePomVars(base, info);
+            }
+        }
+
+        if (computedName == null || computedName.isBlank()) {
+            computedName = module.getName();
+        }
+
+        // If target/<computedName>.woa exists on disk, we have an exact match
+        if (Files.isDirectory(targetDir.resolve(computedName + ".woa"))) {
+            return computedName;
+        }
+
+        // If target/ contains existing .woa bundle(s) on disk:
+        if (Files.isDirectory(targetDir)) {
+            try (var stream = Files.list(targetDir)) {
+                List<Path> woaDirs = stream
+                        .filter(Files::isDirectory)
+                        .filter(p -> p.getFileName().toString().endsWith(".woa"))
+                        .toList();
+                if (woaDirs.size() == 1) {
+                    String folderName = woaDirs.get(0).getFileName().toString();
+                    return folderName.substring(0, folderName.length() - ".woa".length());
+                } else if (woaDirs.size() > 1) {
+                    Path best = findBestMatchingWoa(woaDirs, computedName);
+                    if (best != null) {
+                        String folderName = best.getFileName().toString();
+                        return folderName.substring(0, folderName.length() - ".woa".length());
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return computedName;
     }
 
-    private static final class PomInfo {
+    private static Path findBestMatchingWoa(List<Path> woaDirs, String expectedName) {
+        List<Path> candidates = woaDirs.stream()
+                .filter(p -> p.getFileName().toString().startsWith(expectedName))
+                .toList();
+
+        List<Path> toSort = candidates.isEmpty() ? woaDirs : candidates;
+        return toSort.stream()
+                .max(Comparator.comparingLong(p -> {
+                    try {
+                        return Files.getLastModifiedTime(p).toMillis();
+                    } catch (IOException e) {
+                        return 0L;
+                    }
+                }))
+                .orElse(null);
+    }
+
+    static final class PomInfo {
         final String groupId;
         final String artifactId;
         final String version;
+        final String name;
         final String finalName;
+        final Map<String, String> properties;
 
-        private PomInfo(String groupId, String artifactId, String version, String finalName) {
+        PomInfo(String groupId, String artifactId, String version, String name, String finalName, Map<String, String> properties) {
             this.groupId = groupId;
             this.artifactId = artifactId;
             this.version = version;
+            this.name = name;
             this.finalName = finalName;
+            this.properties = properties != null ? properties : Collections.emptyMap();
         }
     }
 
-    private static PomInfo readPomInfo(@NotNull Path pom) {
+    static PomInfo readPomInfo(@NotNull Path pom) {
         try (var in = Files.newInputStream(pom)) {
             var dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(false);
@@ -147,14 +253,18 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
             String groupId = directChildText(root, "groupId");
             String artifactId = directChildText(root, "artifactId");
             String version = directChildText(root, "version");
+            String name = directChildText(root, "name");
 
-            // If groupId/version are inherited from <parent>, try parent nodes.
+            // If coordinates are inherited from <parent>, try parent nodes.
             org.w3c.dom.Element parentEl = directChildElement(root, "parent");
             if ((groupId == null || groupId.isBlank()) && parentEl != null) {
                 groupId = directChildText(parentEl, "groupId");
             }
             if ((version == null || version.isBlank()) && parentEl != null) {
                 version = directChildText(parentEl, "version");
+            }
+            if ((name == null || name.isBlank()) && parentEl != null) {
+                name = directChildText(parentEl, "name");
             }
 
             String finalName = null;
@@ -163,10 +273,48 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
                 finalName = directChildText(buildEl, "finalName");
             }
 
+            Map<String, String> properties = new HashMap<>();
+            org.w3c.dom.Element propsEl = directChildElement(root, "properties");
+            if (propsEl != null) {
+                var child = propsEl.getFirstChild();
+                while (child != null) {
+                    if (child instanceof org.w3c.dom.Element propChild) {
+                        String pVal = propChild.getTextContent();
+                        if (pVal != null) {
+                            properties.put(propChild.getTagName(), pVal.trim());
+                        }
+                    }
+                    child = child.getNextSibling();
+                }
+            }
+
+            // If parent pom exists on disk and version/name/properties are still missing, try reading parent pom
+            if (parentEl != null && (version == null || version.isBlank() || name == null || name.isBlank())) {
+                try {
+                    String relativePath = directChildText(parentEl, "relativePath");
+                    Path parentPomPath = pom.getParent().resolve(relativePath != null && !relativePath.isBlank() ? relativePath : "../pom.xml").normalize();
+                    if (Files.exists(parentPomPath) && !Files.isSameFile(pom, parentPomPath)) {
+                        PomInfo parentInfo = readPomInfo(parentPomPath);
+                        if (parentInfo != null) {
+                            if (version == null || version.isBlank()) {
+                                version = parentInfo.version;
+                            }
+                            if (name == null || name.isBlank()) {
+                                name = parentInfo.name;
+                            }
+                            for (Map.Entry<String, String> entry : parentInfo.properties.entrySet()) {
+                                properties.putIfAbsent(entry.getKey(), entry.getValue());
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
             if (artifactId == null || artifactId.isBlank()) {
                 return null;
             }
-            return new PomInfo(groupId, artifactId, version, finalName);
+            return new PomInfo(groupId, artifactId, version, name, finalName, properties);
         } catch (Exception e) {
             return null;
         }
@@ -192,23 +340,34 @@ public class WOApplicationCommandLineState<T extends WOApplicationConfiguration>
         return t != null ? t.trim() : null;
     }
 
-    private static @NotNull String substitutePomVars(@NotNull String s, @NotNull PomInfo info) {
+    static @NotNull String substitutePomVars(@NotNull String s, @NotNull PomInfo info) {
         String out = s;
-        if (info.artifactId != null) {
-            out = out.replace("${project.artifactId}", info.artifactId)
-                     .replace("${artifactId}", info.artifactId)
-                     .replace("${pom.artifactId}", info.artifactId)
-                     .replace("${project.name}", info.artifactId);
-        }
-        if (info.groupId != null) {
-            out = out.replace("${project.groupId}", info.groupId)
-                     .replace("${groupId}", info.groupId)
-                     .replace("${pom.groupId}", info.groupId);
-        }
-        if (info.version != null) {
-            out = out.replace("${project.version}", info.version)
-                     .replace("${version}", info.version)
-                     .replace("${pom.version}", info.version);
+        for (int i = 0; i < 2; i++) {
+            if (info.artifactId != null) {
+                out = out.replace("${project.artifactId}", info.artifactId)
+                         .replace("${artifactId}", info.artifactId)
+                         .replace("${pom.artifactId}", info.artifactId);
+            }
+            String projName = (info.name != null && !info.name.isBlank()) ? info.name : info.artifactId;
+            if (projName != null) {
+                out = out.replace("${project.name}", projName)
+                         .replace("${name}", projName)
+                         .replace("${pom.name}", projName);
+            }
+            if (info.groupId != null) {
+                out = out.replace("${project.groupId}", info.groupId)
+                         .replace("${groupId}", info.groupId)
+                         .replace("${pom.groupId}", info.groupId);
+            }
+            if (info.version != null) {
+                out = out.replace("${project.version}", info.version)
+                         .replace("${version}", info.version)
+                         .replace("${pom.version}", info.version);
+            }
+            for (Map.Entry<String, String> prop : info.properties.entrySet()) {
+                out = out.replace("${" + prop.getKey() + "}", prop.getValue())
+                         .replace("${project.properties." + prop.getKey() + "}", prop.getValue());
+            }
         }
         return out;
     }

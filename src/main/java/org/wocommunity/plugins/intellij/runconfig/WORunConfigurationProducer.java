@@ -22,7 +22,7 @@ public class WORunConfigurationProducer extends LazyRunConfigurationProducer<WOA
     @NotNull
     @Override
     public ConfigurationFactory getConfigurationFactory() {
-        return new RunConfigurationFactory(WORunConfigType.getInstance());
+        return WORunConfigType.getInstance().getConfigurationFactories()[0];
     }
 
     @Override
@@ -56,27 +56,5 @@ public class WORunConfigurationProducer extends LazyRunConfigurationProducer<WOA
 
         var containingFile = (PsiJavaFile) psiLocation.getContainingFile();
         return Arrays.stream(containingFile.getClasses()).anyMatch(psiClass -> Objects.equals(psiClass.getQualifiedName(), this));
-    }
-
-    private class RunConfigurationFactory extends ConfigurationFactory {
-        public RunConfigurationFactory(WORunConfigType type) {
-            super(type);
-        }
-
-        @Override
-        public @NotNull String getId() {
-            return WORunConfigType.ID;
-        }
-
-        @NotNull
-        @Override
-        public RunConfiguration createTemplateConfiguration(@NotNull Project project) {
-            return new WOApplicationConfiguration("WO", this, project);
-        }
-
-        @Override
-        public Class<? extends BaseState> getOptionsClass() {
-            return WORunConfigurationOptions.class;
-        }
     }
 }

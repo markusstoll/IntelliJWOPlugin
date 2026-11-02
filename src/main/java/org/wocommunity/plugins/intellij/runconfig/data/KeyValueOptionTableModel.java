@@ -14,8 +14,9 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
     private final Class<?>[] columnClasses = {Boolean.class, String.class, String.class};
 
     public KeyValueOptionTableModel(List<KeyValueOption> options) {
-        // Add a sample row for demo purposes
-        entries.addAll(options);
+        if (options != null) {
+            entries.addAll(options);
+        }
     }
 
     @Override
@@ -41,15 +42,16 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        KeyValueOption newEntry = entries.get(rowIndex).clone();
-        switch (columnIndex) {
-            case 0: newEntry.setActive((Boolean) aValue); break;
-            case 1: newEntry.setKey((String) aValue); break;
-            case 2: newEntry.setValue((String) aValue); break;
+        if (rowIndex < 0 || rowIndex >= entries.size()) {
+            return;
         }
-
-        entries.remove(rowIndex);
-        entries.add(rowIndex, newEntry);
+        KeyValueOption entry = entries.get(rowIndex);
+        switch (columnIndex) {
+            case 0: entry.setActive((Boolean) aValue); break;
+            case 1: entry.setKey((String) aValue); break;
+            case 2: entry.setValue((String) aValue); break;
+        }
+        fireTableCellUpdated(rowIndex, columnIndex);
     }
 
     @Override
@@ -71,18 +73,25 @@ public class KeyValueOptionTableModel extends AbstractTableModel {
     public void addRow() {
         entries.add(new KeyValueOption(false, "", ""));
         int newRow = entries.size() - 1;
+        fireTableRowsInserted(newRow, newRow);
     }
 
     public void remove(int selectedRow) {
-        entries.remove(selectedRow);
+        if (selectedRow >= 0 && selectedRow < entries.size()) {
+            entries.remove(selectedRow);
+            fireTableRowsDeleted(selectedRow, selectedRow);
+        }
     }
 
     public List<KeyValueOption> getEntries() {
-        return entries;
+        return new ArrayList<>(entries);
     }
 
     public void replaceEntries(List<KeyValueOption> keyValueOptions) {
         this.entries.clear();
-        this.entries.addAll(keyValueOptions);
+        if (keyValueOptions != null) {
+            this.entries.addAll(keyValueOptions);
+        }
+        fireTableDataChanged();
     }
 }

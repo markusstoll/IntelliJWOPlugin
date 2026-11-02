@@ -7,6 +7,7 @@ import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiClass;
 import org.jetbrains.annotations.NotNull;
 import org.wocommunity.plugins.intellij.tools.WOProjectUtil;
 
@@ -25,8 +26,47 @@ public class WOApplicationConfiguration extends ApplicationConfiguration {
         return (WORunConfigurationOptions) super.getOptions();
     }
 
+    @Override
+    public String suggestedName() {
+        com.intellij.openapi.module.Module module = getConfigurationModule().getModule();
+        if (module != null) {
+            return module.getName();
+        }
+        String moduleName = getConfigurationModule().getModuleName();
+        if (moduleName != null && !moduleName.isBlank()) {
+            return moduleName;
+        }
+        com.intellij.openapi.module.Module[] modules = com.intellij.openapi.module.ModuleManager.getInstance(getProject()).getModules();
+        if (modules.length > 0) {
+            return modules[0].getName();
+        }
+        return getProject().getName();
+    }
+
     public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
         return new WOApplicationSettingsEditor(this);
+    }
+
+    @Override
+    public JavaRunConfigurationModule checkClass() throws RuntimeConfigurationException {
+        try {
+            return super.checkClass();
+        } catch (RuntimeConfigurationWarning warning) {
+            String mainClassName = getMainClassName();
+            if (mainClassName != null && !mainClassName.isBlank()) {
+                JavaRunConfigurationModule module = getConfigurationModule();
+                PsiClass psiClass = WOApplicationClassUtil.computeReadAction(() -> module.findClass(mainClassName));
+                if (psiClass != null) {
+                    if (WOApplicationClassUtil.fileHasMainMethod(psiClass)) {
+                        return module;
+                    }
+                    if (WOApplicationClassUtil.hasCompanionMainWithoutJvmStatic(psiClass)) {
+                        throw new RuntimeConfigurationWarning("Please add '@JvmStatic' to the companion object's main method so the JVM can execute it.");
+                    }
+                }
+            }
+            throw warning;
+        }
     }
 
     @Override

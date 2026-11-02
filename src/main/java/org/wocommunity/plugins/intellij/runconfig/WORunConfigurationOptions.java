@@ -13,28 +13,28 @@ public class WORunConfigurationOptions extends JvmMainMethodRunConfigurationOpti
 
     @OptionTag("woOptions")
     // A custom stored property to track changes in the list of woOptions
-    private StoredProperty<List<Object>> woOptionsProperty = list().provideDelegate(this, "woOptions");
+    private final StoredProperty<List<KeyValueOption>> woOptionsProperty = this.<KeyValueOption>list().provideDelegate(this, "woOptions");
 
     @OptionTag("higherJdkVMParameters")
     // A custom stored property to track changes in the list of higherJdkVMParameters
-    private StoredProperty<List<Object>> higherJdkVMParametersProperty = list().provideDelegate(this, "higherJdkVMParameters");
+    private final StoredProperty<List<String>> higherJdkVMParametersProperty = this.<String>list().provideDelegate(this, "higherJdkVMParameters");
 
     // Getter for the list of custom options
     public List<KeyValueOption> getWoOptions() {
-        return (List)woOptionsProperty.getValue(this);
+        return woOptionsProperty.getValue(this);
     }
 
     // Getter for the list of custom options
     public List<String> getHigherJdkVMParameters() {
-        return (List) higherJdkVMParametersProperty.getValue(this);
+        return higherJdkVMParametersProperty.getValue(this);
     }
 
     public void setWoOptions(List<KeyValueOption> woOptions) {
-        this.woOptionsProperty.setValue(this, (List)woOptions);
+        this.woOptionsProperty.setValue(this, woOptions);
     }
 
     public void setHigherJdkVMParameters(List<String> higherJdkVMParameters) {
-        this.higherJdkVMParametersProperty.setValue(this, (List) higherJdkVMParameters);
+        this.higherJdkVMParametersProperty.setValue(this, higherJdkVMParameters);
     }
 
     public WORunConfigurationOptions() {

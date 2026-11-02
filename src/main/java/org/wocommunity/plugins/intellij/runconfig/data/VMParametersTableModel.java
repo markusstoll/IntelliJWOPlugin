@@ -14,8 +14,9 @@ public class VMParametersTableModel extends AbstractTableModel {
     private final Class<?>[] columnClasses = {String.class};
 
     public VMParametersTableModel(List<String> options) {
-        // Add a sample row for demo purposes
-        entries.addAll(options);
+        if (options != null) {
+            entries.addAll(options);
+        }
     }
 
     @Override
@@ -35,8 +36,10 @@ public class VMParametersTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        entries.remove(rowIndex);
-        entries.add(rowIndex, (String)aValue);
+        if (rowIndex >= 0 && rowIndex < entries.size()) {
+            entries.set(rowIndex, (String) aValue);
+            fireTableCellUpdated(rowIndex, columnIndex);
+        }
     }
 
     @Override
@@ -57,10 +60,15 @@ public class VMParametersTableModel extends AbstractTableModel {
     // Method to add a new row
     public void addRow() {
         entries.add("");
+        int index = entries.size() - 1;
+        fireTableRowsInserted(index, index);
     }
 
     public void remove(int selectedRow) {
-        entries.remove(selectedRow);
+        if (selectedRow >= 0 && selectedRow < entries.size()) {
+            entries.remove(selectedRow);
+            fireTableRowsDeleted(selectedRow, selectedRow);
+        }
     }
 
     public List<String> getEntries() {
@@ -69,6 +77,9 @@ public class VMParametersTableModel extends AbstractTableModel {
 
     public void replaceEntries(List<String> parameters) {
         this.entries.clear();
-        this.entries.addAll(parameters);
+        if (parameters != null) {
+            this.entries.addAll(parameters);
+        }
+        fireTableDataChanged();
     }
 }
