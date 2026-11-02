@@ -111,7 +111,7 @@ public class WODParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // WODElement COLON WODComponent LBRACE WODAssignmentList RBRACE
+  // WODElement COLON WODComponent LBRACE WODAssignmentList RBRACE SEMI?
   public static boolean WODDeclaration(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "WODDeclaration")) return false;
     if (!nextTokenIs(b, IDENTIFIER)) return false;
@@ -124,6 +124,7 @@ public class WODParser implements PsiParser, LightPsiParser {
     r = p && report_error_(b, consumeToken(b, LBRACE)) && r;
     r = p && report_error_(b, WODAssignmentList(b, l + 1)) && r;
     r = p && consumeToken(b, RBRACE) && r;
+    consumeToken(b, SEMI);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -141,12 +142,13 @@ public class WODParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // WODDeclaration *
+  // (WODDeclaration | SEMI) *
   static boolean WODFile(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "WODFile")) return false;
     while (true) {
       int c = current_position_(b);
       if (consumeToken(b, ASSIGNMENT_COMMENT)) continue;
+      if (consumeToken(b, SEMI)) continue;
       if (!WODDeclaration(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "WODFile", c)) break;
     }

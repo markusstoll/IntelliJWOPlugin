@@ -125,7 +125,7 @@ public class WOComponentConversionUtilTest {
         var result = WOComponentConversionUtil.convertToInline(html, wod);
 
         assertEquals(2, result.getConvertedCount());
-        assertTrue(result.getHtmlText().contains("<wo:if condition=\"$isLoggedIn\" negate=\"$false\">"));
+        assertTrue(result.getHtmlText().contains("<wo:if condition=\"$isLoggedIn\" negate=\"false\">"));
         assertTrue(result.getHtmlText().contains("</wo:if>"));
         assertTrue(result.getHtmlText().contains("<wo:str value=\"$userName\"/>"));
 
@@ -228,6 +228,24 @@ public class WOComponentConversionUtilTest {
         var result = WOComponentConversionUtil.convertToInline(html, wod);
         assertEquals(1, result.getConvertedCount());
         assertTrue(result.getHtmlText().contains("<wo:submit action=\"$login\"/>"));
+        assertEquals("", result.getWodText().trim());
+    }
+
+    @Test
+    public void testConvertDeclarationWithTrailingSemicolonAndBooleanNO() {
+        String html = "<webobject name=\"Frachtkostenhinweis\"/>";
+        String wod = """
+                Frachtkostenhinweis: WOString
+                {
+                	value = session.localizer.AnfrageAuftrag_Frachtkostenhinweis;
+                	escapeHTML = NO;
+                };
+                """;
+        var result = WOComponentConversionUtil.convertToInline(html, wod);
+        assertEquals(1, result.getConvertedCount());
+        assertTrue(result.getHtmlText().contains("<wo:str"));
+        assertTrue(result.getHtmlText().contains("value=\"$session.localizer.AnfrageAuftrag_Frachtkostenhinweis\""));
+        assertTrue(result.getHtmlText().contains("escapeHTML=\"false\""));
         assertEquals("", result.getWodText().trim());
     }
 

@@ -146,6 +146,14 @@ public final class WOComponentConversionUtil {
                     wodVal = rawVal.substring(1);
                 } else if (rawVal.startsWith("~")) {
                     wodVal = "\"" + escapeWodLiteral(rawVal) + "\"";
+                } else if ("true".equalsIgnoreCase(rawVal) || "false".equalsIgnoreCase(rawVal)) {
+                    wodVal = rawVal.toLowerCase(Locale.ROOT);
+                } else if ("yes".equalsIgnoreCase(rawVal)) {
+                    wodVal = "true";
+                } else if ("no".equalsIgnoreCase(rawVal)) {
+                    wodVal = "false";
+                } else if (isNumeric(rawVal)) {
+                    wodVal = rawVal;
                 } else {
                     wodVal = "\"" + escapeWodLiteral(rawVal) + "\"";
                 }
@@ -247,12 +255,16 @@ public final class WOComponentConversionUtil {
                 if (binding.isLiteralString()) {
                     String unquoted = unescapeWodLiteral(val);
                     attrVal = unquoted;
+                } else if ("YES".equalsIgnoreCase(val) || "true".equalsIgnoreCase(val)) {
+                    attrVal = "true";
+                } else if ("NO".equalsIgnoreCase(val) || "false".equalsIgnoreCase(val)) {
+                    attrVal = "false";
+                } else if (val.startsWith("~")) {
+                    attrVal = val;
+                } else if (isNumeric(val)) {
+                    attrVal = val;
                 } else {
-                    if (val.startsWith("~")) {
-                        attrVal = val;
-                    } else {
-                        attrVal = "$" + val;
-                    }
+                    attrVal = "$" + val;
                 }
                 attrs.append(" ").append(formatHtmlAttribute(key, attrVal));
             }
@@ -292,7 +304,7 @@ public final class WOComponentConversionUtil {
                 // Include trailing whitespace / newlines
                 while (end < wodText.length()) {
                     char c = wodText.charAt(end);
-                    if (c == ' ' || c == '\t') {
+                    if (c == ' ' || c == '\t' || c == ';') {
                         end++;
                     } else if (c == '\r' || c == '\n') {
                         if (c == '\r' && end + 1 < wodText.length() && wodText.charAt(end + 1) == '\n') {
@@ -644,5 +656,15 @@ public final class WOComponentConversionUtil {
                 .replace("&lt;", "<")
                 .replace("&gt;", ">")
                 .replace("&amp;", "&");
+    }
+
+    private static boolean isNumeric(@Nullable String s) {
+        if (s == null || s.isBlank()) return false;
+        try {
+            Double.parseDouble(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

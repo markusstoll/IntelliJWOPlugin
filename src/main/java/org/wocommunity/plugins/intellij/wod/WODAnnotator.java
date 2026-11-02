@@ -234,6 +234,9 @@ final class WODAnnotator implements Annotator {
             // TODO Are there cases where simple numbers are invalid?
             return;
         }
+        if (value.getBoolean() != null) {
+            return;
+        }
         if (value.getWODParentBinding() != null) {
             annotateParentBinding(value.getWODParentBinding(), holder);
             return;
@@ -243,6 +246,11 @@ final class WODAnnotator implements Annotator {
             return;
         }
         if (value.getWODKeyPath() != null) {
+            String kpText = value.getWODKeyPath().getText();
+            if ("YES".equalsIgnoreCase(kpText) || "NO".equalsIgnoreCase(kpText)
+                    || "true".equalsIgnoreCase(kpText) || "false".equalsIgnoreCase(kpText)) {
+                return;
+            }
             annotateKeyPath(value, baseClass, value.getWODKeyPath(), holder);
         }
     }

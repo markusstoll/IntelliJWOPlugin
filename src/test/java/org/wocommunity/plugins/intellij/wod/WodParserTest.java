@@ -69,4 +69,24 @@ public class WodParserTest {
         assertEquals("\"Save Changes\"", bVal.getValue());
         assertTrue(bVal.isLiteralString());
     }
+
+    @Test
+    public void testParseTrailingSemicolonAndBooleanNO() {
+        String wodText = """
+                Frachtkostenhinweis: WOString
+                {
+                	value = session.localizer.AnfrageAuftrag_Frachtkostenhinweis;
+                	escapeHTML = NO;
+                };
+                """;
+
+        WodModel model = WodParser.parse(wodText);
+        assertEquals(1, model.getElements().size());
+        WodElement elem = model.getElement("Frachtkostenhinweis");
+        assertNotNull(elem);
+        assertEquals("WOString", elem.getTypeName());
+        assertEquals(2, elem.getBindings().size());
+        assertEquals("NO", elem.getBinding("escapeHTML").getValue());
+        assertEquals(wodText.trim().length(), elem.getTotalRange().getEndOffset());
+    }
 }

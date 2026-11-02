@@ -11,7 +11,7 @@ class WODLexerTest {
     @Test
     void lexesBooleanLiterals() {
         Lexer lexer = new WODLexerAdapter();
-        lexer.start("true;false");
+        lexer.start("true;false;YES;NO;yes;no;TRUE;FALSE");
 
         assertEquals(BOOLEAN, lexer.getTokenType());
         assertEquals("true", lexer.getTokenText());
@@ -20,6 +20,36 @@ class WODLexerTest {
         lexer.advance();
         assertEquals(BOOLEAN, lexer.getTokenType());
         assertEquals("false", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(";", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(BOOLEAN, lexer.getTokenType());
+        assertEquals("YES", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(";", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(BOOLEAN, lexer.getTokenType());
+        assertEquals("NO", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(";", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(BOOLEAN, lexer.getTokenType());
+        assertEquals("yes", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(";", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(BOOLEAN, lexer.getTokenType());
+        assertEquals("no", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(";", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(BOOLEAN, lexer.getTokenType());
+        assertEquals("TRUE", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(";", lexer.getTokenText());
+        lexer.advance();
+        assertEquals(BOOLEAN, lexer.getTokenType());
+        assertEquals("FALSE", lexer.getTokenText());
     }
 
     @Test

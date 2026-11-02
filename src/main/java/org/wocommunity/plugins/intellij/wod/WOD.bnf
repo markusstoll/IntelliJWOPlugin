@@ -25,7 +25,7 @@
 
     IDENTIFIER="regexp:[a-zA-Z_][a-zA-Z0-9_\-]*"
     NUMBER="regexp:[0-9]+"
-    BOOLEAN="regexp:true|false"
+    BOOLEAN="regexp:true|false|TRUE|FALSE|YES|NO|yes|no"
     STRING="regexp:\"([^\\\"\r\n]|\\[^\r\n])*\""
 
     // Support for both line and block comments
@@ -34,9 +34,9 @@
   ]
 }
 
-WODFile ::= WODDeclaration *
+WODFile ::= (WODDeclaration | SEMI) *
 
-WODDeclaration ::= WODElement COLON WODComponent LBRACE WODAssignmentList RBRACE {
+WODDeclaration ::= WODElement COLON WODComponent LBRACE WODAssignmentList RBRACE SEMI? {
     pin=1
 }
 

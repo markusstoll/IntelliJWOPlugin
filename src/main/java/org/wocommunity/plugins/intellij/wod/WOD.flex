@@ -27,7 +27,7 @@ WHITE_SPACE=\s+
 
 IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_\-]*
 NUMBER=[0-9]+
-BOOLEAN=true|false
+BOOLEAN=true|false|TRUE|FALSE|YES|NO|yes|no
 STRING=\"([^\\\"\r\n]|\\[^\r\n])*\"
 ASSIGNMENT_COMMENT="//".*|"/"\*([^*]|\*+[^*/])*\*+"/"
 

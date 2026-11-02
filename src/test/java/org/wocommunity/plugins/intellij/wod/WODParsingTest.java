@@ -105,4 +105,29 @@ public class WODParsingTest extends ParsingTestCase {
         assertNotNull(comment);
         assertEquals("// comment without space", comment.getText());
     }
+
+    @Test
+    public void testDeclarationWithTrailingSemicolonAndBooleanLiterals() {
+        String code = "Frachtkostenhinweis: WOString\n" +
+                "{\n" +
+                "\tvalue = session.localizer.AnfrageAuftrag_Frachtkostenhinweis;\n" +
+                "\tescapeHTML = NO;\n" +
+                "};\n";
+
+        var psiFile = createPsiFile("test.wod", code);
+        assertFalse(PsiTreeUtil.hasErrorElements(psiFile));
+
+        List<WODDeclaration> declarations = new ArrayList<>(PsiTreeUtil.findChildrenOfType(psiFile, WODDeclaration.class));
+        assertEquals(1, declarations.size());
+        WODDeclaration decl = declarations.get(0);
+        assertEquals("Frachtkostenhinweis", decl.getWODElement().getText());
+        assertEquals("WOString", decl.getWODComponent().getText());
+
+        List<WODAssignment> assignments = decl.getWODAssignmentList().getWODAssignmentList();
+        assertEquals(2, assignments.size());
+        assertEquals("value", assignments.get(0).getWODBinding().getText());
+        assertEquals("escapeHTML", assignments.get(1).getWODBinding().getText());
+        assertNotNull(assignments.get(1).getWODValue().getBoolean());
+        assertEquals("NO", assignments.get(1).getWODValue().getBoolean().getText());
+    }
 }

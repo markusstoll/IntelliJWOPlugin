@@ -167,6 +167,11 @@ public class WodParser {
                     if (lexer.getTokenType() == WodTokenTypes.RBRACE) {
                         totalEnd = lexer.getTokenEnd();
                         lexer.advance();
+                        skipWhitespaceAndComments(lexer);
+                        if (lexer.getTokenType() == WodTokenTypes.SEMICOLON) {
+                            totalEnd = lexer.getTokenEnd();
+                            lexer.advance();
+                        }
                     }
                 }
 
