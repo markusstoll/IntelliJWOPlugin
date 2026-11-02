@@ -55,6 +55,17 @@ public class WOComponentNavigatableDirectory implements PsiDirectory {
             delegate.navigate(false);
         } catch (Exception ignored) {
         }
+        if (requestFocus) {
+            com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater(() -> {
+                if (!getProject().isDisposed()) {
+                    com.intellij.openapi.fileEditor.FileEditorManager fem = com.intellij.openapi.fileEditor.FileEditorManager.getInstance(getProject());
+                    com.intellij.openapi.fileEditor.FileEditor editor = fem.getSelectedEditor();
+                    if (editor != null && editor.getPreferredFocusedComponent() != null) {
+                        com.intellij.openapi.wm.IdeFocusManager.getInstance(getProject()).requestFocus(editor.getPreferredFocusedComponent(), true);
+                    }
+                }
+            });
+        }
     }
 
     @Override

@@ -4,6 +4,8 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.module.Module;
@@ -16,6 +18,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.wotemplate.WOComponentClassResolver;
 
 import java.util.Collection;
@@ -25,15 +28,71 @@ public class SwitchToSrcAction extends AnAction {
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
+        return ActionUpdateThread.EDT;
     }
 
     @Override
     public void update(@NotNull AnActionEvent e) {
         Project project = e.getProject();
-        VirtualFile file = e.getData(CommonDataKeys.VIRTUAL_FILE);
+        VirtualFile file = getComponentFile(e);
         boolean enabled = project != null && file != null && isComponentFile(file);
         e.getPresentation().setEnabledAndVisible(enabled);
+    }
+
+    public static @Nullable VirtualFile getComponentFile(@NotNull AnActionEvent e) {
+        VirtualFile file = e.getData(CommonDataKeys.VIRTUAL_FILE);
+        VirtualFile[] files = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY);
+        FileEditor editor = e.getData(PlatformDataKeys.FILE_EDITOR);
+        FileEditor lastActive = e.getData(PlatformDataKeys.LAST_ACTIVE_FILE_EDITOR);
+
+        VirtualFile target = resolveComponentFile(file, files, editor, lastActive);
+        if (target != null) {
+            return target;
+        }
+
+        Project project = e.getProject();
+        if (project != null && !project.isDisposed()) {
+            FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+            FileEditor selectedEditor = fileEditorManager.getSelectedEditor();
+            if (selectedEditor instanceof WOComponentEditor wce) {
+                return wce.getFolder();
+            }
+            if (selectedEditor != null && selectedEditor.getFile() != null && isComponentFile(selectedEditor.getFile())) {
+                return selectedEditor.getFile();
+            }
+            for (VirtualFile sf : fileEditorManager.getSelectedFiles()) {
+                if (isComponentFile(sf)) {
+                    return sf;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static @Nullable VirtualFile resolveComponentFile(@Nullable VirtualFile file,
+                                                             VirtualFile @Nullable [] files,
+                                                             @Nullable FileEditor editor,
+                                                             @Nullable FileEditor lastActiveEditor) {
+        if (file != null && isComponentFile(file)) {
+            return file;
+        }
+        if (files != null && files.length > 0 && isComponentFile(files[0])) {
+            return files[0];
+        }
+        if (editor instanceof WOComponentEditor wce) {
+            return wce.getFolder();
+        }
+        if (editor != null && editor.getFile() != null && isComponentFile(editor.getFile())) {
+            return editor.getFile();
+        }
+        if (lastActiveEditor instanceof WOComponentEditor wce) {
+            return wce.getFolder();
+        }
+        if (lastActiveEditor != null && lastActiveEditor.getFile() != null && isComponentFile(lastActiveEditor.getFile())) {
+            return lastActiveEditor.getFile();
+        }
+        return null;
     }
 
     private static boolean isComponentFile(@NotNull VirtualFile file) {
@@ -50,12 +109,7 @@ public class SwitchToSrcAction extends AnAction {
         Project project = e.getProject();
         if (project == null) return;
 
-        VirtualFile currentFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
-        if (currentFile == null) {
-            FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
-            currentFile = fileEditorManager.getSelectedFiles().length > 0 ? fileEditorManager.getSelectedFiles()[0] : null;
-        }
-
+        VirtualFile currentFile = getComponentFile(e);
         if (currentFile == null) return;
 
         // 1. Try resolving the PsiClass (strictly within the same module, non-build artifact)

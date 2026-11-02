@@ -82,21 +82,21 @@ public final class WOEditorUtils {
 
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
 
-        if (REQUEST_OPEN_FILE_METHOD != null) {
-            try {
-                REQUEST_OPEN_FILE_METHOD.invoke(fileEditorManager, fileToOpen);
-                return;
-            } catch (Exception e) {
-                LOG.warn("Failed to open file via requestOpenFile, falling back to openFile", e);
-            }
-        }
-
         if (OPEN_FILE_METHOD != null) {
             try {
                 OPEN_FILE_METHOD.invoke(fileEditorManager, fileToOpen, true);
                 return;
             } catch (Exception e) {
-                LOG.error("Failed to open file via openFile", e);
+                LOG.warn("Failed to open file via openFile(file, true), falling back to requestOpenFile", e);
+            }
+        }
+
+        if (REQUEST_OPEN_FILE_METHOD != null) {
+            try {
+                REQUEST_OPEN_FILE_METHOD.invoke(fileEditorManager, fileToOpen);
+                return;
+            } catch (Exception e) {
+                LOG.error("Failed to open file via requestOpenFile", e);
             }
         }
     }

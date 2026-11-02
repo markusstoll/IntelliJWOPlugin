@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataSink;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.UiDataProvider;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -32,7 +33,7 @@ import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.pom.Navigatable;
 import java.util.Map;
 
-public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEditor {
+public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEditor, UiDataProvider {
 
     private final VirtualFile folder;
     private final VirtualFile requestedFile;
@@ -151,6 +152,15 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
         }
 
         this.component = new WOComponentPanel(project, folder, tabbedPane, embeddedEditorsByComponent);
+
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (project != null && !project.isDisposed()) {
+                JComponent prefFocus = getPreferredFocusedComponent();
+                if (prefFocus != null) {
+                    IdeFocusManager.getInstance(project).requestFocus(prefFocus, true);
+                }
+            }
+        });
     }
 
     private void ensureApiFileAndEditor(JPanel container, String componentName) {
@@ -384,6 +394,41 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
     }
 
     @Override
+    public void selectNotify() {
+        JComponent focusedComp = getPreferredFocusedComponent();
+        if (focusedComp != null && project != null && !project.isDisposed()) {
+            IdeFocusManager.getInstance(project).requestFocus(focusedComp, true);
+        }
+        FileEditor activeEditor = getActiveEmbeddedEditor();
+        if (activeEditor != null) {
+            activeEditor.selectNotify();
+        }
+    }
+
+    @Override
+    public void deselectNotify() {
+        FileEditor activeEditor = getActiveEmbeddedEditor();
+        if (activeEditor != null) {
+            activeEditor.deselectNotify();
+        }
+    }
+
+    public @Nullable FileEditor getActiveEmbeddedEditor() {
+        int selected = tabbedPane != null ? tabbedPane.getSelectedIndex() : -1;
+        if (selected == 0) {
+            Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            if (wodFileEditor != null && focusOwner != null && SwingUtilities.isDescendingFrom(focusOwner, wodFileEditor.getComponent())) {
+                return wodFileEditor;
+            }
+            return htmlEditor != null ? htmlEditor : wodFileEditor;
+        } else if (selected >= 0 && selected < tabbedPane.getTabCount()) {
+            Component tabComp = tabbedPane.getComponentAt(selected);
+            return embeddedEditorsByComponent.get(tabComp);
+        }
+        return htmlEditor != null ? htmlEditor : wodFileEditor;
+    }
+
+    @Override
     public @Nullable JComponent getPreferredFocusedComponent() {
         if (requestedFile != null) {
             FileEditor ed = embeddedEditorsByFile.get(requestedFile);
@@ -391,10 +436,39 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
                 return ed.getPreferredFocusedComponent();
             }
         }
-        if (htmlEditor != null) {
+        FileEditor activeEditor = getActiveEmbeddedEditor();
+        if (activeEditor != null && activeEditor.getPreferredFocusedComponent() != null) {
+            return activeEditor.getPreferredFocusedComponent();
+        }
+        if (htmlEditor != null && htmlEditor.getPreferredFocusedComponent() != null) {
             return htmlEditor.getPreferredFocusedComponent();
         }
+        if (wodFileEditor != null && wodFileEditor.getPreferredFocusedComponent() != null) {
+            return wodFileEditor.getPreferredFocusedComponent();
+        }
         return component;
+    }
+
+    @Override
+    public void uiDataSnapshot(@NotNull DataSink sink) {
+        String componentName = folder.getName().replace(".wo", "");
+        VirtualFile html = folder.findChild(componentName + ".html");
+        VirtualFile targetFile = (html != null && !html.isDirectory()) ? html : folder.findChild(componentName + ".wod");
+        sink.set(CommonDataKeys.VIRTUAL_FILE, targetFile != null ? targetFile : folder);
+        sink.lazy(CommonDataKeys.PSI_ELEMENT, () -> {
+            if (targetFile != null && !targetFile.isDirectory()) {
+                return PsiManager.getInstance(project).findFile(targetFile);
+            }
+            return PsiManager.getInstance(project).findDirectory(folder);
+        });
+        sink.lazy(CommonDataKeys.NAVIGATABLE, () -> {
+            if (targetFile != null && !targetFile.isDirectory()) {
+                return PsiManager.getInstance(project).findFile(targetFile);
+            }
+            return PsiManager.getInstance(project).findDirectory(folder);
+        });
+        sink.lazy(CommonDataKeys.EDITOR, () -> getEditor());
+        sink.set(PlatformDataKeys.FILE_EDITOR, this);
     }
 
     @Override
