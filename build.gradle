@@ -1,16 +1,17 @@
 plugins {
-    id("org.jetbrains.intellij.platform") version "2.10.2"
+    id("org.jetbrains.intellij.platform") version "2.19.0"
     id("java")
     id("idea")
 }
 
 group = 'de.junidas.webobjects.ijplugin'
-version = '0.7.4'
+version = '0.8.7'
 
 repositories {
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
+        snapshots()
     }
 }
 
@@ -27,13 +28,20 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+def platformVersion = providers.gradleProperty("intellijVersion").orElse("2026.2.4")
+
 dependencies {
     // IntelliJ Platform + zusätzliche Plugins
     intellijPlatform {
-        create("IC", "2025.2.4")
+        intellijIdea(platformVersion) {
+            useInstaller = false
+        }
         bundledPlugin("com.intellij.java")
+        bundledModule("intellij.java.execution")
+        bundledModule("intellij.java.execution.impl")
+        bundledPlugin("org.jetbrains.idea.maven")
 
-        // Test Framework (bringt JUnit 4 + IntelliJ‑Test‑Infrastruktur)
+        // Test Framework (bringt JUnit 4 + IntelliJ-Test-Infrastruktur)
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform.INSTANCE)
     }
 
@@ -42,16 +50,24 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.18.0")
     implementation("org.seleniumhq.selenium:htmlunit3-driver:4.9.1")
 
-    // JUnit Platform Launcher – nötig für Gradle Test‑Executor
+    // JUnit Platform Launcher – nötig für Gradle Test-Executor
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
 
-    // JUnit 5
+    // JUnit 5
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    // JUnit 4 (nur für @Rule‑Schnittstelle, z. B. org.junit.rules.TestRule)
+    // JUnit 4 (nur für @Rule-Schnittstelle und ParsingTestCase)
     testImplementation("junit:junit:4.13.2")
+    // Mockito für Unit-Tests
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
 }
 
 test {
-    // JUnit 5 Test‑Runner aktivieren
+    // JUnit 5 Test-Runner aktivieren
     useJUnitPlatform()
 }
