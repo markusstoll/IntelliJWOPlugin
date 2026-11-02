@@ -218,6 +218,20 @@ public class WOComponentConversionUtilTest {
     }
 
     @Test
+    public void testConvertToInlineUnquotedAttribute() {
+        String html = "<div><webobject name=ShortTermLoginButton/></div>";
+        String wod = """
+                ShortTermLoginButton : WOSubmitButton {
+                    action = login;
+                }
+                """;
+        var result = WOComponentConversionUtil.convertToInline(html, wod);
+        assertEquals(1, result.getConvertedCount());
+        assertTrue(result.getHtmlText().contains("<wo:submit action=\"$login\"/>"));
+        assertEquals("", result.getWodText().trim());
+    }
+
+    @Test
     public void testOgnlExpressionQuoting() {
         String wod = """
                 ReservedWidthValue : WOString {

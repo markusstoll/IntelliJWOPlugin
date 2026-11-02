@@ -13,6 +13,7 @@ import com.intellij.psi.xml.XmlTokenType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.tools.WOIcons;
+import org.wocommunity.plugins.intellij.wotemplate.WOHtmlWebObjectUtil;
 
 public class WOHtmlToWodLineMarkerProvider implements LineMarkerProvider {
 
@@ -40,10 +41,7 @@ public class WOHtmlToWodLineMarkerProvider implements LineMarkerProvider {
             return null;
         }
 
-        String name = tag.getAttributeValue("name");
-        if (name == null || name.isBlank()) {
-            name = tag.getAttributeValue("NAME");
-        }
+        String name = WOHtmlWebObjectUtil.getWebObjectName(tag);
         if (name == null || name.isBlank()) {
             return null;
         }

@@ -125,10 +125,7 @@ public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarat
     }
 
     private static PsiElement @Nullable [] resolveWebObjectGotoTargets(@NotNull XmlTag tag, @NotNull PsiElement sourceElement) {
-        String name = tag.getAttributeValue("name");
-        if (name == null || name.isBlank()) {
-            name = tag.getAttributeValue("NAME");
-        }
+        String name = WOHtmlWebObjectUtil.getWebObjectName(tag);
         if (name == null || name.isBlank()) {
             return null;
         }

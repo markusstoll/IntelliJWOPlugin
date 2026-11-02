@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.psi.wod.WODElement;
 import org.wocommunity.plugins.intellij.tools.WOPsiUtil;
+import org.wocommunity.plugins.intellij.wotemplate.WOHtmlWebObjectUtil;
 
 import java.util.Collection;
 
@@ -39,9 +40,9 @@ public final class WODElementReference extends PsiReferenceBase<WODElement> {
         Collection<XmlTag> tags = PsiTreeUtil.findChildrenOfType(htmlFile, XmlTag.class);
 
         for (XmlTag tag : tags) {
-            if (tag.getName().equals("webobject")) {
-                @Nullable XmlAttribute name = tag.getAttribute("name");
-                if (name != null && elementName.equals(name.getValue())) {
+            if ("webobject".equalsIgnoreCase(tag.getLocalName())) {
+                String val = WOHtmlWebObjectUtil.getWebObjectName(tag);
+                if (elementName.equals(val)) {
                     return tag;
                 }
             }

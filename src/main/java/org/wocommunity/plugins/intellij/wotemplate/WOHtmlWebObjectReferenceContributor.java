@@ -41,7 +41,9 @@ public final class WOHtmlWebObjectReferenceContributor extends PsiReferenceContr
     }
 
     private static boolean isWebObjectName(@NotNull XmlAttribute attribute) {
-        return "webobject".equalsIgnoreCase(attribute.getParent().getName())
+        PsiElement parent = attribute.getParent();
+        return parent instanceof XmlTag tag
+                && "webobject".equalsIgnoreCase(tag.getLocalName())
                 && "name".equalsIgnoreCase(attribute.getName());
     }
 
@@ -51,14 +53,25 @@ public final class WOHtmlWebObjectReferenceContributor extends PsiReferenceContr
         }
 
         @Override
+        public @NotNull com.intellij.openapi.util.TextRange getRangeInElement() {
+            com.intellij.openapi.util.TextRange range = super.getRangeInElement();
+            String text = myElement.getText();
+            if (text != null && text.endsWith("/")) {
+                return new com.intellij.openapi.util.TextRange(range.getStartOffset(), Math.max(range.getStartOffset(), range.getEndOffset() - 1));
+            }
+            return range;
+        }
+
+        @Override
         public @Nullable PsiElement resolve() {
             String name = null;
             if (myElement instanceof XmlAttributeValue val) {
                 name = val.getValue();
             }
             if (name == null || name.isBlank()) {
-                name = stripQuotes(myElement.getText());
+                name = myElement.getText();
             }
+            name = WOHtmlWebObjectUtil.cleanWebObjectName(name);
             if (name == null || name.isBlank()) {
                 return null;
             }

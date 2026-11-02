@@ -14,6 +14,7 @@ import com.intellij.psi.xml.XmlTag;
 import org.jetbrains.annotations.NotNull;
 import org.wocommunity.plugins.intellij.psi.wod.WODFile;
 import org.wocommunity.plugins.intellij.tools.WOIcons;
+import org.wocommunity.plugins.intellij.wotemplate.WOHtmlWebObjectUtil;
 
 import java.util.Collection;
 
@@ -87,10 +88,7 @@ public class WodToHtmlLineMarkerProvider implements LineMarkerProvider {
         Collection<XmlTag> tags = PsiTreeUtil.findChildrenOfType(xmlFile, XmlTag.class);
         for (XmlTag tag : tags) {
             if ("webobject".equalsIgnoreCase(tag.getLocalName())) {
-                String val = tag.getAttributeValue("name");
-                if (val == null) {
-                    val = tag.getAttributeValue("NAME");
-                }
+                String val = WOHtmlWebObjectUtil.getWebObjectName(tag);
                 if (name.equals(val)) {
                     return tag;
                 }

@@ -11,6 +11,7 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
+import org.wocommunity.plugins.intellij.wotemplate.WOHtmlWebObjectUtil;
 
 /**
  * Quick-fix / Intention action (Alt+Enter) on `<webobject name="xxx">` to create the definition in `.wod`.
@@ -38,10 +39,7 @@ public class CreateWodElementIntentionAction extends PsiElementBaseIntentionActi
             return false;
         }
 
-        String name = tag.getAttributeValue("name");
-        if (name == null || name.isBlank()) {
-            name = tag.getAttributeValue("NAME");
-        }
+        String name = WOHtmlWebObjectUtil.getWebObjectName(tag);
         if (name == null || name.isBlank()) {
             return false;
         }
@@ -74,10 +72,7 @@ public class CreateWodElementIntentionAction extends PsiElementBaseIntentionActi
         if (tag == null) {
             return;
         }
-        String name = tag.getAttributeValue("name");
-        if (name == null || name.isBlank()) {
-            name = tag.getAttributeValue("NAME");
-        }
+        String name = WOHtmlWebObjectUtil.getWebObjectName(tag);
         if (name == null || name.isBlank()) {
             return;
         }

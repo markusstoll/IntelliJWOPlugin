@@ -216,6 +216,15 @@ public final class WOComponentConversionUtil {
                 elemName = match.attributes.get("NAME");
             }
             if (elemName == null || elemName.isBlank()) {
+                for (Map.Entry<String, String> entry : match.attributes.entrySet()) {
+                    if ("name".equalsIgnoreCase(entry.getKey())) {
+                        elemName = entry.getValue();
+                        break;
+                    }
+                }
+            }
+            elemName = org.wocommunity.plugins.intellij.wotemplate.WOHtmlWebObjectUtil.cleanWebObjectName(elemName);
+            if (elemName == null || elemName.isBlank()) {
                 continue;
             }
 

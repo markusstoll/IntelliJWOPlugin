@@ -78,10 +78,7 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
     }
 
     public static @NotNull PsiElement resolveWebObjectDeclaration(@NotNull XmlTag tag) {
-        String name = tag.getAttributeValue("name");
-        if (name == null || name.isBlank()) {
-            name = tag.getAttributeValue("NAME");
-        }
+        String name = WOHtmlWebObjectUtil.getWebObjectName(tag);
         if (name == null || name.isBlank()) {
             return tag;
         }
