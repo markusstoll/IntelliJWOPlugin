@@ -45,6 +45,7 @@ public class JavaLineMarkerProvider extends RelatedItemLineMarkerProvider {
                     .toList();
 
             if (!targets.isEmpty()) {
+                @SuppressWarnings("deprecation")
                 NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(WOIcons.WOCOMPONENT_ICON)
                         .setTargets(targets)
                         .setCellRenderer(new DefaultPsiElementCellRenderer() {

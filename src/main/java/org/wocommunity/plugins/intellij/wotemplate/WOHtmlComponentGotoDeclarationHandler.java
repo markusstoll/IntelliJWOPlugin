@@ -107,3 +107,4 @@ public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarat
         return targets.toArray(PsiElement.EMPTY_ARRAY);
     }
 }
+

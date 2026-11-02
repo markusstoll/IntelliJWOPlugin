@@ -101,18 +101,19 @@ public class WODCompletionContributor extends CompletionContributor {
             return;
         }
 
-        for (PsiClass clazz : ClassInheritorsSearch.search(baseClass, scope, true).asIterable()) {
+        ClassInheritorsSearch.search(baseClass, scope, true).forEach(clazz -> {
             String className = clazz.getName();
-            if (className == null) continue;
-
-            // 3. Add to completion lookup list
-            result.addElement(
-                    LookupElementBuilder.create(clazz, className)
-                            .withIcon(AllIcons.Nodes.Class)
-                            .withTypeText(clazz.getContainingFile().getName(), true)
-                            .bold()
-            );
-        }
+            if (className != null) {
+                // 3. Add to completion lookup list
+                result.addElement(
+                        LookupElementBuilder.create(clazz, className)
+                                .withIcon(AllIcons.Nodes.Class)
+                                .withTypeText(clazz.getContainingFile().getName(), true)
+                                .bold()
+                );
+            }
+            return true;
+        });
     }
 
     protected void completeIdentifier4Binding(@NotNull WODBinding binding,

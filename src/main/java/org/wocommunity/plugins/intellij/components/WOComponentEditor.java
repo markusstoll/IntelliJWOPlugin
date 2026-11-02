@@ -440,6 +440,7 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public @Nullable <T> T getUserData(@NotNull Key<T> key) {
         return (T) userData.get(key);
     }
