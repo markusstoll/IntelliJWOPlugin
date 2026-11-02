@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-final class WOComponentTagAliasRegistry {
+public final class WOComponentTagAliasRegistry {
 
     private static final String RESOURCE_PATH = "/wotemplate/wo-tag-aliases.properties";
     private static final Map<String, String> ALIASES = new ConcurrentHashMap<>();
@@ -18,13 +18,13 @@ final class WOComponentTagAliasRegistry {
     private WOComponentTagAliasRegistry() {
     }
 
-    static @NotNull String resolveAlias(@NotNull String rawLocalName) {
+    public static @NotNull String resolveAlias(@NotNull String rawLocalName) {
         ensureLoaded();
         String mapped = ALIASES.get(rawLocalName);
         return mapped != null ? mapped : rawLocalName;
     }
 
-    static @NotNull Map<String, String> getAliases() {
+    public static @NotNull Map<String, String> getAliases() {
         ensureLoaded();
         return Collections.unmodifiableMap(ALIASES);
     }

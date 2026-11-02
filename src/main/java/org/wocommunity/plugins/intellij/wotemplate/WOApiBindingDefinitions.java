@@ -12,42 +12,57 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
+import org.wocommunity.plugins.intellij.components.api.WOComponentApiBinding;
+import org.wocommunity.plugins.intellij.components.api.WOComponentApiModel;
+import org.wocommunity.plugins.intellij.components.api.WOComponentApiXmlParser;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Loads WO binding definitions from classpath resources:
- * {@code Resources/<SimpleClassName>.api}
+ * Loads WO binding definitions from classpath resources or component directories:
+ * {@code Resources/<SimpleClassName>.api}, {@code src/main/components/<SimpleClassName>.api}, etc.
  *
  * These definitions have precedence over reflective member inspection.
  */
-final class WOApiBindingDefinitions {
+public final class WOApiBindingDefinitions {
 
     private static final String RESOURCES_DIR = "Resources";
 
-    private static final Map<String, Set<String>> CACHE_BY_VFILE_URL = new ConcurrentHashMap<>();
+    private record CacheEntry(long modificationStamp, @NotNull Map<String, WOComponentApiBinding> bindings) {}
+    private static final Map<String, CacheEntry> CACHE_BY_VFILE_URL = new ConcurrentHashMap<>();
 
     private WOApiBindingDefinitions() {
     }
 
-    static @NotNull Set<String> getBindingsForPsiClass(@NotNull PsiClass psiClass) {
+    public static @NotNull Map<String, WOComponentApiBinding> getApiBindingsForPsiClass(@NotNull PsiClass psiClass) {
         String simpleName = psiClass.getName();
         if (simpleName == null || simpleName.isBlank()) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
 
         VirtualFile vFile = findApiVirtualFile(psiClass, simpleName);
         if (vFile == null) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
 
-        return CACHE_BY_VFILE_URL.computeIfAbsent(vFile.getUrl(), url -> loadBindingsFromApiFile(vFile));
+        long stamp = vFile.getModificationStamp();
+        CacheEntry entry = CACHE_BY_VFILE_URL.get(vFile.getUrl());
+        if (entry != null && entry.modificationStamp() == stamp) {
+            return entry.bindings();
+        }
+
+        Map<String, WOComponentApiBinding> loaded = loadBindingsFromApiFile(vFile);
+        CACHE_BY_VFILE_URL.put(vFile.getUrl(), new CacheEntry(stamp, loaded));
+        return loaded;
+    }
+
+    static @NotNull Set<String> getBindingsForPsiClass(@NotNull PsiClass psiClass) {
+        return getApiBindingsForPsiClass(psiClass).keySet();
     }
 
     private static VirtualFile findApiVirtualFile(@NotNull PsiClass psiClass, @NotNull String simpleName) {
@@ -93,6 +108,14 @@ final class WOApiBindingDefinitions {
                 if (candidate2 != null && !candidate2.isDirectory()) {
                     return candidate2;
                 }
+                VirtualFile candidate3 = root.findFileByRelativePath("src/main/components/" + fileName);
+                if (candidate3 != null && !candidate3.isDirectory()) {
+                    return candidate3;
+                }
+                VirtualFile candidate4 = root.findFileByRelativePath("src/main/resources/" + fileName);
+                if (candidate4 != null && !candidate4.isDirectory()) {
+                    return candidate4;
+                }
             }
         }
 
@@ -113,10 +136,10 @@ final class WOApiBindingDefinitions {
             if (matches.size() == 1) {
                 return matches.get(0);
             }
-            // If multiple matches exist, prefer Resources/<SimpleName>.api if present.
+            // If multiple matches exist, prefer Resources/<SimpleName>.api or src/main/components/<SimpleName>.api if present.
             String preferredSuffix = "/" + relPath;
             for (VirtualFile v : matches) {
-                if (v.getPath().endsWith(preferredSuffix)) {
+                if (v.getPath().endsWith(preferredSuffix) || v.getPath().contains("/components/" + fileName)) {
                     return v;
                 }
             }
@@ -140,39 +163,19 @@ final class WOApiBindingDefinitions {
         return (candidate != null && !candidate.isDirectory()) ? candidate : null;
     }
 
-    private static @NotNull Set<String> loadBindingsFromApiFile(@NotNull VirtualFile apiFile) {
-        try (InputStream in = apiFile.getInputStream()) {
-            var dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(false);
-            try {
-                dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-                dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
-                dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            } catch (Exception ignored) {
-                // best-effort hardening
-            }
-
-            var doc = dbf.newDocumentBuilder().parse(in);
-            var root = doc.getDocumentElement();
-            if (root == null) {
-                return Collections.emptySet();
-            }
-
-            Set<String> bindings = new LinkedHashSet<>();
-            var bindingNodes = root.getElementsByTagName("binding");
-            for (int j = 0; j < bindingNodes.getLength(); j++) {
-                var bn = bindingNodes.item(j);
-                if (!(bn instanceof org.w3c.dom.Element be)) {
-                    continue;
-                }
-                String name = be.getAttribute("name");
-                if (name != null && !name.isBlank()) {
-                    bindings.add(name.trim());
+    private static @NotNull Map<String, WOComponentApiBinding> loadBindingsFromApiFile(@NotNull VirtualFile apiFile) {
+        try {
+            String content = new String(apiFile.contentsToByteArray(), StandardCharsets.UTF_8);
+            WOComponentApiModel model = WOComponentApiXmlParser.parse(content);
+            Map<String, WOComponentApiBinding> map = new LinkedHashMap<>();
+            for (WOComponentApiBinding b : model.getBindings()) {
+                if (b.getName() != null && !b.getName().isBlank()) {
+                    map.put(b.getName(), b);
                 }
             }
-            return bindings.isEmpty() ? Collections.emptySet() : Collections.unmodifiableSet(bindings);
+            return map.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(map);
         } catch (Exception ignored) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
     }
 }

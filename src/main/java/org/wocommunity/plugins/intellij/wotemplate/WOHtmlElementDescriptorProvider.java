@@ -1,9 +1,12 @@
 package org.wocommunity.plugins.intellij.wotemplate;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.psi.util.InheritanceUtil;
@@ -15,6 +18,10 @@ import com.intellij.psi.impl.source.xml.XmlElementDescriptorProvider;
 import com.intellij.xml.XmlElementDescriptor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.wocommunity.plugins.intellij.wod.CreateWodElementPlaceholder;
+import org.wocommunity.plugins.intellij.wod.WodElement;
+import org.wocommunity.plugins.intellij.wod.WodModel;
+import org.wocommunity.plugins.intellij.wod.WodParser;
 
 /**
  * Makes WO template tags "known" to the XML/HTML PSI.
@@ -40,10 +47,7 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
         String localTagName = tag.getLocalName();
 
         if ("webobject".equalsIgnoreCase(localTagName)) {
-            // TagNameReference.resolve() uses the descriptor declaration. A
-            // null declaration therefore still produces an unresolved-symbol
-            // error, even though the descriptor itself is present.
-            return new WOXmlElementDescriptor("webobject", tag);
+            return new WOXmlElementDescriptor("webobject", null, tag);
         }
 
         String prefix = tag.getNamespacePrefix();
@@ -70,18 +74,55 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
 
     private static boolean isWoComponentHtml(@NotNull XmlTag tag) {
         PsiFile file = tag.getContainingFile();
+        return file != null && WOHtmlCompletionUtil.isWoComponentHtml(file);
+    }
+
+    public static @NotNull PsiElement resolveWebObjectDeclaration(@NotNull XmlTag tag) {
+        String name = tag.getAttributeValue("name");
+        if (name == null || name.isBlank()) {
+            name = tag.getAttributeValue("NAME");
+        }
+        if (name == null || name.isBlank()) {
+            return tag;
+        }
+
+        PsiFile file = tag.getContainingFile();
         if (file == null) {
-            return false;
+            return tag;
         }
-        var vFile = PsiUtilCore.getVirtualFile(file);
+        VirtualFile vFile = PsiUtilCore.getVirtualFile(file);
         if (vFile == null) {
-            return false;
+            PsiFile orig = file.getOriginalFile();
+            if (orig != null) {
+                vFile = PsiUtilCore.getVirtualFile(orig);
+            }
         }
-        if (!vFile.getName().endsWith(".html")) {
-            return false;
+        if (vFile == null || vFile.getParent() == null) {
+            return tag;
         }
-        var parent = vFile.getParent();
-        return parent != null && parent.getName().endsWith(".wo");
+
+        VirtualFile woDir = vFile.getParent();
+        if (!woDir.getName().endsWith(".wo")) {
+            return tag;
+        }
+
+        String componentName = woDir.getName().substring(0, woDir.getName().length() - 3);
+        VirtualFile wodFile = woDir.findChild(componentName + ".wod");
+        if (wodFile != null && wodFile.isValid()) {
+            WodModel model = WodParser.getModel(wodFile);
+            WodElement element = model.getElement(name);
+            if (element != null && element.getNameRange() != null) {
+                PsiFile wodPsiFile = PsiManager.getInstance(tag.getProject()).findFile(wodFile);
+                if (wodPsiFile != null) {
+                    PsiElement target = wodPsiFile.findElementAt(element.getNameRange().getStartOffset());
+                    if (target != null) {
+                        return target;
+                    }
+                }
+            }
+        }
+
+        return new CreateWodElementPlaceholder(tag, wodFile, woDir, name);
     }
 
     private static @Nullable PsiClass resolveWoTagClass(@NotNull Project project, @NotNull String rawLocalName) {
@@ -146,3 +187,4 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
         return woElement != null && InheritanceUtil.isInheritorOrSelf(candidate, woElement, true);
     }
 }
+

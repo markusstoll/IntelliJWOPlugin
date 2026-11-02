@@ -11,9 +11,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Loads WO system component bindings from {@code /wotemplate/WebObjectDefinitions.xml}.
+ * Loads WebObjects system element definitions from bundled {@code /wotemplate/WebObjectDefinitions.xml}.
  *
- * The file contains class names without package, e.g. {@code WOGenericElement}.
+ * Provides binding lists for standard dynamic elements such as {@code WOConditional}, {@code WOString},
+ * {@code WOGenericContainer}, etc.
  */
 public final class WOSystemBindingDefinitions {
 
@@ -27,9 +28,19 @@ public final class WOSystemBindingDefinitions {
             this.name = name;
             this.required = required;
         }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
     }
 
     private static final Map<String, Set<Binding>> BINDINGS_BY_SHORT_CLASS_NAME = new ConcurrentHashMap<>();
+    private static final Map<String, Set<String>> BINDING_NAMES_BY_SHORT_CLASS_NAME = new ConcurrentHashMap<>();
+    private static final Map<String, Set<String>> REQUIRED_BINDINGS_BY_SHORT_CLASS_NAME = new ConcurrentHashMap<>();
     private static volatile boolean loaded;
 
     private WOSystemBindingDefinitions() {
@@ -41,6 +52,23 @@ public final class WOSystemBindingDefinitions {
         return b != null ? b : Collections.emptySet();
     }
 
+    public static @NotNull Set<String> getBindingNamesForShortClassName(@NotNull String shortClassName) {
+        ensureLoaded();
+        Set<String> b = BINDING_NAMES_BY_SHORT_CLASS_NAME.get(shortClassName);
+        return b != null ? b : Collections.emptySet();
+    }
+
+    public static @NotNull Set<String> getRequiredBindingsForShortClassName(@NotNull String shortClassName) {
+        ensureLoaded();
+        Set<String> b = REQUIRED_BINDINGS_BY_SHORT_CLASS_NAME.get(shortClassName);
+        return b != null ? b : Collections.emptySet();
+    }
+
+    public static @NotNull Set<String> getAllShortClassNames() {
+        ensureLoaded();
+        return Collections.unmodifiableSet(BINDINGS_BY_SHORT_CLASS_NAME.keySet());
+    }
+
     private static void ensureLoaded() {
         if (loaded) {
             return;
@@ -49,12 +77,12 @@ public final class WOSystemBindingDefinitions {
             if (loaded) {
                 return;
             }
-            loadFromResource();
+            loadDefinitions();
             loaded = true;
         }
     }
 
-    private static void loadFromResource() {
+    private static void loadDefinitions() {
         try (InputStream in = WOSystemBindingDefinitions.class.getResourceAsStream(RESOURCE_PATH)) {
             if (in == null) {
                 return;
@@ -76,20 +104,22 @@ public final class WOSystemBindingDefinitions {
                 return;
             }
 
-            var woNodes = root.getElementsByTagName("wo");
-            for (int i = 0; i < woNodes.getLength(); i++) {
-                var wo = woNodes.item(i);
-                if (!(wo instanceof org.w3c.dom.Element e)) {
+            var elements = root.getElementsByTagName("wo");
+            for (int i = 0; i < elements.getLength(); i++) {
+                var node = elements.item(i);
+                if (!(node instanceof org.w3c.dom.Element e)) {
                     continue;
                 }
 
                 String cls = e.getAttribute("class");
-                if (cls.isBlank()) {
+                if (cls == null || cls.isBlank()) {
                     continue;
                 }
                 String shortName = cls.trim();
 
                 Set<Binding> bindings = new LinkedHashSet<>();
+                Set<String> bindingNames = new LinkedHashSet<>();
+                Set<String> requiredBindings = new LinkedHashSet<>();
                 var bindingNodes = e.getElementsByTagName("binding");
                 for (int j = 0; j < bindingNodes.getLength(); j++) {
                     var bn = bindingNodes.item(j);
@@ -97,14 +127,24 @@ public final class WOSystemBindingDefinitions {
                         continue;
                     }
                     String name = be.getAttribute("name");
-                    if (!name.isBlank()) {
-                        boolean required = "YES".equals(be.getAttribute("required"));
-                        bindings.add(new Binding(name.trim(), required));
+                    if (name != null && !name.isBlank()) {
+                        String clean = name.trim();
+                        String req = be.getAttribute("required");
+                        boolean isReq = "YES".equalsIgnoreCase(req) || "true".equalsIgnoreCase(req);
+                        bindings.add(new Binding(clean, isReq));
+                        bindingNames.add(clean);
+                        if (isReq) {
+                            requiredBindings.add(clean);
+                        }
                     }
                 }
 
                 if (!bindings.isEmpty()) {
                     BINDINGS_BY_SHORT_CLASS_NAME.put(shortName, Collections.unmodifiableSet(bindings));
+                    BINDING_NAMES_BY_SHORT_CLASS_NAME.put(shortName, Collections.unmodifiableSet(bindingNames));
+                }
+                if (!requiredBindings.isEmpty()) {
+                    REQUIRED_BINDINGS_BY_SHORT_CLASS_NAME.put(shortName, Collections.unmodifiableSet(requiredBindings));
                 }
             }
         } catch (Exception ignored) {
@@ -112,4 +152,3 @@ public final class WOSystemBindingDefinitions {
         }
     }
 }
-

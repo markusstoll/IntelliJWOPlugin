@@ -5,6 +5,7 @@ import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
+import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.psi.JavaPsiFacade;
@@ -16,6 +17,7 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.util.Processor;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
+import org.wocommunity.plugins.intellij.tools.WOIcons;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -42,25 +44,36 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
                         }
 
                         String localPrefix = getWoLocalPrefix(parameters, file);
-                        if (localPrefix == null) {
+                        if (localPrefix != null) {
+                            Set<String> localNames = new LinkedHashSet<>();
+                            localNames.addAll(WOComponentTagAliasRegistry.getAliases().keySet());
+                            localNames.addAll(WOComponentCollector.collectAllComponentAndElementNames(file.getProject()));
+
+                            // Match against full "wo:<localPrefix>" so completion works even if IntelliJ's computed prefix
+                            // is only the part after "wo:".
+                            CompletionResultSet woMatcher = result.withPrefixMatcher(WO_PREFIX_WITH_COLON + localPrefix);
+                            for (String localName : localNames) {
+                                woMatcher.addElement(
+                                        LookupElementBuilder.create(WO_PREFIX_WITH_COLON + localName)
+                                                .withTypeText("WO", true)
+                                                .withInsertHandler(WOHtmlWoTagInsertHandler.INSTANCE)
+                                );
+                            }
                             return;
                         }
 
-                        Set<String> localNames = new LinkedHashSet<>();
-                        localNames.addAll(WOComponentTagAliasRegistry.getAliases().keySet());
-                        if (!DumbService.isDumb(file.getProject())) {
-                            localNames.addAll(collectWoInheritorNames(file));
-                        }
-
-                        // Match against full "wo:<localPrefix>" so completion works even if IntelliJ's computed prefix
-                        // is only the part after "wo:".
-                        CompletionResultSet woMatcher = result.withPrefixMatcher(WO_PREFIX_WITH_COLON + localPrefix);
-                        for (String localName : localNames) {
-                            woMatcher.addElement(
-                                    LookupElementBuilder.create(WO_PREFIX_WITH_COLON + localName)
-                                            .withTypeText("WO", true)
-                                            .withInsertHandler(WOHtmlWoTagInsertHandler.INSTANCE)
-                            );
+                        // Complete <webobject when user types tag name after '<'
+                        String htmlTagPrefix = getHtmlTagPrefix(parameters, file);
+                        if (htmlTagPrefix != null) {
+                            String lower = htmlTagPrefix.toLowerCase();
+                            if ("webobject".startsWith(lower) || "webobjects".startsWith(lower) || lower.isEmpty()) {
+                                LookupElementBuilder builder = LookupElementBuilder.create("webobject")
+                                        .withIcon(WOIcons.WOCOMPONENT_ICON)
+                                        .withTypeText("WebObject", true)
+                                        .withTailText(" name=\"...\"", true)
+                                        .withInsertHandler(WebObjectTagInsertHandler.INSTANCE);
+                                result.withPrefixMatcher(htmlTagPrefix).addElement(PrioritizedLookupElement.withPriority(builder, 200.0));
+                            }
                         }
                     }
                 });
@@ -121,6 +134,37 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
                 return null;
             }
             j--;
+        }
+        return null;
+    }
+
+    private static String getHtmlTagPrefix(@NotNull CompletionParameters parameters, @NotNull PsiFile file) {
+        var doc = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+        if (doc == null) {
+            return null;
+        }
+        int offset = parameters.getOffset();
+        if (offset < 0 || offset > doc.getTextLength()) {
+            return null;
+        }
+
+        CharSequence text = doc.getCharsSequence();
+        int i = offset;
+        while (i > 0) {
+            char c = text.charAt(i - 1);
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '-') {
+                i--;
+                continue;
+            }
+            break;
+        }
+        String typed = text.subSequence(i, offset).toString();
+        int j = i - 1;
+        while (j >= 0 && Character.isWhitespace(text.charAt(j))) {
+            j--;
+        }
+        if (j >= 0 && text.charAt(j) == '<') {
+            return typed;
         }
         return null;
     }

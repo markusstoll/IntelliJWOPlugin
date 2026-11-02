@@ -18,10 +18,32 @@ final class WOXmlAttributeDescriptor implements XmlAttributeDescriptor {
 
     private final @NotNull String name;
     private final @Nullable PsiElement declaration;
+    private final boolean required;
+    private final @Nullable String typeText;
+    private final @Nullable String requiredMessage;
 
     WOXmlAttributeDescriptor(@NotNull String name, @Nullable PsiElement declaration) {
+        this(name, declaration, false, null, null);
+    }
+
+    WOXmlAttributeDescriptor(@NotNull String name,
+                             @Nullable PsiElement declaration,
+                             boolean required,
+                             @Nullable String typeText,
+                             @Nullable String requiredMessage) {
         this.name = name;
         this.declaration = declaration;
+        this.required = required;
+        this.typeText = typeText;
+        this.requiredMessage = requiredMessage;
+    }
+
+    public @Nullable String getTypeText() {
+        return typeText;
+    }
+
+    public @Nullable String getRequiredMessage() {
+        return requiredMessage;
     }
 
     @Override
@@ -46,7 +68,7 @@ final class WOXmlAttributeDescriptor implements XmlAttributeDescriptor {
 
     @Override
     public boolean isRequired() {
-        return false;
+        return required;
     }
 
     @Override

@@ -18,13 +18,27 @@ public final class WOHtmlCompletionUtil {
     public static boolean isWoComponentHtml(@NotNull PsiFile file) {
         var vFile = PsiUtilCore.getVirtualFile(file);
         if (vFile == null) {
+            PsiFile orig = file.getOriginalFile();
+            if (orig != null) {
+                vFile = PsiUtilCore.getVirtualFile(orig);
+            }
+        }
+        if (vFile == null) {
+            vFile = file.getVirtualFile();
+        }
+        if (vFile == null) {
             return false;
         }
-        if (!vFile.getName().endsWith(".html")) {
+        String fileName = vFile.getName().toLowerCase(java.util.Locale.ROOT);
+        boolean isHtml = fileName.endsWith(".html") || fileName.endsWith(".htm") || fileName.endsWith(".xhtml");
+        if (!isHtml) {
             return false;
         }
         var parent = vFile.getParent();
-        return parent != null && parent.getName().endsWith(".wo");
+        if (parent != null && parent.getName().endsWith(".wo")) {
+            return true;
+        }
+        return WOComponentClassResolver.findComponentClass(file) != null;
     }
 
     public static boolean isWoPrefixedTag(@NotNull XmlTag tag) {

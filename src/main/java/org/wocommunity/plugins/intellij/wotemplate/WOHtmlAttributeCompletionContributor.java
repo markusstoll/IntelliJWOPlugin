@@ -5,6 +5,7 @@ import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
+import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
@@ -106,12 +107,30 @@ public final class WOHtmlAttributeCompletionContributor extends CompletionContri
                     if (takenByOtherAttributes.contains(name)) {
                         continue;
                     }
-                    LookupElementBuilder le = LookupElementBuilder.create(name).withTypeText("WO binding", true);
+
+                    boolean isRequired = d.isRequired();
+                    String typeText = (d instanceof WOXmlAttributeDescriptor woad && woad.getTypeText() != null)
+                            ? woad.getTypeText()
+                            : "WO binding";
+
+                    LookupElementBuilder le = LookupElementBuilder.create(name)
+                            .withTypeText(typeText, true)
+                            .withBoldness(isRequired);
+
+                    if (isRequired) {
+                        le = le.withTailText(" (required)", true);
+                    }
+
                     PsiElement decl = d.getDeclaration();
                     if (decl != null) {
                         le = le.withPsiElement(decl);
                     }
-                    out.addElement(le);
+
+                    if (isRequired) {
+                        out.addElement(PrioritizedLookupElement.withPriority(le, 100.0));
+                    } else {
+                        out.addElement(le);
+                    }
                 }
             }
         };

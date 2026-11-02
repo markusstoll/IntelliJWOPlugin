@@ -28,19 +28,25 @@ import java.util.Set;
 
 final class WOXmlElementDescriptor implements XmlElementDescriptor {
 
-    private static final String WEBOBJECT_TAG = "webobject";
-    private static final String WEBOBJECT_NAME_ATTRIBUTE = "name";
-
     private final @NotNull String name;
     private final @Nullable PsiElement declaration;
+    private final @Nullable XmlTag tag;
 
     WOXmlElementDescriptor(@NotNull String name, @Nullable PsiElement declaration) {
+        this(name, declaration, null);
+    }
+
+    WOXmlElementDescriptor(@NotNull String name, @Nullable PsiElement declaration, @Nullable XmlTag tag) {
         this.name = name;
         this.declaration = declaration;
+        this.tag = tag;
     }
 
     @Override
     public PsiElement getDeclaration() {
+        if ("webobject".equalsIgnoreCase(name) && tag != null) {
+            return WOHtmlElementDescriptorProvider.resolveWebObjectDeclaration(tag);
+        }
         return declaration;
     }
 
@@ -89,6 +95,9 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
     public @Nullable XmlAttributeDescriptor getAttributeDescriptor(@NonNls String attributeName, @Nullable XmlTag context) {
         if (attributeName == null || attributeName.isBlank()) {
             return null;
+        }
+        if ("webobject".equalsIgnoreCase(name)) {
+            return new WOXmlAttributeDescriptor(attributeName, null, false, "string", null);
         }
         return getOrBuildAttributeDescriptors().get(attributeName);
     }
@@ -139,25 +148,31 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
     }
 
     private @NotNull Map<String, XmlAttributeDescriptor> buildAttributeDescriptors() {
-        // The legacy <webobject name="..."> syntax is resolved from the
-        // companion .wod file, so there is no Java declaration to inspect.
-        // Still describe its structural attribute to the HTML inspections.
-        if (WEBOBJECT_TAG.equalsIgnoreCase(name)) {
-            return Map.of(WEBOBJECT_NAME_ATTRIBUTE,
-                    new WOXmlAttributeDescriptor(WEBOBJECT_NAME_ATTRIBUTE, null));
+        if ("webobject".equalsIgnoreCase(name)) {
+            Map<String, XmlAttributeDescriptor> map = new LinkedHashMap<>();
+            map.put("name", new WOXmlAttributeDescriptor("name", null, false, "string", null));
+            map.put("NAME", new WOXmlAttributeDescriptor("NAME", null, false, "string", null));
+            return map;
         }
 
         if (!(declaration instanceof PsiClass psiClass)) {
             return Map.of();
         }
 
-        // 0) If a classpath resource "Resources/<SimpleName>.api" exists for this class,
+        // 0) If a classpath resource or component API "<SimpleName>.api" exists for this class,
         // use its bindings (takes precedence over reflective inspection).
-        Set<String> apiBindings = WOApiBindingDefinitions.getBindingsForPsiClass(psiClass);
+        Map<String, org.wocommunity.plugins.intellij.components.api.WOComponentApiBinding> apiBindings =
+                WOApiBindingDefinitions.getApiBindingsForPsiClass(psiClass);
         if (!apiBindings.isEmpty()) {
             Map<String, XmlAttributeDescriptor> out = new LinkedHashMap<>();
-            for (String b : apiBindings) {
-                out.put(b, new WOXmlAttributeDescriptor(b, psiClass));
+            for (var b : apiBindings.values()) {
+                out.put(b.getName(), new WOXmlAttributeDescriptor(
+                        b.getName(),
+                        psiClass,
+                        b.isRequired(),
+                        b.getDefaults(),
+                        b.getRequiredMessage()
+                ));
             }
             filterOutWOComponentBaseBindings(psiClass, out);
             return out;
@@ -170,7 +185,7 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
             if (!defined.isEmpty()) {
                 Map<String, XmlAttributeDescriptor> out = new LinkedHashMap<>();
                 for (WOSystemBindingDefinitions.Binding b : defined) {
-                    out.put(b.name, new WOXmlAttributeDescriptor(b.name, psiClass));
+                    out.put(b.name, new WOXmlAttributeDescriptor(b.name, psiClass, b.required, null, null));
                 }
                 filterOutWOComponentBaseBindings(psiClass, out);
                 return out;
@@ -368,3 +383,4 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
         return s.substring(0, 1).toLowerCase(Locale.ROOT) + s.substring(1);
     }
 }
+
