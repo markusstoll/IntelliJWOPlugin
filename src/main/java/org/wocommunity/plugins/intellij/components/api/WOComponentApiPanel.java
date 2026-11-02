@@ -1,6 +1,7 @@
 package org.wocommunity.plugins.intellij.components.api;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.event.DocumentEvent;
@@ -8,6 +9,7 @@ import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.TitledSeparator;
@@ -59,7 +61,9 @@ public class WOComponentApiPanel extends JPanel implements Disposable {
     public WOComponentApiPanel(@NotNull Project project, @NotNull VirtualFile apiFile) {
         this.project = project;
         this.apiFile = apiFile;
-        this.document = FileDocumentManager.getInstance().getDocument(apiFile);
+        this.document = ApplicationManager.getApplication().runReadAction((Computable<Document>) () ->
+                FileDocumentManager.getInstance().getDocument(apiFile)
+        );
 
         initModel();
         buildUI();
@@ -82,14 +86,17 @@ public class WOComponentApiPanel extends JPanel implements Disposable {
     }
 
     private void initModel() {
-        String content = "";
-        if (document != null) {
-            content = document.getText();
-        } else {
-            try {
-                content = new String(apiFile.contentsToByteArray(), StandardCharsets.UTF_8);
-            } catch (Exception ignored) {}
-        }
+        String content = ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
+            if (document != null) {
+                return document.getText();
+            } else {
+                try {
+                    return new String(apiFile.contentsToByteArray(), StandardCharsets.UTF_8);
+                } catch (Exception ignored) {
+                    return "";
+                }
+            }
+        });
 
         this.model = WOComponentApiXmlParser.parse(content);
         if (this.model.getComponentClassName() == null || this.model.getComponentClassName().isBlank()) {
@@ -406,7 +413,8 @@ public class WOComponentApiPanel extends JPanel implements Disposable {
         isUpdatingUi = true;
         try {
             String xml = WOComponentApiXmlParser.toXml(model);
-            if (!xml.equals(document.getText())) {
+            String currentText = ApplicationManager.getApplication().runReadAction((Computable<String>) document::getText);
+            if (!xml.equals(currentText)) {
                 WriteCommandAction.runWriteCommandAction(project, "Edit Component API", null, () -> {
                     document.setText(xml);
                 });

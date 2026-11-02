@@ -12,6 +12,7 @@ import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.OnePixelSplitter;
@@ -200,7 +201,9 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
     }
 
     private FileEditor createIntellijFileEditor(VirtualFile file) {
-        FileEditor editor = TextEditorProvider.getInstance().createEditor(project, file);
+        FileEditor editor = ApplicationManager.getApplication().runReadAction((Computable<FileEditor>) () ->
+                TextEditorProvider.getInstance().createEditor(project, file)
+        );
         JComponent comp = editor.getComponent();
         this.embeddedEditorsByComponent.put(comp, editor);
         return editor;
