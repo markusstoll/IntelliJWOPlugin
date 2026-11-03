@@ -6,7 +6,6 @@ package org.wocommunity.plugins.intellij.java.linemarker;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
-import com.intellij.ide.util.DefaultPsiElementCellRenderer;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.psi.*;
@@ -45,20 +44,11 @@ public class JavaLineMarkerProvider extends RelatedItemLineMarkerProvider {
                     .toList();
 
             if (!targets.isEmpty()) {
-                @SuppressWarnings("deprecation")
                 NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(WOIcons.WOCOMPONENT_ICON)
                         .setTargets(targets)
-                        .setCellRenderer(new DefaultPsiElementCellRenderer() {
-                            @Override
-                            public String getElementText(PsiElement element) {
-                                PsiFile file = element.getContainingFile();
-                                return (file != null ? file.getName() : element.getText());
-                            }
-
-                            @Override
-                            public String getContainerText(PsiElement element, String name) {
-                                return null;
-                            }
+                        .setNamer(el -> {
+                            PsiFile file = el.getContainingFile();
+                            return file != null ? file.getName() : el.getText();
                         })
                         .setTooltipText("Used in WO Component");
 

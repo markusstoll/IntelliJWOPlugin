@@ -11,11 +11,11 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.roots.ui.configuration.ModulesProvider;
-import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -113,7 +113,7 @@ public class WOModuleBuilder extends ModuleBuilder {
 
         if (contentEntryPath != null && !contentEntryPath.isBlank()) {
             File targetDir = new File(contentEntryPath);
-            StartupManager.getInstance(project).runAfterOpened(() -> {
+            DumbService.getInstance(project).runWhenSmart(() -> {
                 WOArchetypeGenerator.importMavenProjectIfPossible(project, targetDir);
             });
         }

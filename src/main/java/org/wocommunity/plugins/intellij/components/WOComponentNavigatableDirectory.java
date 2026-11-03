@@ -306,6 +306,7 @@ public class WOComponentNavigatableDirectory implements PsiDirectory {
     }
 
     @Override
+    @Deprecated
     @SuppressWarnings("deprecation")
     public void checkAdd(@NotNull PsiElement element) throws IncorrectOperationException {
         delegate.checkAdd(element);
@@ -332,6 +333,7 @@ public class WOComponentNavigatableDirectory implements PsiDirectory {
     }
 
     @Override
+    @Deprecated
     @SuppressWarnings("deprecation")
     public void checkDelete() throws IncorrectOperationException {
         delegate.checkDelete();
