@@ -1,5 +1,6 @@
 package org.wocommunity.plugins.intellij.components.api;
 
+import com.intellij.openapi.application.WriteIntentReadAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorProvider;
 import com.intellij.openapi.project.Project;
@@ -36,7 +37,9 @@ public class WOComponentApiEditorTab extends JPanel {
         this.subTabbedPane.setTabPlacement(JBTabbedPane.BOTTOM);
 
         this.visualPanel = new WOComponentApiPanel(project, apiFile);
-        this.textEditor = TextEditorProvider.getInstance().createEditor(project, apiFile);
+        this.textEditor = WriteIntentReadAction.compute(() ->
+                TextEditorProvider.getInstance().createEditor(project, apiFile)
+        );
         embeddedEditorsByComponent.put(textEditor.getComponent(), textEditor);
 
         subTabbedPane.addTab("API", visualPanel);
