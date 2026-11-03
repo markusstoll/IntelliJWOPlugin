@@ -201,9 +201,7 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
     }
 
     private FileEditor createIntellijFileEditor(VirtualFile file) {
-        FileEditor editor = ApplicationManager.getApplication().runReadAction((Computable<FileEditor>) () ->
-                TextEditorProvider.getInstance().createEditor(project, file)
-        );
+        FileEditor editor = TextEditorProvider.getInstance().createEditor(project, file);
         JComponent comp = editor.getComponent();
         this.embeddedEditorsByComponent.put(comp, editor);
         return editor;
