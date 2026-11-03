@@ -152,9 +152,10 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.3)
+## Recent Highlights (v0.9.4)
 
 - **Inspection Registration & Component API Stability**:
+  - Resolved `WriteIntentReadAction` conflict during Component API source editor initialization.
   - Enforced strict platform read actions (`Application.runReadAction`) across `FileDocumentManager` and `VirtualFile` operations during Component API tab initialization, eliminating threading assertion exceptions on the EDT.
   - Fixed duplicate `shortName` collision (`WORequiredBindings`) across HTML and XHTML inspection registrations that caused a `PluginException` when switching to the Component API tab.
 - **Robust WebObjects Syntax Support**:
