@@ -1,10 +1,12 @@
 package org.wocommunity.plugins.intellij.components;
 
+import com.intellij.ide.projectView.ProjectView;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
@@ -15,6 +17,9 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
@@ -116,6 +121,7 @@ public class SwitchToSrcAction extends AnAction {
         PsiClass componentClass = WOComponentClassResolver.findComponentClass(project, currentFile);
         if (componentClass != null && componentClass.canNavigate() && WOComponentClassResolver.isValidSourceClass(componentClass)) {
             componentClass.navigate(true);
+            selectInProjectView(project, componentClass);
             return;
         }
 
@@ -132,6 +138,7 @@ public class SwitchToSrcAction extends AnAction {
                 for (VirtualFile targetFile : files) {
                     if (WOComponentClassResolver.isValidSourceFile(project, targetFile)) {
                         new OpenFileDescriptor(project, targetFile).navigate(true);
+                        selectInProjectView(project, targetFile);
                         return;
                     }
                 }
@@ -145,6 +152,7 @@ public class SwitchToSrcAction extends AnAction {
                     VirtualFile targetFile = WOComponentClassResolver.findFileByNameRecursive(sRoot, componentName + ext);
                     if (targetFile != null && WOComponentClassResolver.isValidSourceFile(project, targetFile)) {
                         new OpenFileDescriptor(project, targetFile).navigate(true);
+                        selectInProjectView(project, targetFile);
                         return;
                     }
                 }
@@ -165,9 +173,29 @@ public class SwitchToSrcAction extends AnAction {
                 VirtualFile targetFile = WOComponentClassResolver.findFileByNameRecursive(contentRoot, componentName + ext);
                 if (targetFile != null && WOComponentClassResolver.isValidSourceFile(project, targetFile)) {
                     new OpenFileDescriptor(project, targetFile).navigate(true);
+                    selectInProjectView(project, targetFile);
                     return;
                 }
             }
         }
+    }
+
+    private static void selectInProjectView(@NotNull Project project, @NotNull Object target) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (project.isDisposed()) return;
+            ProjectView projectView = ProjectView.getInstance(project);
+            if (projectView == null) return;
+
+            if (target instanceof PsiElement psiElement && psiElement.isValid()) {
+                projectView.selectPsiElement(psiElement, false);
+            } else if (target instanceof VirtualFile vFile && vFile.isValid()) {
+                PsiFile psiFile = PsiManager.getInstance(project).findFile(vFile);
+                if (psiFile != null) {
+                    projectView.selectPsiElement(psiFile, false);
+                } else {
+                    projectView.select(null, vFile, false);
+                }
+            }
+        });
     }
 }
