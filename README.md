@@ -152,7 +152,13 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.5)
+## Recent Highlights (v0.9.6)
+
+- **KVC Accessor & Field Usage Tracking (Find Usages / "Used by")**: Bridges KVC-bound property expressions in `.wod` (`value = currency;`) and `.html` (`$currency`) to backing Java accessor methods (`getCurrency()`, `setCurrency()`, `isAvailable()`) and fields (`_currency`), ensuring they appear in IntelliJ's native "Find Usages" and "Used by" results.
+- **Java ↔ Template Gutter Icons for HTML Bindings & Accessors**: WebObjects gutter navigation icons now appear on Java getters, setters, and fields referenced by inline HTML `$property` bindings, seamlessly supporting both WOD and template-based components.
+- **Cross-Language Rename Refactoring (Shift+F6)**: Renaming a Java accessor method (e.g. `getCurrency()` $\rightarrow$ `getEuro()`) automatically renames referencing `.html` templates (`$currency` $\rightarrow$ `$euro`) and `.wod` declarations (`currency` $\rightarrow$ `euro`) using intelligent KVC property name conversion while preserving explicit method calls (`$getCurrency()` $\rightarrow$ `$getEuro()`) and dollar prefixes.
+
+## Highlights (v0.9.5)
 
 - **Project View Selection on "Switch to Java Code"**: Executing **⌥⌘1** / **Ctrl+Alt+1** (`SwitchToSrcAction`) now automatically synchronizes and highlights the resolved controller class / file in the Project tool window.
 - **Unquoted Self-Closing `<webobject>` Tag Support**: Suppressed false-positive `HtmlMissingClosingTag` ("tag unclosed") warnings on self-closing WebObjects tags without preceding whitespace (e.g. `<webobject name=ShortTermLoginButton/>`).
