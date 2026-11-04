@@ -152,7 +152,16 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.4)
+## Recent Highlights (v0.9.5)
+
+- **Project View Selection on "Switch to Java Code"**: Executing **⌥⌘1** / **Ctrl+Alt+1** (`SwitchToSrcAction`) now automatically synchronizes and highlights the resolved controller class / file in the Project tool window.
+- **Unquoted Self-Closing `<webobject>` Tag Support**: Suppressed false-positive `HtmlMissingClosingTag` ("tag unclosed") warnings on self-closing WebObjects tags without preceding whitespace (e.g. `<webobject name=ShortTermLoginButton/>`).
+- **Platform Modernization & Compatibility**:
+  - Replaced internal `StartupManager.runAfterOpened` with `DumbService.runWhenSmart` for post-creation Maven project imports.
+  - Replaced deprecated `NavigationGutterIconBuilder.setCellRenderer` with type-safe `.setNamer(...)`.
+  - Resolved `WriteIntentReadAction` EDT threading assertions during implicit and explicit Component API tab initialization.
+
+## Highlights (v0.9.4)
 
 - **Inspection Registration & Component API Stability**:
   - Resolved `WriteIntentReadAction` conflict during Component API source editor initialization.
