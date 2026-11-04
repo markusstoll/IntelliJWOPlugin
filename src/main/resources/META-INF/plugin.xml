@@ -125,6 +125,8 @@
         <psi.referenceContributor language="XHTML"
                                   implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlWebObjectReferenceContributor"/>
 
+        <referencesSearch implementation="org.wocommunity.plugins.intellij.java.search.WOKvcReferencesSearcher"/>
+
         <localInspection language="HTML"
                          shortName="WORequiredBindings"
                          displayName="Missing required WebObjects binding"

@@ -14,10 +14,12 @@ import org.jetbrains.annotations.Nullable;
 import org.wocommunity.plugins.intellij.psi.wod.WODKeyPath;
 import org.wocommunity.plugins.intellij.psi.wod.WODKeyPathElement;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 public class KeyValueCodingUtil {
 
@@ -188,5 +190,105 @@ public class KeyValueCodingUtil {
                     .bold(); // Macht den Namen fett, weil es z.B. ein direktes Attribut ist
             result.addElement(lookup);
         }
+    }
+
+    public static @NotNull String decapitalize(@NotNull String name) {
+        if (name.isEmpty()) return name;
+        if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) && Character.isUpperCase(name.charAt(0))) {
+            return name;
+        }
+        return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+    }
+
+    /**
+     * Extracts the KVC property name from an accessor method or field name.
+     * Examples:
+     * - "getCurrency" -> "currency"
+     * - "isAvailable" -> "available"
+     * - "setCurrency" -> "currency"
+     * - "_getCurrency" -> "currency"
+     * - "_currency" -> "currency"
+     */
+    public static @Nullable String extractKvcPropertyName(@Nullable String name) {
+        if (name == null || name.isBlank()) {
+            return null;
+        }
+        if (name.startsWith("get") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) {
+            return decapitalize(name.substring(3));
+        }
+        if (name.startsWith("is") && name.length() > 2 && Character.isUpperCase(name.charAt(2))) {
+            return decapitalize(name.substring(2));
+        }
+        if (name.startsWith("set") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) {
+            return decapitalize(name.substring(3));
+        }
+        if (name.startsWith("_get") && name.length() > 4 && Character.isUpperCase(name.charAt(4))) {
+            return decapitalize(name.substring(4));
+        }
+        if (name.startsWith("_is") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) {
+            return decapitalize(name.substring(3));
+        }
+        if (name.startsWith("_set") && name.length() > 4 && Character.isUpperCase(name.charAt(4))) {
+            return decapitalize(name.substring(4));
+        }
+        if (name.startsWith("_") && name.length() > 1 && !name.startsWith("__")) {
+            return name.substring(1);
+        }
+        return null;
+    }
+
+    /**
+     * Returns alternative KVC names for a PSI member to search for in templates (.wod and .html).
+     * For example, for 'getCurrency()' this returns ['currency'].
+     */
+    public static @NotNull Set<String> getAlternativeKvcNames(@NotNull PsiElement element) {
+        if (element instanceof PsiNamedElement named) {
+            String name = named.getName();
+            if (name == null || name.isBlank()) {
+                return Collections.emptySet();
+            }
+            String kvcName = extractKvcPropertyName(name);
+            if (kvcName != null && !kvcName.equals(name)) {
+                return Set.of(kvcName);
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    /**
+     * Computes the new key/binding name when refactoring/renaming a Java method or field.
+     * Preserves leading '$', trailing '()', and converts method names (like "getEuro")
+     * back to KVC property names (like "euro") if the original binding was a KVC property name.
+     */
+    public static @NotNull String computeRenamedKey(@NotNull String currentText, @NotNull String newElementName) {
+        boolean hasDollar = currentText.startsWith("$");
+        String rawCurrent = hasDollar ? currentText.substring(1) : currentText;
+        boolean hasParens = rawCurrent.endsWith("()");
+        if (hasParens) {
+            rawCurrent = rawCurrent.substring(0, rawCurrent.length() - 2);
+        }
+
+        String newKvcName = extractKvcPropertyName(newElementName);
+        boolean originalWasKvc = !rawCurrent.startsWith("get")
+                && !rawCurrent.startsWith("set")
+                && !rawCurrent.startsWith("is")
+                && !rawCurrent.startsWith("_");
+
+        String renamed;
+        if (originalWasKvc && newKvcName != null) {
+            renamed = newKvcName;
+        } else {
+            renamed = newElementName;
+        }
+
+        StringBuilder result = new StringBuilder();
+        if (hasDollar) {
+            result.append("$");
+        }
+        result.append(renamed);
+        if (hasParens && !renamed.endsWith("()")) {
+            result.append("()");
+        }
+        return result.toString();
     }
 }

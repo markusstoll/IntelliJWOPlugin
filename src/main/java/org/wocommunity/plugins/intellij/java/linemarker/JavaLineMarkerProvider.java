@@ -17,6 +17,7 @@ import org.wocommunity.plugins.intellij.psi.references.WODComponentReference;
 import org.wocommunity.plugins.intellij.psi.references.WODKeyPathReference;
 import org.wocommunity.plugins.intellij.psi.wod.WODComponent;
 import org.wocommunity.plugins.intellij.tools.WOIcons;
+import org.wocommunity.plugins.intellij.wotemplate.WOHtmlBindingReference;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,7 +40,9 @@ public class JavaLineMarkerProvider extends RelatedItemLineMarkerProvider {
 
             // Verwende Query-Lazy-Iteration anstelle von .findAll() wo möglich
             List<PsiElement> targets = ReferencesSearch.search(parent, typeScope).findAll().stream()
-                    .filter(ref -> ref instanceof WODKeyPathReference || ref instanceof WODComponentReference)
+                    .filter(ref -> ref instanceof WODKeyPathReference
+                            || ref instanceof WODComponentReference
+                            || ref instanceof WOHtmlBindingReference)
                     .map(PsiReference::getElement)
                     .toList();
 

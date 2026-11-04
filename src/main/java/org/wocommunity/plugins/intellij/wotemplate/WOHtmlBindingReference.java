@@ -7,6 +7,8 @@ import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import org.wocommunity.plugins.intellij.tools.KeyValueCodingUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,10 +74,8 @@ public class WOHtmlBindingReference extends PsiReferenceBase<XmlAttributeValue> 
     public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
         TextRange range = getRangeInElement();
         String currentText = range.substring(myElement.getText());
-        if (currentText.startsWith("$")) {
-            return super.handleElementRename("$" + newElementName);
-        }
-        return super.handleElementRename(newElementName);
+        String renamed = KeyValueCodingUtil.computeRenamedKey(currentText, newElementName);
+        return super.handleElementRename(renamed);
     }
 
     @Override
