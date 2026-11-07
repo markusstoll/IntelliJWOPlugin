@@ -72,6 +72,103 @@ public class EOEntity {
 		return lastDot > 0 ? className.substring(lastDot + 1) : className;
 	}
 
+	public String getClassNameWithDefault() {
+		if (className != null && !className.trim().isEmpty()) {
+			return className;
+		}
+		return "com.webobjects.eocontrol.EOGenericRecord";
+	}
+
+	public String getClassNameWithOptionalPackage() {
+		if (superclassPackageName != null && !superclassPackageName.equals(getPackageName())) {
+			return getClassName();
+		}
+		return getClassNameWithoutPackage();
+	}
+
+	public boolean isParentClassNameSet() {
+		return parentEntityName != null && !parentEntityName.trim().isEmpty();
+	}
+
+	public String getParentClassName() {
+		EOEntity p = getParent();
+		if (p != null) {
+			return p.getClassNameWithDefault();
+		}
+		return parentEntityName;
+	}
+
+	public boolean isParentSet() {
+		return parentEntity != null || (parentEntityName != null && !parentEntityName.trim().isEmpty());
+	}
+
+	public EOEntity getParent() {
+		if (parentEntity != null) {
+			return parentEntity;
+		}
+		if (model != null && parentEntityName != null) {
+			return model.getEntity(parentEntityName);
+		}
+		return null;
+	}
+
+	public boolean isPartialEntitySet() {
+		return false;
+	}
+
+	public EOEntity getPartialEntity() {
+		return null;
+	}
+
+	public boolean isInherited() {
+		return isParentSet();
+	}
+
+	public boolean isGenericRecord() {
+		return className == null || className.trim().isEmpty() || className.endsWith("GenericRecord");
+	}
+
+	public String getPluralName() {
+		if (name == null || name.isEmpty()) return "";
+		if (name.endsWith("y") && !name.endsWith("ay") && !name.endsWith("ey") && !name.endsWith("oy") && !name.endsWith("uy")) {
+			return name.substring(0, name.length() - 1) + "ies";
+		}
+		if (name.endsWith("s") || name.endsWith("x") || name.endsWith("z") || name.endsWith("ch") || name.endsWith("sh")) {
+			return name + "es";
+		}
+		return name + "s";
+	}
+
+	public Set<String> getRestrictingQualifierKeys() {
+		return Collections.emptySet();
+	}
+
+	public List<EORelationship> getSortedClassToOneRelationships() {
+		List<EORelationship> list = new ArrayList<>();
+		for (EORelationship rel : getRelationships()) {
+			if (!rel.isToMany() && rel.isClassProperty()) {
+				list.add(rel);
+			}
+		}
+		list.sort(Comparator.comparing(EORelationship::getName));
+		return list;
+	}
+
+	public List<EORelationship> getSortedClassToManyRelationships() {
+		List<EORelationship> list = new ArrayList<>();
+		for (EORelationship rel : getRelationships()) {
+			if (rel.isToMany() && rel.isClassProperty()) {
+				list.add(rel);
+			}
+		}
+		list.sort(Comparator.comparing(EORelationship::getName));
+		return list;
+	}
+
+	public List<Object> getSortedFetchSpecs() {
+		return Collections.emptyList();
+	}
+
 	private transient String superclassPackageName;
 	private transient String prefixClassNameWithoutPackage;
 	private transient String prefixClassNameWithOptionalPackage;

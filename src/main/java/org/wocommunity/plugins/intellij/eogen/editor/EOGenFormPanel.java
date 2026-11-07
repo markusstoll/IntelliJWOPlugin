@@ -211,8 +211,10 @@ public class EOGenFormPanel extends JBPanel<EOGenFormPanel> {
 		panel.add(new JBLabel("Prefix:"), gbc);
 		gbc.gridx = 1; gbc.weightx = 1.0;
 		prefixField = new JBTextField();
+		prefixField.getEmptyText().setText("_ (default)");
 		addDocListener(prefixField, () -> {
-			model.setPrefix(prefixField.getText().trim());
+			String txt = prefixField.getText().trim();
+			model.setPrefix(txt.isEmpty() ? null : txt);
 			fireModified();
 		});
 		panel.add(prefixField, gbc);
@@ -298,8 +300,10 @@ public class EOGenFormPanel extends JBPanel<EOGenFormPanel> {
 		panel.add(new JBLabel("Template:"), gbc);
 		gbc.gridx = 1; gbc.weightx = 1.0;
 		templateField = new JBTextField();
+		templateField.getEmptyText().setText("_WonderEntity.java / _Entity.java (default)");
 		addDocListener(templateField, () -> {
-			model.setJavaTemplate(templateField.getText().trim());
+			String txt = templateField.getText().trim();
+			model.setJavaTemplate(txt.isEmpty() ? null : txt);
 			fireModified();
 		});
 		panel.add(templateField, gbc);
@@ -309,8 +313,10 @@ public class EOGenFormPanel extends JBPanel<EOGenFormPanel> {
 		panel.add(new JBLabel("Subclass Template:"), gbc);
 		gbc.gridx = 1; gbc.weightx = 1.0;
 		subclassTemplateField = new JBTextField();
+		subclassTemplateField.getEmptyText().setText("WonderEntity.java / Entity.java (default)");
 		addDocListener(subclassTemplateField, () -> {
-			model.setSubclassJavaTemplate(subclassTemplateField.getText().trim());
+			String txt = subclassTemplateField.getText().trim();
+			model.setSubclassJavaTemplate(txt.isEmpty() ? null : txt);
 			fireModified();
 		});
 		panel.add(subclassTemplateField, gbc);
@@ -451,8 +457,8 @@ public class EOGenFormPanel extends JBPanel<EOGenFormPanel> {
 			loadModelGroupCheckBox.setSelected(Boolean.TRUE.equals(model.isLoadModelGroup()));
 
 			filenameTemplateField.setText(model.getFilenameTemplate() != null ? model.getFilenameTemplate() : "");
-			prefixField.setText(model.getPrefix());
-			extensionField.setText(model.getExtension());
+			prefixField.setText(model.getPrefix() != null ? model.getPrefix() : "");
+			extensionField.setText(model.getExtension() != null ? model.getExtension() : "");
 
 			superclassPackageField.setText(model.getSuperclassPackage() != null ? model.getSuperclassPackage() : "");
 			destinationField.setText(model.getDestination() != null ? model.getDestination() : "");

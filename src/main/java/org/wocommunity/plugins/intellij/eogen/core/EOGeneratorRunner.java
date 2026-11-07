@@ -19,6 +19,7 @@ import org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -105,8 +106,21 @@ public class EOGeneratorRunner {
 			velocityEngine.setProperty("output.encoding", "UTF-8");
 			velocityEngine.init();
 
-			String superclassTemplateContent = loadTemplate(workingDir, eogenModel.getTemplateDir(), eogenModel.getJavaTemplate(), true);
-			String subclassTemplateContent = loadTemplate(workingDir, eogenModel.getTemplateDir(), eogenModel.getSubclassJavaTemplate(), false);
+			boolean isWonder = isWonderProject(project, projectRoot, eogenModel);
+			log(logConsumer, result, "Project type detected: " + (isWonder ? "WebObjects with Project Wonder / ERExtensions" : "Standard WebObjects"));
+
+			ResolvedTemplate superclassTemplate = resolveTemplate(workingDir, projectRoot, eogenModel.getTemplateDir(),
+					eogenModel.getJavaTemplate(), true, isWonder);
+			ResolvedTemplate subclassTemplate = resolveTemplate(workingDir, projectRoot, eogenModel.getTemplateDir(),
+					eogenModel.getSubclassJavaTemplate(), false, isWonder);
+
+			log(logConsumer, result, "Selected superclass template: '" + superclassTemplate.name + "'");
+			log(logConsumer, result, "  -> Loaded from: " + superclassTemplate.sourceDescription);
+			log(logConsumer, result, "Selected subclass template:   '" + subclassTemplate.name + "'");
+			log(logConsumer, result, "  -> Loaded from: " + subclassTemplate.sourceDescription);
+
+			String superclassTemplateContent = superclassTemplate.content;
+			String subclassTemplateContent = subclassTemplate.content;
 
 			List<String> modelsToLoad = new ArrayList<>(eogenModel.getModels());
 			if (modelsToLoad.isEmpty()) {
@@ -373,7 +387,8 @@ public class EOGeneratorRunner {
 			superclassPackageName = packageName;
 		}
 
-		String prefix = eogenModel.getPrefix() != null ? eogenModel.getPrefix() : "_";
+		String prefix = eogenModel.getPrefix() != null && !eogenModel.getPrefix().trim().isEmpty() ? eogenModel.getPrefix().trim() : "_";
+		String extension = eogenModel.getExtension() != null && !eogenModel.getExtension().trim().isEmpty() ? eogenModel.getExtension().trim() : "java";
 		String prefixClassNameWithoutPackage = prefix + simpleClassName;
 
 		String prefixClassName;
@@ -398,14 +413,17 @@ public class EOGeneratorRunner {
 		VelocityContext context = new VelocityContext();
 		context.put("model", model);
 		context.put("entity", entity);
+		context.put("eogeneratorModel", eogenModel);
 		context.put("className", fullClassName);
 		context.put("packageName", packageName);
 		context.put("superclassPackageName", superclassPackageName);
 		context.put("classNameWithoutPackage", simpleClassName);
-		context.put("classNameWithOptionalPackage", fullClassName);
+		context.put("classNameWithOptionalPackage", entity.getClassNameWithOptionalPackage());
 		context.put("prefixClassNameWithoutPackage", prefixClassNameWithoutPackage);
 		context.put("prefixClassName", prefixClassName);
 		context.put("prefixClassNameWithOptionalPackage", prefixClassNameWithOptionalPackage);
+		context.put("date", new Date());
+		context.put("calendar", Calendar.getInstance());
 
 		for (EODefine define : eogenModel.getDefines()) {
 			context.put(define.getName(), define.getValue());
@@ -428,7 +446,7 @@ public class EOGeneratorRunner {
 		}
 
 		// 1. Superclass: always overwrite
-		File superclassFile = new File(superclassPackageDir, prefixClassNameWithoutPackage + "." + eogenModel.getExtension());
+		File superclassFile = new File(superclassPackageDir, prefixClassNameWithoutPackage + "." + extension);
 		try (StringWriter sw = new StringWriter();
 			 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(superclassFile), StandardCharsets.UTF_8))) {
 			velocityEngine.evaluate(context, sw, "EOGenerator", superclassTemplateContent);
@@ -438,7 +456,7 @@ public class EOGeneratorRunner {
 		}
 
 		// 2. Subclass: generate only if it doesn't already exist!
-		File subclassFile = new File(subclassPackageDir, simpleClassName + "." + eogenModel.getExtension());
+		File subclassFile = new File(subclassPackageDir, simpleClassName + "." + extension);
 		if (!subclassFile.exists()) {
 			try (StringWriter sw = new StringWriter();
 				 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(subclassFile), StandardCharsets.UTF_8))) {
@@ -461,31 +479,199 @@ public class EOGeneratorRunner {
 		}
 	}
 
-	private static String loadTemplate(File workingDir, String templateDir, String templateName, boolean isSuperclass) {
+	public static class ResolvedTemplate {
+		public final String name;
+		public final String content;
+		public final String sourceDescription;
+
+		public ResolvedTemplate(String name, String content, String sourceDescription) {
+			this.name = name;
+			this.content = content;
+			this.sourceDescription = sourceDescription;
+		}
+	}
+
+	public static boolean isWonderProject(Project project, File projectRoot, EOGeneratorModel eogenModel) {
+		if (eogenModel != null) {
+			if (eogenModel.getDefineValue("wonder") != null || eogenModel.getDefineValue("Wonder") != null) {
+				return true;
+			}
+			if (eogenModel.getDefineValue("ERXGenericRecord") != null) {
+				return true;
+			}
+			if (eogenModel.getJavaTemplate() != null && eogenModel.getJavaTemplate().contains("Wonder")) {
+				return true;
+			}
+			if (eogenModel.getSubclassJavaTemplate() != null && eogenModel.getSubclassJavaTemplate().contains("Wonder")) {
+				return true;
+			}
+		}
+
+		if (projectRoot != null && projectRoot.exists()) {
+			File pom = new File(projectRoot, "pom.xml");
+			if (pom.exists() && fileContains(pom, "wonder", "er.extensions", "ERExtensions")) {
+				return true;
+			}
+			File gradle = new File(projectRoot, "build.gradle");
+			if (gradle.exists() && fileContains(gradle, "wonder", "er.extensions", "ERExtensions")) {
+				return true;
+			}
+			File gradleKts = new File(projectRoot, "build.gradle.kts");
+			if (gradleKts.exists() && fileContains(gradleKts, "wonder", "er.extensions", "ERExtensions")) {
+				return true;
+			}
+			File dotClasspath = new File(projectRoot, ".classpath");
+			if (dotClasspath.exists() && fileContains(dotClasspath, "ERExtensions", "wonder")) {
+				return true;
+			}
+			File templatesDir = new File(projectRoot, "Templates");
+			if (new File(templatesDir, "_WonderEntity.java").exists()) {
+				return true;
+			}
+			File resTemplatesDir = new File(projectRoot, "Resources/Templates");
+			if (new File(resTemplatesDir, "_WonderEntity.java").exists()) {
+				return true;
+			}
+		}
+
+		if (project != null && project.getBasePath() != null) {
+			File base = new File(project.getBasePath());
+			File pom = new File(base, "pom.xml");
+			if (pom.exists() && fileContains(pom, "wonder", "er.extensions", "ERExtensions")) {
+				return true;
+			}
+			File gradle = new File(base, "build.gradle");
+			if (gradle.exists() && fileContains(gradle, "wonder", "er.extensions", "ERExtensions")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static boolean fileContains(File file, String... keywords) {
+		try {
+			String content = Files.readString(file.toPath());
+			for (String kw : keywords) {
+				if (content.toLowerCase().contains(kw.toLowerCase())) {
+					return true;
+				}
+			}
+		} catch (Exception ignored) {
+		}
+		return false;
+	}
+
+	public static ResolvedTemplate resolveTemplate(File workingDir, File projectRoot, String templateDir,
+												   String requestedTemplateName, boolean isSuperclass, boolean isWonder) {
+		String templateName = requestedTemplateName;
+		if (templateName == null || templateName.trim().isEmpty()) {
+			if (isSuperclass) {
+				templateName = isWonder ? "_WonderEntity.java" : "_Entity.java";
+			} else {
+				templateName = isWonder ? "WonderEntity.java" : "Entity.java";
+			}
+		}
+
+		// 1. If explicit templateDir was provided
 		if (templateDir != null && !templateDir.trim().isEmpty()) {
 			File dir = new File(templateDir);
-			if (!dir.isAbsolute() && workingDir != null) {
-				dir = new File(workingDir, templateDir);
+			if (!dir.isAbsolute()) {
+				if (workingDir != null && new File(workingDir, templateDir).exists()) {
+					dir = new File(workingDir, templateDir);
+				} else if (projectRoot != null && new File(projectRoot, templateDir).exists()) {
+					dir = new File(projectRoot, templateDir);
+				}
 			}
 			File tFile = new File(dir, templateName);
-			if (tFile.exists()) {
-				try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(tFile), StandardCharsets.UTF_8))) {
-					StringBuilder sb = new StringBuilder();
-					String line;
-					while ((line = reader.readLine()) != null) {
-						sb.append(line).append("\n");
-					}
-					return sb.toString();
+			if (tFile.exists() && tFile.isFile()) {
+				try {
+					return new ResolvedTemplate(templateName, Files.readString(tFile.toPath(), StandardCharsets.UTF_8), tFile.getAbsolutePath());
 				} catch (IOException ignored) {
 				}
 			}
 		}
 
-		if (isSuperclass) {
-			return getDefaultSuperclassTemplate();
-		} else {
-			return getDefaultSubclassTemplate();
+		// 2. Look in project Templates/ or Resources/Templates/
+		if (projectRoot != null) {
+			File t1 = new File(projectRoot, "Templates/" + templateName);
+			if (t1.exists() && t1.isFile()) {
+				try {
+					return new ResolvedTemplate(templateName, Files.readString(t1.toPath(), StandardCharsets.UTF_8), t1.getAbsolutePath());
+				} catch (IOException ignored) {
+				}
+			}
+			File t2 = new File(projectRoot, "Resources/Templates/" + templateName);
+			if (t2.exists() && t2.isFile()) {
+				try {
+					return new ResolvedTemplate(templateName, Files.readString(t2.toPath(), StandardCharsets.UTF_8), t2.getAbsolutePath());
+				} catch (IOException ignored) {
+				}
+			}
 		}
+		if (workingDir != null) {
+			File t3 = new File(workingDir, "Templates/" + templateName);
+			if (t3.exists() && t3.isFile()) {
+				try {
+					return new ResolvedTemplate(templateName, Files.readString(t3.toPath(), StandardCharsets.UTF_8), t3.getAbsolutePath());
+				} catch (IOException ignored) {
+				}
+			}
+		}
+
+		// 3. User's system WOLips folder (~/Library/Application Support/WOLips/EOGenerator/<templateName>)
+		String userHome = System.getProperty("user.home");
+		if (userHome != null) {
+			File macAppSupport = new File(userHome, "Library/Application Support/WOLips/EOGenerator/" + templateName);
+			if (macAppSupport.exists() && macAppSupport.isFile()) {
+				try {
+					return new ResolvedTemplate(templateName, Files.readString(macAppSupport.toPath(), StandardCharsets.UTF_8), macAppSupport.getAbsolutePath());
+				} catch (IOException ignored) {
+				}
+			}
+		}
+		File sysAppSupport = new File("/Library/Application Support/WOLips/EOGenerator/" + templateName);
+		if (sysAppSupport.exists() && sysAppSupport.isFile()) {
+			try {
+				return new ResolvedTemplate(templateName, Files.readString(sysAppSupport.toPath(), StandardCharsets.UTF_8), sysAppSupport.getAbsolutePath());
+			} catch (IOException ignored) {
+			}
+		}
+
+		// 4. Bundled classpath resource (/templates/eogen/<templateName>)
+		String resourcePath = "/templates/eogen/" + templateName;
+		String bundledContent = readClasspathResource(resourcePath);
+		if (bundledContent != null) {
+			return new ResolvedTemplate(templateName, bundledContent, "Plugin Classpath (" + resourcePath + ")");
+		}
+
+		// 5. If requestedTemplateName was not found in classpath, try fallback to default template name
+		String fallbackName = isSuperclass ? (isWonder ? "_WonderEntity.java" : "_Entity.java") : (isWonder ? "WonderEntity.java" : "Entity.java");
+		String fallbackPath = "/templates/eogen/" + fallbackName;
+		String fallbackContent = readClasspathResource(fallbackPath);
+		if (fallbackContent != null) {
+			return new ResolvedTemplate(fallbackName, fallbackContent, "Plugin Classpath fallback (" + fallbackPath + ")");
+		}
+
+		// 6. Absolute last resort fallback (in case classpath resources failed)
+		String codeFallback = isSuperclass ? getDefaultSuperclassTemplate() : getDefaultSubclassTemplate();
+		return new ResolvedTemplate(templateName, codeFallback, "Built-in minimal code template");
+	}
+
+	private static String readClasspathResource(String resourcePath) {
+		try (InputStream is = EOGeneratorRunner.class.getResourceAsStream(resourcePath)) {
+			if (is != null) {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				byte[] buf = new byte[4096];
+				int n;
+				while ((n = is.read(buf)) > 0) {
+					baos.write(buf, 0, n);
+				}
+				return baos.toString(StandardCharsets.UTF_8);
+			}
+		} catch (IOException ignored) {
+		}
+		return null;
 	}
 
 	private static GenerationResult runExternal(Project project, File workingDir, EOGeneratorModel eogenModel,

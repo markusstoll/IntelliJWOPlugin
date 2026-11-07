@@ -19,14 +19,14 @@ public class EOGeneratorModel {
 	private String destination4;
 
 	private String templateDir;
-	private String javaTemplate = "_Entity.java";
-	private String subclassJavaTemplate = "Entity.java";
+	private String javaTemplate;
+	private String subclassJavaTemplate;
 	private String javaTemplate2;
 	private String javaTemplate3;
 	private String javaTemplate4;
 
 	private String filenameTemplate;
-	private String prefix = "_";
+	private String prefix;
 	private String extension = "java";
 	private String superclassPackage;
 
@@ -220,7 +220,7 @@ public class EOGeneratorModel {
 	}
 
 	public String getPrefix() {
-		return prefix != null ? prefix : "_";
+		return prefix;
 	}
 
 	public void setPrefix(String prefix) {

@@ -50,6 +50,22 @@ public class EOAttribute {
 		return name;
 	}
 
+	public String getCapitalizedName() {
+		if (name == null || name.isEmpty()) return "";
+		return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+	}
+
+	public String getJavaClassName() {
+		return getFormatJavaType();
+	}
+
+	public boolean isInherited() {
+		if (entity != null && entity.isInherited() && entity.getParent() != null) {
+			return entity.getParent().getAttribute(name) != null;
+		}
+		return false;
+	}
+
 	public String getUppercaseUnderscoreName() {
 		if (name == null) return "";
 		StringBuilder sb = new StringBuilder();

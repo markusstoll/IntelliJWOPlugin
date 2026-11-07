@@ -142,4 +142,16 @@ public class EOGeneratorModelTest {
 
 		assertEquals("_", model.getSuperclassPackage());
 	}
+
+	@Test
+	public void testPrefixNotEmittedUnlessConfigured() throws Exception {
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.setDestination("Sources");
+		assertNull(model.getPrefix(), "Prefix should be null by default");
+		assertFalse(model.writeToString().contains("-prefix"), "writeToString should not contain -prefix when null");
+
+		model.setPrefix("_");
+		assertEquals("_", model.getPrefix());
+		assertTrue(model.writeToString().contains("-prefix _"), "writeToString should contain -prefix _ when explicitly set");
+	}
 }

@@ -50,6 +50,47 @@ public class EORelationship {
 		return name;
 	}
 
+	public String getCapitalizedName() {
+		if (name == null || name.isEmpty()) return "";
+		return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+	}
+
+	public boolean isInherited() {
+		if (entity != null && entity.isInherited() && entity.getParent() != null) {
+			return entity.getParent().getRelationship(name) != null;
+		}
+		return false;
+	}
+
+	public EOEntity getActualDestination() {
+		EOEntity dest = getDestination();
+		if (dest == null && destinationEntityName != null && entity != null && entity.getModel() != null) {
+			dest = entity.getModel().getEntity(destinationEntityName);
+		}
+		if (dest != null && dest.isPartialEntitySet()) {
+			dest = dest.getPartialEntity();
+		}
+		if (dest == null) {
+			dest = new EOEntity(destinationEntityName != null ? destinationEntityName : "EOGenericRecord");
+			dest.setClassName(destinationEntityName);
+		}
+		return dest;
+	}
+
+	public EORelationship getInverseRelationship() {
+		EOEntity dest = getDestination();
+		if (dest == null && destinationEntityName != null && entity != null && entity.getModel() != null) {
+			dest = entity.getModel().getEntity(destinationEntityName);
+		}
+		if (dest == null || entity == null) return null;
+		for (EORelationship rel : dest.getRelationships()) {
+			if (entity.getName().equals(rel.getDestinationEntityName())) {
+				return rel;
+			}
+		}
+		return null;
+	}
+
 	public String getUppercaseUnderscoreName() {
 		if (name == null) return "";
 		StringBuilder sb = new StringBuilder();

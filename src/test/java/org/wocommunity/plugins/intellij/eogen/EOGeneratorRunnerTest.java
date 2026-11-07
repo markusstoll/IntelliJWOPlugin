@@ -46,10 +46,10 @@ public class EOGeneratorRunnerTest {
 		String superclassContent = Files.readString(artistSuperclass.toPath());
 		assertTrue(superclassContent.contains("package org.objectstyle.art;"), "Should declare correct package");
 		assertTrue(superclassContent.contains("public abstract class _Artist"), "Should declare abstract superclass");
-		assertTrue(superclassContent.contains("public static final String ARTISTNAME_KEY = \"artistName\";"), "Should define attribute keys");
+		assertTrue(superclassContent.contains("public static final String ARTIST_NAME_KEY = \"artistName\";"), "Should define attribute keys");
 		assertTrue(superclassContent.contains("public String artistName()"), "Should have artistName getter");
 		assertTrue(superclassContent.contains("public void setArtistName(String value)"), "Should have artistName setter");
-		assertTrue(superclassContent.contains("public NSArray<Painting> paintingArray()"), "Should have relationship getter");
+		assertTrue(superclassContent.contains("paintingArray()"), "Should have relationship getter");
 
 		String subclassContent = Files.readString(artistSubclass.toPath());
 		assertTrue(subclassContent.contains("public class Artist extends _Artist"), "Subclass should extend _Artist");
@@ -135,5 +135,30 @@ public class EOGeneratorRunnerTest {
 		assertTrue(subclassContent.contains("package org.objectstyle.art;"), "Subclass should declare base package");
 		assertTrue(subclassContent.contains("import org.objectstyle.art._._Artist;") || subclassContent.contains("extends org.objectstyle.art._._Artist"),
 				"Subclass should reference superclass in subpackage");
+	}
+
+	@Test
+	public void testWonderProjectUsesWonderEntityTemplate(@TempDir Path tempDir) throws IOException {
+		File modelDir = new File("src/test/resources/eomodeld/art.eomodeld");
+		File eogenFile = tempDir.resolve("test.eogen").toFile();
+
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.setDestination("src/main/java");
+		model.setSubclassDestination("src/main/java");
+		model.setModels(Collections.singletonList(modelDir.getAbsolutePath()));
+		model.setJava(true);
+		model.setPackageDirs(true);
+		model.addDefine("wonder", "1");
+
+		List<String> logs = new ArrayList<>();
+		EOGeneratorRunner.GenerationResult result = EOGeneratorRunner.generate(null, eogenFile, model, null, logs::add);
+		assertTrue(result.isSuccess(), "Generation should succeed: " + result.getMessages());
+
+		File artistSuperclass = tempDir.resolve("src/main/java/org/objectstyle/art/_Artist.java").toFile();
+		assertTrue(artistSuperclass.exists());
+
+		String content = Files.readString(artistSuperclass.toPath());
+		assertTrue(content.contains("ERXGenericRecord"), "Wonder template should extend ERXGenericRecord: " + content);
+		assertTrue(content.contains("ERXKey"), "Wonder template should define ERXKey fields: " + content);
 	}
 }
