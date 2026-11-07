@@ -152,7 +152,15 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.9)
+## Recent Highlights (v0.9.10)
+
+- **EOGenerator Diagnostics & Superclass Package Support**:
+  - **Live Log & Output Tab**: Real-time execution log in the `.eogen` editor with timestamps, automatic switching on 0 generated files, and a "View Log" notification dialog.
+  - **Hierarchical Path & Model Resolution**: Intelligently resolves models and destination folders across project/content roots, `Resources/`, `src/main/resources/`, and IntelliJ's `FilenameIndex`.
+  - **Full `-superclassPackage` Support**: Correctly computes subpackages (e.g. `_` or `auto`), places `_Entity.java` in the subpackage directory, updates `package` declarations, and imports superclasses in subclasses.
+  - **Robust Command Line Tokenizer**: Handles trailing backslashes and EOF line continuations without parser exceptions.
+
+## Highlights (v0.9.9)
 
 - **EOGen Editor & Integrated EOGenerate Action**:
   - Native IntelliJ Editor Tab (`FileEditorProvider`) for `.eogen` files with two synchronized views: **Configuration Form** and **Source**.
