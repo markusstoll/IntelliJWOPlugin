@@ -300,6 +300,16 @@ public final class WOComponentClassResolver {
                     }
                 }
             }
+
+            // 4. Final fallback: search across project scope if module search yielded nothing
+            if (candidates.isEmpty()) {
+                GlobalSearchScope projectScope = GlobalSearchScope.projectScope(project);
+                for (PsiClass cls : cache.getClassesByName(componentName, projectScope)) {
+                    if (isValidSourceClass(cls) && seen.add(cls)) {
+                        candidates.add(cls);
+                    }
+                }
+            }
         } else {
             // Module could not be determined: search strictly in content root of file
             VirtualFile contentRoot = null;

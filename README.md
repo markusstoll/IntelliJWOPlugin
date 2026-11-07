@@ -152,7 +152,17 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.6)
+## Recent Highlights (v0.9.7)
+
+- **Inline HTML Template Binding & Keypath Validation (`WOHtmlAnnotator`)**:
+  - Highlights invalid inline `$keypath` bindings (e.g. `value="$nonExisting"`) with a warning in the editor (`There is no key '...' in Component`), matching the exact behavior of classic `.wod` files.
+  - Highlights undefined component bindings on `<wo:*>` tags (e.g. `<wo:WOString invalidBinding="..." />`) with a warning (`Binding '...' is not defined for component '...'`).
+  - Validates parent bindings in inline templates (`value="^parentBinding"`) against component `.api` declarations.
+- **Java Method Rename Refactoring via `MethodReferencesSearch`**:
+  - Implemented `WOKvcMethodReferencesSearcher` registered on `com.intellij.methodReferencesSearch`, enabling Java method rename refactoring (`Shift+F6`) on getters (e.g. `getContent()` $\rightarrow$ `getBody()`) to reliably propagate to KVC bindings in HTML templates (`$content` $\rightarrow$ `$body`) and `.wod` declarations (`content` $\rightarrow$ `body`).
+  - Added robust cross-module component class discovery fallback in `WOComponentClassResolver`.
+
+## Highlights (v0.9.6)
 
 - **KVC Accessor & Field Usage Tracking (Find Usages / "Used by")**: Bridges KVC-bound property expressions in `.wod` (`value = currency;`) and `.html` (`$currency`) to backing Java accessor methods (`getCurrency()`, `setCurrency()`, `isAvailable()`) and fields (`_currency`), ensuring they appear in IntelliJ's native "Find Usages" and "Used by" results.
 - **Java ↔ Template Gutter Icons for HTML Bindings & Accessors**: WebObjects gutter navigation icons now appear on Java getters, setters, and fields referenced by inline HTML `$property` bindings, seamlessly supporting both WOD and template-based components.

@@ -21,6 +21,7 @@ public class KeyValueCodingUtilTest {
     public void testExtractKvcPropertyName() {
         // Getters
         assertEquals("currency", KeyValueCodingUtil.extractKvcPropertyName("getCurrency"));
+        assertEquals("content", KeyValueCodingUtil.extractKvcPropertyName("getContent"));
         assertEquals("URL", KeyValueCodingUtil.extractKvcPropertyName("getURL"));
         assertNull(KeyValueCodingUtil.extractKvcPropertyName("get"));
         assertNull(KeyValueCodingUtil.extractKvcPropertyName("getup")); // 'u' is not uppercase
@@ -53,6 +54,7 @@ public class KeyValueCodingUtilTest {
     public void testComputeRenamedKeyForHtmlTemplate() {
         // Getter renamed -> KVC property name in HTML
         assertEquals("$euro", KeyValueCodingUtil.computeRenamedKey("$currency", "getEuro"));
+        assertEquals("$body", KeyValueCodingUtil.computeRenamedKey("$content", "getBody"));
 
         // Method call with parens and getter name preserved
         assertEquals("$getEuro()", KeyValueCodingUtil.computeRenamedKey("$getCurrency()", "getEuro"));
@@ -92,5 +94,16 @@ public class KeyValueCodingUtilTest {
 
         // Normal property renamed
         assertEquals("euro", KeyValueCodingUtil.computeRenamedKey("currency", "euro"));
+        assertEquals("body", KeyValueCodingUtil.computeRenamedKey("content", "getBody"));
+    }
+
+    @Test
+    public void testSystemBindingValidation() {
+        Set<String> woStringBindings = org.wocommunity.plugins.intellij.wotemplate.WOSystemBindingDefinitions
+                .getBindingNamesForShortClassName("WOString");
+        assertTrue(woStringBindings.contains("value"));
+        assertTrue(woStringBindings.contains("valueWhenEmpty"));
+        assertFalse(woStringBindings.contains("invalidBinding"));
+        assertFalse(woStringBindings.contains("notDefined"));
     }
 }

@@ -126,6 +126,10 @@
                                   implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlWebObjectReferenceContributor"/>
 
         <referencesSearch implementation="org.wocommunity.plugins.intellij.java.search.WOKvcReferencesSearcher"/>
+        <methodReferencesSearch implementation="org.wocommunity.plugins.intellij.java.search.WOKvcMethodReferencesSearcher"/>
+
+        <annotator language="HTML" implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlAnnotator"/>
+        <annotator language="XHTML" implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlAnnotator"/>
 
         <localInspection language="HTML"
                          shortName="WORequiredBindings"

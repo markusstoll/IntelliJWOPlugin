@@ -11,6 +11,7 @@ import org.wocommunity.plugins.intellij.tools.KeyValueCodingUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A PSI reference from an HTML attribute binding ($property, $method, $user.name)
@@ -80,13 +81,29 @@ public class WOHtmlBindingReference extends PsiReferenceBase<XmlAttributeValue> 
 
     @Override
     public boolean isReferenceTo(@NotNull PsiElement element) {
+        if (super.isReferenceTo(element)) {
+            return true;
+        }
         for (ResolveResult result : multiResolve(false)) {
             PsiElement target = result.getElement();
             if (target != null && getElement().getManager().areElementsEquivalent(target, element)) {
                 return true;
             }
         }
-        return super.isReferenceTo(element);
+        if (element instanceof PsiNamedElement named) {
+            String altName = KeyValueCodingUtil.extractKvcPropertyName(named.getName());
+            if (segmentKey.equals(altName) || segmentKey.equals(named.getName())) {
+                for (ResolveResult result : multiResolve(false)) {
+                    PsiElement target = result.getElement();
+                    if (target instanceof PsiMember targetMember && element instanceof PsiMember searchMember) {
+                        if (Objects.equals(targetMember.getContainingClass(), searchMember.getContainingClass())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
