@@ -50,6 +50,9 @@ public class EOGeneratorRunnerTest {
 		assertTrue(superclassContent.contains("public String artistName()"), "Should have artistName getter");
 		assertTrue(superclassContent.contains("public void setArtistName(String value)"), "Should have artistName setter");
 		assertTrue(superclassContent.contains("paintingArray()"), "Should have relationship getter");
+		assertFalse(superclassContent.contains("artistId()"), "artistId is not a class property and must not have a getter");
+		assertFalse(superclassContent.contains("ARTIST_ID_KEY"), "artistId is not a class property and must not have a key constant");
+		assertTrue(superclassContent.contains("dateOfBirth()"), "dateOfBirth is a class property and must have a getter");
 
 		String subclassContent = Files.readString(artistSubclass.toPath());
 		assertTrue(subclassContent.contains("public class Artist extends _Artist"), "Subclass should extend _Artist");
@@ -160,5 +163,7 @@ public class EOGeneratorRunnerTest {
 		String content = Files.readString(artistSuperclass.toPath());
 		assertTrue(content.contains("ERXGenericRecord"), "Wonder template should extend ERXGenericRecord: " + content);
 		assertTrue(content.contains("ERXKey"), "Wonder template should define ERXKey fields: " + content);
+		assertFalse(content.contains("ARTIST_ID"), "artistId is not a class property and must not have an ERXKey: " + content);
+		assertTrue(content.contains("ARTIST_NAME"), "artistName is a class property and must have an ERXKey: " + content);
 	}
 }

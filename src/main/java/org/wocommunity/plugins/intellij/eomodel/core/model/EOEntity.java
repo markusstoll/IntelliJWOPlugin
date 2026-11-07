@@ -197,15 +197,55 @@ public class EOEntity {
 		this.prefixClassNameWithOptionalPackage = prefixClassNameWithOptionalPackage;
 	}
 
+	public List<EOAttribute> getClassAttributes() {
+		List<EOAttribute> list = new ArrayList<>();
+		for (EOAttribute attr : getAttributes()) {
+			if (attr.isClassProperty()) {
+				list.add(attr);
+			}
+		}
+		return list;
+	}
+
 	public List<EOAttribute> getSortedClassAttributes() {
-		List<EOAttribute> list = new ArrayList<>(getAttributes());
+		List<EOAttribute> list = new ArrayList<>(getClassAttributes());
 		list.sort(Comparator.comparing(EOAttribute::getName));
 		return list;
 	}
 
+	public List<EOAttribute> getNonClassAttributes() {
+		List<EOAttribute> list = new ArrayList<>();
+		for (EOAttribute attr : getAttributes()) {
+			if (!attr.isClassProperty()) {
+				list.add(attr);
+			}
+		}
+		return list;
+	}
+
+	public List<EORelationship> getClassRelationships() {
+		List<EORelationship> list = new ArrayList<>();
+		for (EORelationship rel : getRelationships()) {
+			if (rel.isClassProperty()) {
+				list.add(rel);
+			}
+		}
+		return list;
+	}
+
 	public List<EORelationship> getSortedClassRelationships() {
-		List<EORelationship> list = new ArrayList<>(getRelationships());
+		List<EORelationship> list = new ArrayList<>(getClassRelationships());
 		list.sort(Comparator.comparing(EORelationship::getName));
+		return list;
+	}
+
+	public List<EORelationship> getNonClassRelationships() {
+		List<EORelationship> list = new ArrayList<>();
+		for (EORelationship rel : getRelationships()) {
+			if (!rel.isClassProperty()) {
+				list.add(rel);
+			}
+		}
 		return list;
 	}
 
