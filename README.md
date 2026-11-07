@@ -152,7 +152,15 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.8)
+## Recent Highlights (v0.9.9)
+
+- **EOGen Editor & Integrated EOGenerate Action**:
+  - Native IntelliJ Editor Tab (`FileEditorProvider`) for `.eogen` files with two synchronized views: **Configuration Form** and **Source**.
+  - **Configuration Form**: Visual form mirroring the Eclipse/WOLips EOGenerator layout with sections for Models, Referenced Models, Destination Directories (Sources, Subclasses), Template Configuration, Options, and Defines (`-define-<name> <value>`).
+  - **"EOGenerate..." Action Button**: Prominently positioned directly in the editor header toolbar in the top right (`rechts oben`) for single-click execution, in addition to the Project View context menu.
+  - **Embedded Velocity Generation Engine**: Generates standard Wonder-compatible abstract superclasses (`_Entity.java`, overwritten on update) and concrete subclasses (`Entity.java`, preserved if existing) without external dependencies, with automatic VFS refresh and progress notifications.
+
+## Highlights (v0.9.8)
 
 - **EOModel Support & Integrated Editor Tab**:
   - Encapsulates `.eomodeld` folders in the Project View tree as single model elements with custom icons (preventing unorganized expansion of raw `.plist` files).
