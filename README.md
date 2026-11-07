@@ -152,7 +152,20 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.7)
+## Recent Highlights (v0.9.8)
+
+- **EOModel Support & Integrated Editor Tab**:
+  - Encapsulates `.eomodeld` folders in the Project View tree as single model elements with custom icons (preventing unorganized expansion of raw `.plist` files).
+  - Native IntelliJ Editor Tab (`FileEditorProvider`): Opens `.eomodeld` folders directly inside the IDE editor area (no external window).
+  - **Entities Overview (Left Pane)**: Search and filter entities, add and remove entities with immediate visual feedback.
+  - **Entity Detail (Center/Right)**: Entity and table names, Java class navigation ("Open Java Class" button), abstract and read-only flags.
+  - **Attributes Table**: Configure attributes, column names, external SQL types, Java types, primary keys, class properties, locking, and nullable flags.
+  - **Relationships Table & Joins Editor**: Configure to-one / to-many relationships, delete rules, and define column joins.
+  - **Database Connection Settings**: Form for database adaptor, JDBC URL, driver class, credentials, and WebObjects plugin.
+  - **Raw Plist Source Tab**: Direct formatted inspection of `index.eomodeld` and `<Entity>.plist` files.
+  - **New EOModel Action**: Right-click *New -> EOModel* to create a new model package with initial structure.
+
+## Highlights (v0.9.7)
 
 - **Inline HTML Template Binding & Keypath Validation (`WOHtmlAnnotator`)**:
   - Highlights invalid inline `$keypath` bindings (e.g. `value="$nonExisting"`) with a warning in the editor (`There is no key '...' in Component`), matching the exact behavior of classic `.wod` files.

@@ -43,6 +43,13 @@
                 icon="icons/WOComponentIcon.svg">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
         </action>
+        <action id="org.wocommunity.plugins.intellij.eomodel.NewEOModelAction"
+                class="org.wocommunity.plugins.intellij.eomodel.NewEOModelAction"
+                text="EOModel"
+                description="Create a new WebObjects EOModel"
+                icon="icons/EOModelIcon.svg">
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="org.wocommunity.plugins.intellij.actions.wocomponent.NewWOComponentAction"/>
+        </action>
         <action id="org.wocommunity.plugins.intellij.actions.NewWOProjectAction"
                 class="org.wocommunity.plugins.intellij.wizards.NewWOProjectAction"
                 text="WebObjects Project..."
@@ -90,6 +97,12 @@
         <iconProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentIconProvider"/>
         <editorTabTitleProvider implementation="org.wocommunity.plugins.intellij.components.WOComponentEditorTabTitleProvider"/>
         <selectInTarget implementation="org.wocommunity.plugins.intellij.components.WOComponentSelectInTarget"/>
+
+        <!-- EOModel extensions -->
+        <treeStructureProvider implementation="org.wocommunity.plugins.intellij.eomodel.EOModelTreeStructureProvider"/>
+        <fileEditorProvider implementation="org.wocommunity.plugins.intellij.eomodel.EOModelEditorProvider"/>
+        <iconProvider implementation="org.wocommunity.plugins.intellij.eomodel.EOModelIconProvider"/>
+        <editorTabTitleProvider implementation="org.wocommunity.plugins.intellij.eomodel.EOModelEditorTabTitleProvider"/>
 
         <xml.elementDescriptorProvider
                 implementation="org.wocommunity.plugins.intellij.wotemplate.WOHtmlElementDescriptorProvider"/>
