@@ -45,11 +45,39 @@ public class CommandLineTokenizer implements Enumeration<String> {
 	}
 
 	public boolean hasMoreTokens() {
-		char c = iterator.current();
-		while (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
-			c = iterator.next();
+		skipWhitespaceAndEscapes();
+		return iterator.current() != CharacterIterator.DONE;
+	}
+
+	private void skipWhitespaceAndEscapes() {
+		while (true) {
+			char c = iterator.current();
+			while (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+				c = iterator.next();
+			}
+			if (c == '\\') {
+				int savedIndex = iterator.getIndex();
+				char next = iterator.next();
+				if (next == '\r') {
+					char nextNext = iterator.next();
+					if (nextNext != '\n') {
+						iterator.setIndex(iterator.getIndex() - 1);
+					}
+					continue;
+				} else if (next == '\n') {
+					iterator.next();
+					continue;
+				} else if (next == CharacterIterator.DONE) {
+					// Trailing backslash at end of file - treat as end of file
+					break;
+				} else {
+					iterator.setIndex(savedIndex);
+					break;
+				}
+			} else {
+				break;
+			}
 		}
-		return c != CharacterIterator.DONE;
 	}
 
 	@Override
@@ -62,12 +90,10 @@ public class CommandLineTokenizer implements Enumeration<String> {
 	}
 
 	public String nextToken() throws ParseException {
-		// 1. Skip leading whitespace
-		char c = iterator.current();
-		while (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
-			c = iterator.next();
-		}
+		// 1. Skip leading whitespace and line continuations
+		skipWhitespaceAndEscapes();
 
+		char c = iterator.current();
 		if (c == CharacterIterator.DONE) {
 			throw new NoSuchElementException("There are no more tokens.");
 		}

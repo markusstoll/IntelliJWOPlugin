@@ -9,7 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,9 +31,11 @@ public class EOGeneratorRunnerTest {
 		model.setJava(true);
 		model.setPackageDirs(true);
 
-		EOGeneratorRunner.GenerationResult result = EOGeneratorRunner.generate(null, eogenFile, model, null);
+		List<String> streamedLogs = new ArrayList<>();
+		EOGeneratorRunner.GenerationResult result = EOGeneratorRunner.generate(null, eogenFile, model, null, streamedLogs::add);
 		assertTrue(result.isSuccess(), "Generation should succeed: " + result.getMessages());
 		assertFalse(result.getGeneratedFiles().isEmpty(), "Should have generated files");
+		assertFalse(streamedLogs.isEmpty(), "Should have received streamed logs");
 
 		File artistSuperclass = tempDir.resolve("src/main/java/org/objectstyle/art/_Artist.java").toFile();
 		File artistSubclass = tempDir.resolve("src/main/java/org/objectstyle/art/Artist.java").toFile();
@@ -59,5 +63,77 @@ public class EOGeneratorRunnerTest {
 
 		String reloadedSubclass = Files.readString(artistSubclass.toPath());
 		assertTrue(reloadedSubclass.contains("// Custom logic"), "Existing subclass should NOT be overwritten");
+	}
+
+	@Test
+	public void testInferredModelFromEogenName(@TempDir Path tempDir) throws IOException {
+		// Create art.eomodeld in tempDir
+		File artSource = new File("src/test/resources/eomodeld/art.eomodeld");
+		Path artTarget = tempDir.resolve("art.eomodeld");
+		Files.createDirectories(artTarget);
+		for (File f : artSource.listFiles()) {
+			if (f.isFile()) {
+				Files.copy(f.toPath(), artTarget.resolve(f.getName()));
+			}
+		}
+
+		// .eogen file named art.eogen with NO -model argument
+		File eogenFile = tempDir.resolve("art.eogen").toFile();
+
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.setDestination("src/main/java");
+		model.setSubclassDestination("src/main/java");
+		model.setJava(true);
+
+		EOGeneratorRunner.GenerationResult result = EOGeneratorRunner.generate(null, eogenFile, model, null);
+		assertTrue(result.isSuccess(), "Should succeed by inferring art.eomodeld");
+		assertFalse(result.getGeneratedFiles().isEmpty());
+	}
+
+	@Test
+	public void testMissingModelGeneratesZeroFilesAndLogsDiagnostics(@TempDir Path tempDir) {
+		File eogenFile = tempDir.resolve("nonexistent.eogen").toFile();
+
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.setDestination("src/main/java");
+		model.setModels(Collections.singletonList("DoesNotExist.eomodeld"));
+
+		EOGeneratorRunner.GenerationResult result = EOGeneratorRunner.generate(null, eogenFile, model, null);
+		assertFalse(result.isSuccess(), "Should fail when 0 files generated");
+		assertTrue(result.getGeneratedFiles().isEmpty());
+
+		boolean hasDiagnostic = result.getMessages().stream().anyMatch(m -> m.contains("Model folder not found"));
+		assertTrue(hasDiagnostic, "Log must contain diagnostic about missing model folder");
+	}
+
+	@Test
+	public void testSuperclassPackageGeneration(@TempDir Path tempDir) throws IOException {
+		File modelDir = new File("src/test/resources/eomodeld/art.eomodeld");
+		File eogenFile = tempDir.resolve("test.eogen").toFile();
+
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.setDestination("src/main/java");
+		model.setSubclassDestination("src/main/java");
+		model.setModels(Collections.singletonList(modelDir.getAbsolutePath()));
+		model.setJava(true);
+		model.setPackageDirs(true);
+		model.setSuperclassPackage("_");
+
+		EOGeneratorRunner.GenerationResult result = EOGeneratorRunner.generate(null, eogenFile, model, null);
+		assertTrue(result.isSuccess(), "Generation should succeed: " + result.getMessages());
+
+		File superclassFile = tempDir.resolve("src/main/java/org/objectstyle/art/_/_Artist.java").toFile();
+		File subclassFile = tempDir.resolve("src/main/java/org/objectstyle/art/Artist.java").toFile();
+
+		assertTrue(superclassFile.exists(), "_Artist.java should be in _ subfolder: " + superclassFile.getAbsolutePath());
+		assertTrue(subclassFile.exists(), "Artist.java should be in org.objectstyle.art");
+
+		String superclassContent = Files.readString(superclassFile.toPath());
+		assertTrue(superclassContent.contains("package org.objectstyle.art._;"), "Superclass should declare subpackage: " + superclassContent);
+
+		String subclassContent = Files.readString(subclassFile.toPath());
+		assertTrue(subclassContent.contains("package org.objectstyle.art;"), "Subclass should declare base package");
+		assertTrue(subclassContent.contains("import org.objectstyle.art._._Artist;") || subclassContent.contains("extends org.objectstyle.art._._Artist"),
+				"Subclass should reference superclass in subpackage");
 	}
 }

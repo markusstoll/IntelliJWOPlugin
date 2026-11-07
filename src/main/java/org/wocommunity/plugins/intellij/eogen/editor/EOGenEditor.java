@@ -48,6 +48,8 @@ public class EOGenEditor implements FileEditor, DumbAware, UiDataProvider {
 	private JBLabel titleLabel;
 	private EOGenFormPanel formPanel;
 	private EOGenSourcePanel sourcePanel;
+	private EOGenLogPanel logPanel;
+	private EOGenerateAction generateAction;
 	private JBTabbedPane tabbedPane;
 	private boolean isDisposed = false;
 
@@ -110,7 +112,25 @@ public class EOGenEditor implements FileEditor, DumbAware, UiDataProvider {
 		});
 
 		// "EOGenerate..." Button positioned directly at the top right of the view
-		EOGenerateAction generateAction = new EOGenerateAction(this::save, model);
+		generateAction = new EOGenerateAction(
+				() -> {
+					if (logPanel != null) {
+						logPanel.clear();
+					}
+					save();
+				},
+				model,
+				line -> {
+					if (logPanel != null) {
+						logPanel.appendLine(line);
+					}
+				},
+				result -> {
+					if (logPanel != null && (!result.isSuccess() || result.getGeneratedFiles().isEmpty())) {
+						tabbedPane.setSelectedComponent(logPanel);
+					}
+				}
+		);
 		actionGroup.add(generateAction);
 
 		ActionToolbarImpl toolbar = new ActionToolbarImpl("EOGenMainToolbar", actionGroup, true);
@@ -123,9 +143,11 @@ public class EOGenEditor implements FileEditor, DumbAware, UiDataProvider {
 		tabbedPane = new JBTabbedPane();
 		formPanel = new EOGenFormPanel(project, model, this::onModelModified);
 		sourcePanel = new EOGenSourcePanel(model, ioFile.getParentFile(), this::onModelModified);
+		logPanel = new EOGenLogPanel(() -> generateAction.executeGeneration(project, file));
 
 		tabbedPane.addTab("Configuration Form", AllIcons.Nodes.Editorconfig, formPanel);
 		tabbedPane.addTab("Source", AllIcons.FileTypes.Text, sourcePanel);
+		tabbedPane.addTab("Log / Output", AllIcons.Debugger.Console, logPanel);
 
 		tabbedPane.addChangeListener(e -> {
 			if (tabbedPane.getSelectedComponent() == sourcePanel) {

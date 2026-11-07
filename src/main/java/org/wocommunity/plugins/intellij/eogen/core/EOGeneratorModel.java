@@ -381,7 +381,15 @@ public class EOGeneratorModel {
 
 		CommandLineTokenizer tokenizer = new CommandLineTokenizer(str);
 		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
+			String token;
+			try {
+				token = tokenizer.nextToken();
+			} catch (NoSuchElementException e) {
+				break;
+			}
+			if (token == null) {
+				break;
+			}
 			if (eogeneratorPath == null && !token.startsWith("-")) {
 				eogeneratorPath = token;
 			} else if (token.startsWith("-")) {
@@ -447,9 +455,14 @@ public class EOGeneratorModel {
 
 	private String nextTokenValue(String previousToken, CommandLineTokenizer tokenizer) throws ParseException {
 		if (!tokenizer.hasMoreTokens()) {
-			throw new ParseException(previousToken + " must be followed by a value.", -1);
+			return "";
 		}
-		return tokenizer.nextToken().trim();
+		try {
+			String token = tokenizer.nextToken();
+			return token != null ? token.trim() : "";
+		} catch (NoSuchElementException e) {
+			return "";
+		}
 	}
 
 	public String writeToString(File workingDirectory) {

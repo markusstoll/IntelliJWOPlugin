@@ -112,4 +112,34 @@ public class EOGeneratorModelTest {
 		assertEquals("wonder", loaded.getDefines().get(0).getName());
 		assertEquals("1", loaded.getDefines().get(0).getValue());
 	}
+
+	@Test
+	public void testSuperclassPackageAsLastParameter() throws Exception {
+		String content = "-destination Sources \\\n" +
+				"-extension java \\\n" +
+				"-java \\\n" +
+				"-model MyModel.eomodeld \\\n" +
+				"-packagedirs \\\n" +
+				"-subclassDestination Sources \\\n" +
+				"-superclassPackage _";
+
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.readFromString(content);
+
+		assertEquals("_", model.getSuperclassPackage());
+		assertEquals("Sources", model.getDestination());
+		assertEquals("Sources", model.getSubclassDestination());
+		assertEquals(Collections.singletonList("MyModel.eomodeld"), model.getModels());
+	}
+
+	@Test
+	public void testSuperclassPackageWithTrailingWhitespaceOrBackslash() throws Exception {
+		String content = "-destination Sources \\\n" +
+				"-superclassPackage _ \\\n";
+
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.readFromString(content);
+
+		assertEquals("_", model.getSuperclassPackage());
+	}
 }

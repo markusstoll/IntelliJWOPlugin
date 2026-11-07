@@ -60,6 +60,58 @@ public class EOEntity {
 		this.className = className;
 	}
 
+	public String getPackageName() {
+		if (className == null) return "";
+		int lastDot = className.lastIndexOf('.');
+		return lastDot > 0 ? className.substring(0, lastDot) : "";
+	}
+
+	public String getClassNameWithoutPackage() {
+		if (className == null) return name;
+		int lastDot = className.lastIndexOf('.');
+		return lastDot > 0 ? className.substring(lastDot + 1) : className;
+	}
+
+	private transient String superclassPackageName;
+	private transient String prefixClassNameWithoutPackage;
+	private transient String prefixClassNameWithOptionalPackage;
+
+	public String getSuperclassPackageName() {
+		return superclassPackageName != null ? superclassPackageName : getPackageName();
+	}
+
+	public void setSuperclassPackageName(String superclassPackageName) {
+		this.superclassPackageName = superclassPackageName;
+	}
+
+	public String getPrefixClassNameWithoutPackage() {
+		return prefixClassNameWithoutPackage != null ? prefixClassNameWithoutPackage : "_" + getClassNameWithoutPackage();
+	}
+
+	public void setPrefixClassNameWithoutPackage(String prefixClassNameWithoutPackage) {
+		this.prefixClassNameWithoutPackage = prefixClassNameWithoutPackage;
+	}
+
+	public String getPrefixClassNameWithOptionalPackage() {
+		return prefixClassNameWithOptionalPackage != null ? prefixClassNameWithOptionalPackage : getPrefixClassNameWithoutPackage();
+	}
+
+	public void setPrefixClassNameWithOptionalPackage(String prefixClassNameWithOptionalPackage) {
+		this.prefixClassNameWithOptionalPackage = prefixClassNameWithOptionalPackage;
+	}
+
+	public List<EOAttribute> getSortedClassAttributes() {
+		List<EOAttribute> list = new ArrayList<>(getAttributes());
+		list.sort(Comparator.comparing(EOAttribute::getName));
+		return list;
+	}
+
+	public List<EORelationship> getSortedClassRelationships() {
+		List<EORelationship> list = new ArrayList<>(getRelationships());
+		list.sort(Comparator.comparing(EORelationship::getName));
+		return list;
+	}
+
 	public String getExternalName() {
 		return externalName != null ? externalName : name;
 	}

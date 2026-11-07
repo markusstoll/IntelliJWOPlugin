@@ -1,10 +1,15 @@
 package org.wocommunity.plugins.intellij.eogen.core;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute;
@@ -14,10 +19,14 @@ import org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class EOGeneratorRunner {
 	private static final Logger LOG = Logger.getInstance(EOGeneratorRunner.class);
+	private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
 	public static class GenerationResult {
 		private boolean success = true;
@@ -42,10 +51,26 @@ public class EOGeneratorRunner {
 	}
 
 	public static GenerationResult generate(Project project, File eogenFile, EOGeneratorModel eogenModel, ProgressIndicator indicator) {
+		return generate(project, eogenFile, eogenModel, indicator, null);
+	}
+
+	public static GenerationResult generate(Project project, File eogenFile, EOGeneratorModel eogenModel,
+										   ProgressIndicator indicator, Consumer<String> logConsumer) {
 		GenerationResult result = new GenerationResult();
+
+		log(logConsumer, result, "=== Starting EOGenerator for: " + eogenFile.getName() + " ===");
+		log(logConsumer, result, "File path: " + eogenFile.getAbsolutePath());
+
 		File workingDir = eogenFile.getParentFile();
 		if (workingDir == null && project != null && project.getBasePath() != null) {
 			workingDir = new File(project.getBasePath());
+		}
+		log(logConsumer, result, "Working directory (.eogen dir): " + (workingDir != null ? workingDir.getAbsolutePath() : "unknown"));
+
+		// Determine module/project content root
+		File projectRoot = findProjectOrContentRoot(project, eogenFile);
+		if (projectRoot != null) {
+			log(logConsumer, result, "Project / Content root: " + projectRoot.getAbsolutePath());
 		}
 
 		// 1. Check for external executable
@@ -53,20 +78,25 @@ public class EOGeneratorRunner {
 		if (extPath != null && !extPath.trim().isEmpty()) {
 			File extExe = new File(extPath);
 			if (extExe.exists() && extExe.canExecute()) {
-				return runExternal(project, workingDir, eogenModel, result);
+				log(logConsumer, result, "Using external EOGenerator executable: " + extPath);
+				return runExternal(project, workingDir, eogenModel, result, logConsumer);
 			}
 		}
 
 		// 2. Built-in Generation
 		try {
-			File superclassDest = resolveDirectory(workingDir, eogenModel.getDestination());
-			File subclassDest = resolveDirectory(workingDir, eogenModel.getSubclassDestination());
+			File superclassDest = resolveDestination(project, workingDir, projectRoot, eogenModel.getDestination());
+			File subclassDest = resolveDestination(project, workingDir, projectRoot, eogenModel.getSubclassDestination());
+
+			log(logConsumer, result, "Resolved superclass destination: " + superclassDest.getAbsolutePath());
+			log(logConsumer, result, "Resolved subclass destination:   " + subclassDest.getAbsolutePath());
+			log(logConsumer, result, "Superclass package setting:      " + (eogenModel.getSuperclassPackage() != null ? eogenModel.getSuperclassPackage() : "(none)"));
 
 			if (!superclassDest.exists() && !superclassDest.mkdirs()) {
-				throw new IOException("Failed to create destination directory: " + superclassDest);
+				throw new IOException("Failed to create destination directory: " + superclassDest.getAbsolutePath());
 			}
 			if (!subclassDest.exists() && !subclassDest.mkdirs()) {
-				throw new IOException("Failed to create subclass destination directory: " + subclassDest);
+				throw new IOException("Failed to create subclass destination directory: " + subclassDest.getAbsolutePath());
 			}
 
 			// Initialize Velocity Engine
@@ -78,29 +108,64 @@ public class EOGeneratorRunner {
 			String superclassTemplateContent = loadTemplate(workingDir, eogenModel.getTemplateDir(), eogenModel.getJavaTemplate(), true);
 			String subclassTemplateContent = loadTemplate(workingDir, eogenModel.getTemplateDir(), eogenModel.getSubclassJavaTemplate(), false);
 
+			List<String> modelsToLoad = new ArrayList<>(eogenModel.getModels());
+			if (modelsToLoad.isEmpty()) {
+				log(logConsumer, result, "No -model arguments defined in .eogen file. Searching for matching .eomodeld...");
+				String baseName = eogenFile.getName();
+				int dot = baseName.lastIndexOf('.');
+				if (dot > 0) {
+					baseName = baseName.substring(0, dot);
+				}
+				File inferred = resolveModel(project, workingDir, projectRoot, baseName + ".eomodeld");
+				if (inferred != null && inferred.exists()) {
+					log(logConsumer, result, "Found matching model: " + inferred.getName() + " -> " + inferred.getAbsolutePath());
+					modelsToLoad.add(inferred.getAbsolutePath());
+				} else {
+					log(logConsumer, result, "WARNING: No model could be inferred for " + eogenFile.getName());
+				}
+			}
+
+			log(logConsumer, result, "Models to process: " + modelsToLoad.size());
+
 			// Load each model
-			for (String modelPath : eogenModel.getModels()) {
-				File modelFolder = resolveDirectory(workingDir, modelPath);
-				if (!modelFolder.exists()) {
-					result.getMessages().add("Warning: Model folder does not exist: " + modelFolder.getPath());
+			for (String modelPath : modelsToLoad) {
+				log(logConsumer, result, "--- Resolving model: '" + modelPath + "' ---");
+				File modelFolder = resolveModel(project, workingDir, projectRoot, modelPath);
+
+				if (modelFolder == null || !modelFolder.exists()) {
+					String msg = "ERROR: Model folder not found for '" + modelPath + "'!";
+					log(logConsumer, result, msg);
+					log(logConsumer, result, "Checked:\n  1. " + new File(workingDir, modelPath).getAbsolutePath() +
+							(projectRoot != null ? "\n  2. " + new File(projectRoot, modelPath).getAbsolutePath() +
+									"\n  3. " + new File(projectRoot, "Resources/" + modelPath).getAbsolutePath() +
+									"\n  4. " + new File(projectRoot, "src/main/resources/" + modelPath).getAbsolutePath() : ""));
 					continue;
 				}
 
+				log(logConsumer, result, "Found model folder: " + modelFolder.getAbsolutePath());
 				EOModel eoModel = new EOModel();
 				eoModel.loadFromFolder(modelFolder);
 
-				for (EOEntity entity : eoModel.getEntities()) {
+				List<EOEntity> entities = eoModel.getEntities();
+				log(logConsumer, result, "Loaded model '" + eoModel.getName() + "' with " + entities.size() + " entities: " +
+						entities.stream().map(EOEntity::getName).toList());
+
+				if (entities.isEmpty()) {
+					log(logConsumer, result, "WARNING: Model '" + eoModel.getName() + "' has 0 entities.");
+				}
+
+				for (EOEntity entity : entities) {
 					if (indicator != null) {
 						indicator.setText("Generating " + entity.getName() + "...");
 					}
 
 					generateEntity(velocityEngine, eoModel, entity, eogenModel, superclassDest, subclassDest,
-							superclassTemplateContent, subclassTemplateContent, result);
+							superclassTemplateContent, subclassTemplateContent, result, logConsumer);
 				}
 			}
 
 			// Refresh VFS
-			if (com.intellij.openapi.application.ApplicationManager.getApplication() != null) {
+			if (ApplicationManager.getApplication() != null) {
 				VirtualFile superclassVf = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(superclassDest);
 				if (superclassVf != null) {
 					superclassVf.refresh(true, true);
@@ -111,24 +176,172 @@ public class EOGeneratorRunner {
 				}
 			}
 
-			result.getMessages().add("Generated " + result.getGeneratedFiles().size() + " files successfully.");
+			if (result.getGeneratedFiles().isEmpty()) {
+				result.setSuccess(false);
+				log(logConsumer, result, "=========================================================");
+				log(logConsumer, result, "RESULT: 0 files were generated!");
+				log(logConsumer, result, "Diagnostics:");
+				log(logConsumer, result, " • If models were not found, check the '-model' paths in the .eogen Configuration Form.");
+				log(logConsumer, result, " • If entities were skipped because of 'className=EOGenericRecord', open the EOModel editor and assign custom Java class names to your entities.");
+				log(logConsumer, result, "=========================================================");
+			} else {
+				log(logConsumer, result, "=========================================================");
+				log(logConsumer, result, "RESULT: " + result.getGeneratedFiles().size() + " files generated successfully.");
+				log(logConsumer, result, "=========================================================");
+			}
 		} catch (Exception ex) {
 			LOG.error("EOGenerator failed", ex);
 			result.setSuccess(false);
-			result.getMessages().add("Error: " + ex.getMessage());
+			log(logConsumer, result, "ERROR: EOGenerator failed with exception: " + ex.getMessage());
+			StringWriter sw = new StringWriter();
+			ex.printStackTrace(new PrintWriter(sw));
+			log(logConsumer, result, sw.toString());
 		}
 
 		return result;
 	}
 
+	private static File findProjectOrContentRoot(Project project, File eogenFile) {
+		if (project != null) {
+			VirtualFile vf = LocalFileSystem.getInstance().findFileByIoFile(eogenFile);
+			if (vf != null) {
+				try {
+					VirtualFile contentRoot = ProjectFileIndex.getInstance(project).getContentRootForFile(vf);
+					if (contentRoot != null) {
+						return new File(contentRoot.getPath());
+					}
+				} catch (Exception ignored) {
+				}
+			}
+			if (project.getBasePath() != null) {
+				return new File(project.getBasePath());
+			}
+		}
+		return eogenFile.getParentFile();
+	}
+
+	public static File resolveModel(Project project, File workingDir, File projectRoot, String modelPath) {
+		if (modelPath == null || modelPath.trim().isEmpty()) {
+			return null;
+		}
+
+		File f = new File(modelPath);
+		if (f.isAbsolute() && f.exists()) {
+			return f;
+		}
+
+		// 1. Relative to workingDir
+		if (workingDir != null) {
+			File direct = new File(workingDir, modelPath);
+			if (direct.exists()) return direct;
+		}
+
+		// 2. Relative to projectRoot / contentRoot
+		if (projectRoot != null) {
+			File fromRoot = new File(projectRoot, modelPath);
+			if (fromRoot.exists()) return fromRoot;
+
+			File inResources = new File(projectRoot, "Resources/" + modelPath);
+			if (inResources.exists()) return inResources;
+
+			File inMaven = new File(projectRoot, "src/main/resources/" + modelPath);
+			if (inMaven.exists()) return inMaven;
+		}
+
+		// 3. Relative to project base path
+		if (project != null && project.getBasePath() != null) {
+			File base = new File(project.getBasePath());
+			File fromBase = new File(base, modelPath);
+			if (fromBase.exists()) return fromBase;
+
+			File inBaseRes = new File(base, "Resources/" + modelPath);
+			if (inBaseRes.exists()) return inBaseRes;
+
+			File inBaseMaven = new File(base, "src/main/resources/" + modelPath);
+			if (inBaseMaven.exists()) return inBaseMaven;
+		}
+
+		// 4. FilenameIndex across the project
+		if (project != null && !project.isDisposed()) {
+			String searchName = new File(modelPath).getName();
+			if (!searchName.endsWith(".eomodeld")) {
+				searchName += ".eomodeld";
+			}
+			final String finalSearchName = searchName;
+			try {
+				VirtualFile[] found = ApplicationManager.getApplication().runReadAction((com.intellij.openapi.util.Computable<VirtualFile[]>) () -> {
+					Collection<VirtualFile> vfs = FilenameIndex.getVirtualFilesByName(
+							finalSearchName,
+							GlobalSearchScope.projectScope(project)
+					);
+					return vfs.toArray(VirtualFile.EMPTY_ARRAY);
+				});
+				if (found != null && found.length > 0) {
+					return new File(found[0].getPath());
+				}
+			} catch (Exception ignored) {
+			}
+		}
+
+		// Fallback
+		return workingDir != null ? new File(workingDir, modelPath) : f;
+	}
+
+	public static File resolveDestination(Project project, File workingDir, File projectRoot, String path) {
+		if (path == null || path.trim().isEmpty()) {
+			if (projectRoot != null) {
+				File sources = new File(projectRoot, "Sources");
+				if (sources.exists()) return sources;
+				File maven = new File(projectRoot, "src/main/java");
+				if (maven.exists()) return maven;
+				return sources;
+			}
+			return workingDir;
+		}
+
+		File f = new File(path);
+		if (f.isAbsolute()) {
+			return f;
+		}
+
+		// 1. If exists in projectRoot
+		if (projectRoot != null) {
+			File fromRoot = new File(projectRoot, path);
+			if (fromRoot.exists()) return fromRoot;
+		}
+
+		// 2. If exists in project base
+		if (project != null && project.getBasePath() != null) {
+			File fromBase = new File(project.getBasePath(), path);
+			if (fromBase.exists()) return fromBase;
+		}
+
+		// 3. If exists in workingDir
+		if (workingDir != null) {
+			File fromWorking = new File(workingDir, path);
+			if (fromWorking.exists()) return fromWorking;
+		}
+
+		// 4. Default to projectRoot/path if creating new folder
+		if (projectRoot != null) {
+			return new File(projectRoot, path);
+		}
+		if (project != null && project.getBasePath() != null) {
+			return new File(project.getBasePath(), path);
+		}
+		return new File(workingDir, path);
+	}
+
 	private static void generateEntity(VelocityEngine velocityEngine, EOModel model, EOEntity entity,
 									   EOGeneratorModel eogenModel, File superclassDest, File subclassDest,
 									   String superclassTemplateContent, String subclassTemplateContent,
-									   GenerationResult result) throws IOException {
+									   GenerationResult result, Consumer<String> logConsumer) throws IOException {
 
 		String fullClassName = entity.getClassName();
-		if (fullClassName == null || fullClassName.trim().isEmpty() || fullClassName.equals("EOGenericRecord")) {
-			return; // Don't generate for raw generic record
+		if (fullClassName == null || fullClassName.trim().isEmpty() || fullClassName.equals("EOGenericRecord") || fullClassName.endsWith(".EOGenericRecord")) {
+			log(logConsumer, result, "  • Entity '" + entity.getName() + "': Skipped (className is '" +
+					(fullClassName == null ? "null" : fullClassName) + "', EOGenericRecord has no custom class)");
+			return;
 		}
 
 		String packageName = "";
@@ -139,17 +352,60 @@ public class EOGeneratorRunner {
 			simpleClassName = fullClassName.substring(lastDot + 1);
 		}
 
+		// Calculate superclass package name
+		String superclassPackageParam = eogenModel.getSuperclassPackage();
+		String superclassPackageName;
+		if (superclassPackageParam != null && !superclassPackageParam.trim().isEmpty()) {
+			superclassPackageParam = superclassPackageParam.trim();
+			if (superclassPackageParam.startsWith(".")) {
+				superclassPackageParam = superclassPackageParam.substring(1);
+			}
+			if (!packageName.isEmpty()) {
+				if (superclassPackageParam.startsWith(packageName + ".")) {
+					superclassPackageName = superclassPackageParam;
+				} else {
+					superclassPackageName = packageName + "." + superclassPackageParam;
+				}
+			} else {
+				superclassPackageName = superclassPackageParam;
+			}
+		} else {
+			superclassPackageName = packageName;
+		}
+
 		String prefix = eogenModel.getPrefix() != null ? eogenModel.getPrefix() : "_";
-		String prefixClassName = prefix + simpleClassName;
+		String prefixClassNameWithoutPackage = prefix + simpleClassName;
+
+		String prefixClassName;
+		if (!superclassPackageName.isEmpty()) {
+			prefixClassName = superclassPackageName + "." + prefixClassNameWithoutPackage;
+		} else {
+			prefixClassName = prefixClassNameWithoutPackage;
+		}
+
+		String prefixClassNameWithOptionalPackage;
+		if (superclassPackageParam != null && !superclassPackageParam.trim().isEmpty()) {
+			prefixClassNameWithOptionalPackage = prefixClassName;
+		} else {
+			prefixClassNameWithOptionalPackage = prefixClassNameWithoutPackage;
+		}
+
+		// Set transient helpers on entity for custom Velocity templates
+		entity.setSuperclassPackageName(superclassPackageName);
+		entity.setPrefixClassNameWithoutPackage(prefixClassNameWithoutPackage);
+		entity.setPrefixClassNameWithOptionalPackage(prefixClassNameWithOptionalPackage);
 
 		VelocityContext context = new VelocityContext();
 		context.put("model", model);
 		context.put("entity", entity);
 		context.put("className", fullClassName);
 		context.put("packageName", packageName);
+		context.put("superclassPackageName", superclassPackageName);
 		context.put("classNameWithoutPackage", simpleClassName);
-		context.put("prefixClassNameWithoutPackage", prefixClassName);
-		context.put("prefixClassName", (packageName.isEmpty() ? "" : packageName + ".") + prefixClassName);
+		context.put("classNameWithOptionalPackage", fullClassName);
+		context.put("prefixClassNameWithoutPackage", prefixClassNameWithoutPackage);
+		context.put("prefixClassName", prefixClassName);
+		context.put("prefixClassNameWithOptionalPackage", prefixClassNameWithOptionalPackage);
 
 		for (EODefine define : eogenModel.getDefines()) {
 			context.put(define.getName(), define.getValue());
@@ -158,21 +414,27 @@ public class EOGeneratorRunner {
 		File superclassPackageDir = superclassDest;
 		File subclassPackageDir = subclassDest;
 
-		if (Boolean.TRUE.equals(eogenModel.isPackageDirs()) && !packageName.isEmpty()) {
-			String relPath = packageName.replace('.', File.separatorChar);
-			superclassPackageDir = new File(superclassDest, relPath);
-			subclassPackageDir = new File(subclassDest, relPath);
+		if (Boolean.TRUE.equals(eogenModel.isPackageDirs())) {
+			if (!superclassPackageName.isEmpty()) {
+				String superRelPath = superclassPackageName.replace('.', File.separatorChar);
+				superclassPackageDir = new File(superclassDest, superRelPath);
+			}
+			if (!packageName.isEmpty()) {
+				String subRelPath = packageName.replace('.', File.separatorChar);
+				subclassPackageDir = new File(subclassDest, subRelPath);
+			}
 			superclassPackageDir.mkdirs();
 			subclassPackageDir.mkdirs();
 		}
 
 		// 1. Superclass: always overwrite
-		File superclassFile = new File(superclassPackageDir, prefixClassName + "." + eogenModel.getExtension());
+		File superclassFile = new File(superclassPackageDir, prefixClassNameWithoutPackage + "." + eogenModel.getExtension());
 		try (StringWriter sw = new StringWriter();
 			 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(superclassFile), StandardCharsets.UTF_8))) {
 			velocityEngine.evaluate(context, sw, "EOGenerator", superclassTemplateContent);
 			bw.write(sw.toString());
 			result.getGeneratedFiles().add(superclassFile.getName());
+			log(logConsumer, result, "  • Entity '" + entity.getName() + "': Generated superclass -> " + superclassFile.getAbsolutePath());
 		}
 
 		// 2. Subclass: generate only if it doesn't already exist!
@@ -183,13 +445,28 @@ public class EOGeneratorRunner {
 				velocityEngine.evaluate(context, sw, "EOGenerator", subclassTemplateContent);
 				bw.write(sw.toString());
 				result.getGeneratedFiles().add(subclassFile.getName());
+				log(logConsumer, result, "  • Entity '" + entity.getName() + "': Generated subclass -> " + subclassFile.getAbsolutePath());
 			}
+		} else {
+			log(logConsumer, result, "  • Entity '" + entity.getName() + "': Subclass " + subclassFile.getName() + " already exists (preserved).");
+		}
+	}
+
+	private static void log(Consumer<String> logger, GenerationResult result, String message) {
+		String line = "[" + LocalTime.now().format(TIME_FMT) + "] " + message;
+		result.getMessages().add(line);
+		LOG.info("[EOGenerator] " + message);
+		if (logger != null) {
+			logger.accept(line);
 		}
 	}
 
 	private static String loadTemplate(File workingDir, String templateDir, String templateName, boolean isSuperclass) {
 		if (templateDir != null && !templateDir.trim().isEmpty()) {
-			File dir = resolveDirectory(workingDir, templateDir);
+			File dir = new File(templateDir);
+			if (!dir.isAbsolute() && workingDir != null) {
+				dir = new File(workingDir, templateDir);
+			}
 			File tFile = new File(dir, templateName);
 			if (tFile.exists()) {
 				try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(tFile), StandardCharsets.UTF_8))) {
@@ -204,7 +481,6 @@ public class EOGeneratorRunner {
 			}
 		}
 
-		// Default built-in template
 		if (isSuperclass) {
 			return getDefaultSuperclassTemplate();
 		} else {
@@ -212,18 +488,8 @@ public class EOGeneratorRunner {
 		}
 	}
 
-	private static File resolveDirectory(File workingDir, String path) {
-		if (path == null || path.trim().isEmpty()) {
-			return workingDir;
-		}
-		File f = new File(path);
-		if (f.isAbsolute()) {
-			return f;
-		}
-		return new File(workingDir, path);
-	}
-
-	private static GenerationResult runExternal(Project project, File workingDir, EOGeneratorModel eogenModel, GenerationResult result) {
+	private static GenerationResult runExternal(Project project, File workingDir, EOGeneratorModel eogenModel,
+												GenerationResult result, Consumer<String> logConsumer) {
 		try {
 			List<String> command = new ArrayList<>();
 			command.add(eogenModel.getEOGeneratorPath());
@@ -232,30 +498,38 @@ public class EOGeneratorRunner {
 				command.add(tokenizer.nextToken());
 			}
 
+			log(logConsumer, result, "Executing external command: " + String.join(" ", command));
+
 			ProcessBuilder pb = new ProcessBuilder(command);
-			pb.directory(workingDir);
+			if (workingDir != null) {
+				pb.directory(workingDir);
+			}
 			pb.redirectErrorStream(true);
 			Process proc = pb.start();
 
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					result.getMessages().add(line);
+					log(logConsumer, result, line);
 				}
 			}
 
 			int exitCode = proc.waitFor();
 			result.setSuccess(exitCode == 0);
+			log(logConsumer, result, "External process exited with code " + exitCode);
 		} catch (Exception ex) {
 			result.setSuccess(false);
-			result.getMessages().add("External execution failed: " + ex.getMessage());
+			log(logConsumer, result, "External execution failed: " + ex.getMessage());
 		}
 		return result;
 	}
 
 	private static String getDefaultSuperclassTemplate() {
 		return "// DO NOT EDIT. Make changes to ${classNameWithoutPackage}.java instead.\n" +
-				"#if ($packageName && $packageName != \"\")\n" +
+				"#if ($superclassPackageName && $superclassPackageName != \"\")\n" +
+				"package ${superclassPackageName};\n" +
+				"\n" +
+				"#elseif ($packageName && $packageName != \"\")\n" +
 				"package ${packageName};\n" +
 				"\n" +
 				"#end\n" +
@@ -298,12 +572,7 @@ public class EOGeneratorRunner {
 				"    public ${rel.destinationEntityName} ${rel.name}() {\n" +
 				"        return (${rel.destinationEntityName}) storedValueForKey(\"${rel.name}\");\n" +
 				"    }\n" +
-				"\n" +
-				"    public void set${rel.name.substring(0,1).toUpperCase()}${rel.name.substring(1)}(${rel.destinationEntityName} value) {\n" +
-				"        takeStoredValueForKey(value, \"${rel.name}\");\n" +
-				"    }\n" +
 				"#end\n" +
-				"\n" +
 				"#end\n" +
 				"}\n";
 	}
@@ -311,6 +580,10 @@ public class EOGeneratorRunner {
 	private static String getDefaultSubclassTemplate() {
 		return "#if ($packageName && $packageName != \"\")\n" +
 				"package ${packageName};\n" +
+				"\n" +
+				"#end\n" +
+				"#if ($superclassPackageName && $superclassPackageName != \"\" && $superclassPackageName != $packageName)\n" +
+				"import ${prefixClassName};\n" +
 				"\n" +
 				"#end\n" +
 				"public class ${classNameWithoutPackage} extends ${prefixClassNameWithoutPackage} {\n" +
