@@ -82,7 +82,7 @@
                 class="org.wocommunity.plugins.intellij.eogen.actions.EOGenerateAction"
                 text="EOGenerate..."
                 description="Run EOGenerator to generate Java source files"
-                icon="icons/WebObjectsIcon.svg">
+                icon="icons/EOGenIcon.svg">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
         </action>
         <action id="org.wocommunity.plugins.intellij.components.conversion.ConvertToInlineAction"

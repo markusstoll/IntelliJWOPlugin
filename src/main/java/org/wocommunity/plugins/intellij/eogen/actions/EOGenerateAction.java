@@ -23,6 +23,7 @@ import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.NotNull;
 import org.wocommunity.plugins.intellij.eogen.core.EOGeneratorModel;
 import org.wocommunity.plugins.intellij.eogen.core.EOGeneratorRunner;
+import org.wocommunity.plugins.intellij.tools.WOIcons;
 
 import java.io.File;
 import java.util.List;
@@ -46,7 +47,7 @@ public class EOGenerateAction extends AnAction {
 	public EOGenerateAction(Runnable preGenerateSave, EOGeneratorModel generatorModel,
 							Consumer<String> logConsumer,
 							Consumer<EOGeneratorRunner.GenerationResult> resultConsumer) {
-		super("EOGenerate...", "Run EOGenerator to generate Java source files", AllIcons.Actions.Execute);
+		super("EOGenerate...", "Run EOGenerator to generate Java source files", WOIcons.EOGEN_ICON);
 		this.preGenerateSave = preGenerateSave;
 		this.generatorModel = generatorModel;
 		this.logConsumer = logConsumer;
