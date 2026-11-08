@@ -297,4 +297,85 @@ public class EOGeneratorRunnerTest {
 		assertTrue(result.contains("createFoo(EOEditingContext editingContext, Object attr2NotNull"),
 				"Should contain non-null attribute directly without empty line: " + result);
 	}
+
+	@Test
+	public void testEntityModelerParentClassNameAndGenerateSource(@TempDir Path tempDir) throws IOException {
+		File modelDir = tempDir.resolve("Test.eomodeld").toFile();
+		assertTrue(modelDir.mkdirs());
+
+		// index.eomodeld
+		File indexFile = new File(modelDir, "index.eomodeld");
+		Files.writeString(indexFile.toPath(),
+				"{\n" +
+				"    EOModelVersion = \"2.1\";\n" +
+				"    entities = (\n" +
+				"        {className = \"de.junidas.bosch.ptextranet.data.SubAuftrag\"; name = SubAuftrag; },\n" +
+				"        {className = \"ERXGenericRecord\"; name = GenericEntity; },\n" +
+				"        {className = \"de.junidas.bosch.ptextranet.data.SkippedEntity\"; name = SkippedEntity; }\n" +
+				"    );\n" +
+				"}\n");
+
+		// SubAuftrag.plist with parentClassName
+		File subAuftragFile = new File(modelDir, "SubAuftrag.plist");
+		Files.writeString(subAuftragFile.toPath(),
+				"{\n" +
+				"    name = SubAuftrag;\n" +
+				"    className = \"de.junidas.bosch.ptextranet.data.SubAuftrag\";\n" +
+				"    userInfo = {\n" +
+				"        \"_EntityModeler\" = {parentClassName = \"de.junidas.bosch.ptextranet.data.Auftrag\"; };\n" +
+				"    };\n" +
+				"    attributes = ();\n" +
+				"}\n");
+
+		// GenericEntity.plist with className = ERXGenericRecord
+		File genericFile = new File(modelDir, "GenericEntity.plist");
+		Files.writeString(genericFile.toPath(),
+				"{\n" +
+				"    name = GenericEntity;\n" +
+				"    className = \"ERXGenericRecord\";\n" +
+				"    attributes = ();\n" +
+				"}\n");
+
+		// SkippedEntity.plist with generateSource = NO
+		File skippedFile = new File(modelDir, "SkippedEntity.plist");
+		Files.writeString(skippedFile.toPath(),
+				"{\n" +
+				"    name = SkippedEntity;\n" +
+				"    className = \"de.junidas.bosch.ptextranet.data.SkippedEntity\";\n" +
+				"    userInfo = {\n" +
+				"        \"_EntityModeler\" = {generateSource = NO; };\n" +
+				"    };\n" +
+				"    attributes = ();\n" +
+				"}\n");
+
+		File eogenFile = tempDir.resolve("test.eogen").toFile();
+
+		EOGeneratorModel model = new EOGeneratorModel();
+		model.setDestination("src/main/java");
+		model.setSubclassDestination("src/main/java");
+		model.setModels(Collections.singletonList(modelDir.getAbsolutePath()));
+		model.setJava(true);
+		model.setPackageDirs(true);
+
+		List<String> logs = new ArrayList<>();
+		EOGeneratorRunner.GenerationResult result = EOGeneratorRunner.generate(null, eogenFile, model, null, logs::add);
+		assertTrue(result.isSuccess(), "Generation should succeed: " + result.getMessages());
+
+		// SubAuftrag should be generated and extend parentClassName: de.junidas.bosch.ptextranet.data.Auftrag
+		File superclassFile = tempDir.resolve("src/main/java/de/junidas/bosch/ptextranet/data/_SubAuftrag.java").toFile();
+		assertTrue(superclassFile.exists(), "_SubAuftrag.java should be generated");
+		String superclassContent = Files.readString(superclassFile.toPath());
+		assertTrue(superclassContent.contains("public abstract class _SubAuftrag extends de.junidas.bosch.ptextranet.data.Auftrag"),
+				"Should extend parentClassName from _EntityModeler, but was: " + superclassContent);
+
+		// ERXGenericRecord entity should be skipped!
+		File genericSuperclass = tempDir.resolve("src/main/java/_GenericEntity.java").toFile();
+		assertFalse(genericSuperclass.exists(), "ERXGenericRecord entity should not have generated code");
+		File genericDirect = tempDir.resolve("src/main/java/_ERXGenericRecord.java").toFile();
+		assertFalse(genericDirect.exists(), "Must never generate _ERXGenericRecord.java");
+
+		// SkippedEntity should be skipped!
+		File skippedSuperclass = tempDir.resolve("src/main/java/de/junidas/bosch/ptextranet/data/_SkippedEntity.java").toFile();
+		assertFalse(skippedSuperclass.exists(), "Entity with generateSource=NO must not have generated code");
+	}
 }

@@ -17,6 +17,8 @@ public class EOEntity {
 	private String externalName;
 	private String parentEntityName;
 	private EOEntity parentEntity;
+	private String parentClassName;
+	private boolean generateSource = true;
 
 	private boolean abstractEntity = false;
 	private boolean readOnly = false;
@@ -87,19 +89,39 @@ public class EOEntity {
 	}
 
 	public boolean isParentClassNameSet() {
-		return parentEntityName != null && !parentEntityName.trim().isEmpty();
+		return parentClassName != null && !parentClassName.trim().isEmpty();
 	}
 
 	public String getParentClassName() {
-		EOEntity p = getParent();
-		if (p != null) {
-			return p.getClassNameWithDefault();
+		return parentClassName;
+	}
+
+	public void setParentClassName(String parentClassName) {
+		this.parentClassName = parentClassName;
+		if (parentClassName != null && !parentClassName.trim().isEmpty()) {
+			Map<Object, Object> emMap = (Map<Object, Object>) userInfo.computeIfAbsent("_EntityModeler", k -> new PropertyListMap<>());
+			emMap.put("parentClassName", parentClassName);
+		} else if (userInfo.get("_EntityModeler") instanceof Map<?, ?> emMap) {
+			((Map<Object, Object>) emMap).remove("parentClassName");
 		}
-		return parentEntityName;
+	}
+
+	public boolean isGenerateSource() {
+		return generateSource;
+	}
+
+	public void setGenerateSource(boolean generateSource) {
+		this.generateSource = generateSource;
+		if (!generateSource) {
+			Map<Object, Object> emMap = (Map<Object, Object>) userInfo.computeIfAbsent("_EntityModeler", k -> new PropertyListMap<>());
+			emMap.put("generateSource", "NO");
+		} else if (userInfo.get("_EntityModeler") instanceof Map<?, ?> emMap) {
+			((Map<Object, Object>) emMap).remove("generateSource");
+		}
 	}
 
 	public boolean isParentSet() {
-		return parentEntity != null || (parentEntityName != null && !parentEntityName.trim().isEmpty());
+		return getParent() != null;
 	}
 
 	public EOEntity getParent() {
@@ -125,7 +147,10 @@ public class EOEntity {
 	}
 
 	public boolean isGenericRecord() {
-		return className == null || className.trim().isEmpty() || className.endsWith("GenericRecord");
+		if (className == null || className.trim().isEmpty()) {
+			return true;
+		}
+		return className.endsWith("GenericRecord") && (name == null || !name.endsWith("GenericRecord"));
 	}
 
 	public String getPluralName() {
@@ -473,10 +498,29 @@ public class EOEntity {
 			fetchSpecificationDictionary.putAll((Map) fspecs);
 		}
 
+		this.parentClassName = null;
+		this.generateSource = true;
 		Map<?, ?> userInfoMap = m.getMap("userInfo");
 		if (userInfoMap != null) {
 			this.userInfo.clear();
 			this.userInfo.putAll(userInfoMap);
+
+			Object entityModelerObj = this.userInfo.get("_EntityModeler");
+			if (entityModelerObj instanceof Map<?, ?> emMap) {
+				Object pcn = emMap.get("parentClassName");
+				if (pcn != null && !pcn.toString().trim().isEmpty()) {
+					this.parentClassName = pcn.toString().trim();
+				}
+				Object gs = emMap.get("generateSource");
+				if (gs instanceof Boolean b) {
+					this.generateSource = b;
+				} else if (gs != null) {
+					String gsStr = gs.toString().trim();
+					this.generateSource = !"NO".equalsIgnoreCase(gsStr) && !"false".equalsIgnoreCase(gsStr) && !"0".equals(gsStr);
+				}
+			}
+		} else {
+			this.userInfo.clear();
 		}
 
 		Map<?, ?> internalInfoMap = m.getMap("internalInfo");
@@ -531,6 +575,20 @@ public class EOEntity {
 			map.setMap("fetchSpecificationDictionary", fetchSpecificationDictionary);
 		} else {
 			map.put("fetchSpecificationDictionary", new PropertyListMap<>());
+		}
+
+		if (parentClassName != null && !parentClassName.trim().isEmpty()) {
+			Map<Object, Object> emMap = (Map<Object, Object>) userInfo.computeIfAbsent("_EntityModeler", k -> new PropertyListMap<>());
+			emMap.put("parentClassName", parentClassName);
+		} else if (userInfo.get("_EntityModeler") instanceof Map<?, ?> emMap) {
+			((Map<Object, Object>) emMap).remove("parentClassName");
+		}
+
+		if (!generateSource) {
+			Map<Object, Object> emMap = (Map<Object, Object>) userInfo.computeIfAbsent("_EntityModeler", k -> new PropertyListMap<>());
+			emMap.put("generateSource", "NO");
+		} else if (userInfo.get("_EntityModeler") instanceof Map<?, ?> emMap) {
+			((Map<Object, Object>) emMap).remove("generateSource");
 		}
 
 		if (!userInfo.isEmpty()) {

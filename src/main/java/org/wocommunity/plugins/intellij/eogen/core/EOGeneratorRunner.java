@@ -197,7 +197,7 @@ public class EOGeneratorRunner {
 				log(logConsumer, result, "RESULT: 0 files were generated!");
 				log(logConsumer, result, "Diagnostics:");
 				log(logConsumer, result, " • If models were not found, check the '-model' paths in the .eogen Configuration Form.");
-				log(logConsumer, result, " • If entities were skipped because of 'className=EOGenericRecord', open the EOModel editor and assign custom Java class names to your entities.");
+				log(logConsumer, result, " • If entities were skipped because of 'className=EOGenericRecord' or 'ERXGenericRecord', open the EOModel editor and assign custom Java class names to your entities.");
 				log(logConsumer, result, "=========================================================");
 			} else {
 				log(logConsumer, result, "=========================================================");
@@ -352,12 +352,18 @@ public class EOGeneratorRunner {
 									   String superclassTemplateContent, String subclassTemplateContent,
 									   GenerationResult result, Consumer<String> logConsumer) throws IOException {
 
-		String fullClassName = entity.getClassName();
-		if (fullClassName == null || fullClassName.trim().isEmpty() || fullClassName.equals("EOGenericRecord") || fullClassName.endsWith(".EOGenericRecord")) {
-			log(logConsumer, result, "  • Entity '" + entity.getName() + "': Skipped (className is '" +
-					(fullClassName == null ? "null" : fullClassName) + "', EOGenericRecord has no custom class)");
+		if (!entity.isGenerateSource()) {
+			log(logConsumer, result, "  • Entity '" + entity.getName() + "': Skipped (generateSource is false in _EntityModeler)");
 			return;
 		}
+
+		if (entity.isGenericRecord()) {
+			log(logConsumer, result, "  • Entity '" + entity.getName() + "': Skipped (className is '" +
+					(entity.getClassName() == null ? "null" : entity.getClassName()) + "', generic record has no custom class)");
+			return;
+		}
+
+		String fullClassName = entity.getClassName();
 
 		String packageName = "";
 		String simpleClassName = fullClassName;
