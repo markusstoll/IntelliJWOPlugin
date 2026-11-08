@@ -77,6 +77,43 @@ public class EORelationship {
 		return dest;
 	}
 
+	public boolean isInverseRelationship(EORelationship other) {
+		if (other == null || other == this) {
+			return false;
+		}
+		String thisEntityName = entity != null ? entity.getName() : null;
+		String otherEntityName = other.entity != null ? other.entity.getName() : null;
+		if (thisEntityName == null || otherEntityName == null) {
+			return false;
+		}
+		if (!Objects.equals(thisEntityName, other.getDestinationEntityName()) ||
+				!Objects.equals(getDestinationEntityName(), otherEntityName)) {
+			return false;
+		}
+		List<EOJoin> myJoins = getJoins();
+		List<EOJoin> otherJoins = other.getJoins();
+		if (myJoins.isEmpty() || myJoins.size() != otherJoins.size()) {
+			return false;
+		}
+		for (EOJoin myJoin : myJoins) {
+			boolean matched = false;
+			for (EOJoin otherJoin : otherJoins) {
+				String mySrc = myJoin.getSourceAttributeName();
+				String myDst = myJoin.getDestinationAttributeName();
+				String otherSrc = otherJoin.getSourceAttributeName();
+				String otherDst = otherJoin.getDestinationAttributeName();
+				if (Objects.equals(mySrc, otherDst) && Objects.equals(myDst, otherSrc)) {
+					matched = true;
+					break;
+				}
+			}
+			if (!matched) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public EORelationship getInverseRelationship() {
 		EOEntity dest = getDestination();
 		if (dest == null && destinationEntityName != null && entity != null && entity.getModel() != null) {
@@ -84,7 +121,7 @@ public class EORelationship {
 		}
 		if (dest == null || entity == null) return null;
 		for (EORelationship rel : dest.getRelationships()) {
-			if (entity.getName().equals(rel.getDestinationEntityName())) {
+			if (isInverseRelationship(rel)) {
 				return rel;
 			}
 		}

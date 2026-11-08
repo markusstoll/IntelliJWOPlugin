@@ -225,6 +225,37 @@ public class EOGeneratorRunnerTest {
 	}
 
 	@Test
+	public void testInverseRelationshipResolution() {
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOModel model =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOModel();
+
+		// Self-referencing entity: Element (toParent <-> children)
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity elementEntity =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Element");
+		model.addEntity(elementEntity);
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship toParent =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("toParent");
+		toParent.setDestinationEntityName("Element");
+		toParent.setToMany(false);
+		toParent.addJoin(new org.wocommunity.plugins.intellij.eomodel.core.model.EOJoin("parentId", "id"));
+		elementEntity.addRelationship(toParent);
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship children =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("children");
+		children.setDestinationEntityName("Element");
+		children.setToMany(true);
+		children.addJoin(new org.wocommunity.plugins.intellij.eomodel.core.model.EOJoin("id", "parentId"));
+		elementEntity.addRelationship(children);
+
+		// Must NOT return itself (the forward relationship)!
+		assertNotEquals(toParent, toParent.getInverseRelationship(), "Inverse of toParent must not be toParent itself");
+		assertEquals(children, toParent.getInverseRelationship());
+		assertNotEquals(children, children.getInverseRelationship(), "Inverse of children must not be children itself");
+		assertEquals(toParent, children.getInverseRelationship());
+	}
+
+	@Test
 	public void testSpaceGobblingBcModeDoesNotGenerateBlankLinesForNullableAttributes() {
 		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity entity =
 				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Test");
