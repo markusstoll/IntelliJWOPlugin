@@ -166,4 +166,85 @@ public class EOGeneratorRunnerTest {
 		assertFalse(content.contains("ARTIST_ID"), "artistId is not a class property and must not have an ERXKey: " + content);
 		assertTrue(content.contains("ARTIST_NAME"), "artistName is a class property and must have an ERXKey: " + content);
 	}
+
+	@Test
+	public void testCustomValueClassNamePreservesPackage() {
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute attr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("priority");
+		attr.setValueClassName("de.junidas.pe4.data.SortPriority");
+		assertEquals("de.junidas.pe4.data.SortPriority", attr.getFormatJavaType());
+		assertEquals("de.junidas.pe4.data.SortPriority", attr.getJavaClassName());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute stringAttr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("name");
+		stringAttr.setValueClassName("java.lang.String");
+		assertEquals("String", stringAttr.getFormatJavaType());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute intAttr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("count");
+		intAttr.setValueClassName("NSNumber");
+		intAttr.setValueType("i");
+		assertEquals("Integer", intAttr.getFormatJavaType());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute bigDecimalAttr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("amount");
+		bigDecimalAttr.setValueClassName("NSDecimalNumber");
+		assertEquals("java.math.BigDecimal", bigDecimalAttr.getFormatJavaType());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute boolAttr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("isEdited");
+		boolAttr.setValueClassName("NSNumber");
+		boolAttr.setValueType("c");
+		assertEquals("Boolean", boolAttr.getFormatJavaType());
+		assertEquals("Boolean", boolAttr.getJavaClassName());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute byteAttr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("flagByte");
+		byteAttr.setValueClassName("NSNumber");
+		byteAttr.setValueType("b");
+		assertEquals("Byte", byteAttr.getFormatJavaType());
+	}
+
+	@Test
+	public void testSpaceGobblingBcModeDoesNotGenerateBlankLinesForNullableAttributes() {
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity entity =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Test");
+		entity.setClassName("com.test.Test");
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute a1 =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("attr1Null");
+		a1.setAllowsNull(true);
+		a1.setClassProperty(true);
+		entity.addAttribute(a1);
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute a2 =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("attr2NotNull");
+		a2.setAllowsNull(false);
+		a2.setClassProperty(true);
+		entity.addAttribute(a2);
+
+		String templateWithForeachOnSameLine =
+				"public static Foo createFoo(EOEditingContext editingContext#foreach ($attribute in $entity.sortedClassAttributes)\n" +
+				"#if (!$attribute.allowsNull)\n" +
+				", ${attribute.javaClassName} ${attribute.name}\n" +
+				"#end\n" +
+				"#end\n" +
+				")";
+
+		org.apache.velocity.app.VelocityEngine ve = new org.apache.velocity.app.VelocityEngine();
+		ve.setProperty("parser.space_gobbling", "bc");
+		ve.init();
+
+		org.apache.velocity.VelocityContext ctx = new org.apache.velocity.VelocityContext();
+		ctx.put("entity", entity);
+
+		java.io.StringWriter sw = new java.io.StringWriter();
+		ve.evaluate(ctx, sw, "test", templateWithForeachOnSameLine);
+		String result = sw.toString();
+
+		// In 'bc' (backward compatible) mode, the skipped nullable attribute must NOT introduce an empty line in the param list
+		assertFalse(result.contains("\n\n"), "Output should not contain empty lines: " + result);
+		assertTrue(result.contains("createFoo(EOEditingContext editingContext, Object attr2NotNull"),
+				"Should contain non-null attribute directly without empty line: " + result);
+	}
 }

@@ -111,13 +111,19 @@ public class EOAttribute {
 			case "NSString":
 			case "java.lang.String":
 				return "String";
+			case "Boolean":
+			case "java.lang.Boolean":
+				return "Boolean";
 			case "NSNumber":
+			case "java.lang.Number":
+			case "Number":
+				if ("c".equals(valueType)) return "Boolean";
+				if ("b".equals(valueType)) return "Byte";
+				if ("s".equals(valueType)) return "Short";
 				if ("i".equals(valueType)) return "Integer";
 				if ("l".equals(valueType)) return "Long";
 				if ("f".equals(valueType)) return "Float";
 				if ("d".equals(valueType)) return "Double";
-				if ("b".equals(valueType)) return "Boolean";
-				if ("s".equals(valueType)) return "Short";
 				if ("B".equals(valueType)) return "java.math.BigDecimal";
 				return "Number";
 			case "NSDecimalNumber":
@@ -131,8 +137,10 @@ public class EOAttribute {
 			case "NSArray":
 				return "NSArray";
 			default:
-				int lastDot = valueClassName.lastIndexOf('.');
-				return lastDot > 0 ? valueClassName.substring(lastDot + 1) : valueClassName;
+				if (valueClassName.startsWith("java.lang.")) {
+					return valueClassName.substring("java.lang.".length());
+				}
+				return valueClassName;
 		}
 	}
 

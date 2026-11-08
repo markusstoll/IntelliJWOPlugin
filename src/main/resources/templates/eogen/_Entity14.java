@@ -193,7 +193,7 @@ public abstract class ${entity.prefixClassNameWithoutPackage} extends #if ($enti
 #foreach ($attribute in $entity.sortedClassAttributes)
 #if (!$attribute.allowsNull)
 #set ($restrictingQualifierKey = 'false')
-#foreach ($qualifierKey in $entity.restrictingQualifierKeys) 
+#foreach ($qualifierKey in $entity.restrictingQualifierKeys)
 #if ($attribute.name == $qualifierKey)
 #set ($restrictingQualifierKey = 'true')
 #end

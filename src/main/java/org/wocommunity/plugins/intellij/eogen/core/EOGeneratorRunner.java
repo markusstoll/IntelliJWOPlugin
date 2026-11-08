@@ -104,6 +104,7 @@ public class EOGeneratorRunner {
 			VelocityEngine velocityEngine = new VelocityEngine();
 			velocityEngine.setProperty("input.encoding", "UTF-8");
 			velocityEngine.setProperty("output.encoding", "UTF-8");
+			velocityEngine.setProperty("parser.space_gobbling", "bc");
 			velocityEngine.init();
 
 			boolean isWonder = isWonderProject(project, projectRoot, eogenModel);
