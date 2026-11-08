@@ -206,6 +206,25 @@ public class EOGeneratorRunnerTest {
 	}
 
 	@Test
+	public void testUppercaseUnderscoreName() {
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute attr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("fkLandingPageMPElementId");
+		assertEquals("FK_LANDING_PAGE_MP_ELEMENT_ID", attr.getUppercaseUnderscoreName());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship rel =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("fkLandingPageMPElementId");
+		assertEquals("FK_LANDING_PAGE_MP_ELEMENT_ID", rel.getUppercaseUnderscoreName());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute idAttr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("id");
+		assertEquals("ID", idAttr.getUppercaseUnderscoreName());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute artistIdAttr =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("artistId");
+		assertEquals("ARTIST_ID", artistIdAttr.getUppercaseUnderscoreName());
+	}
+
+	@Test
 	public void testSpaceGobblingBcModeDoesNotGenerateBlankLinesForNullableAttributes() {
 		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity entity =
 				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Test");

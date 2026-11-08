@@ -67,16 +67,7 @@ public class EOAttribute {
 	}
 
 	public String getUppercaseUnderscoreName() {
-		if (name == null) return "";
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < name.length(); i++) {
-			char c = name.charAt(i);
-			if (Character.isUpperCase(c) && i > 0 && Character.isLowerCase(name.charAt(i - 1))) {
-				sb.append('_');
-			}
-			sb.append(Character.toUpperCase(c));
-		}
-		return sb.toString();
+		return StringUtils.camelCaseToUnderscore(name);
 	}
 
 	public void setName(String name) {
