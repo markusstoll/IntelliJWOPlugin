@@ -175,7 +175,7 @@ public class EOEntity {
 				list.add(rel);
 			}
 		}
-		list.sort(Comparator.comparing(EORelationship::getName));
+		list.sort(Comparator.comparing(EORelationship::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EORelationship::getName));
 		return list;
 	}
 
@@ -186,7 +186,29 @@ public class EOEntity {
 				list.add(rel);
 			}
 		}
-		list.sort(Comparator.comparing(EORelationship::getName));
+		list.sort(Comparator.comparing(EORelationship::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EORelationship::getName));
+		return list;
+	}
+
+	public List<EORelationship> getSortedToOneRelationships() {
+		List<EORelationship> list = new ArrayList<>();
+		for (EORelationship rel : getRelationships()) {
+			if (!rel.isToMany()) {
+				list.add(rel);
+			}
+		}
+		list.sort(Comparator.comparing(EORelationship::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EORelationship::getName));
+		return list;
+	}
+
+	public List<EORelationship> getSortedToManyRelationships() {
+		List<EORelationship> list = new ArrayList<>();
+		for (EORelationship rel : getRelationships()) {
+			if (rel.isToMany()) {
+				list.add(rel);
+			}
+		}
+		list.sort(Comparator.comparing(EORelationship::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EORelationship::getName));
 		return list;
 	}
 
@@ -232,9 +254,15 @@ public class EOEntity {
 		return list;
 	}
 
+	public List<EOAttribute> getSortedAttributes() {
+		List<EOAttribute> list = new ArrayList<>(getAttributes());
+		list.sort(Comparator.comparing(EOAttribute::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EOAttribute::getName));
+		return list;
+	}
+
 	public List<EOAttribute> getSortedClassAttributes() {
 		List<EOAttribute> list = new ArrayList<>(getClassAttributes());
-		list.sort(Comparator.comparing(EOAttribute::getName));
+		list.sort(Comparator.comparing(EOAttribute::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EOAttribute::getName));
 		return list;
 	}
 
@@ -245,6 +273,12 @@ public class EOEntity {
 				list.add(attr);
 			}
 		}
+		return list;
+	}
+
+	public List<EORelationship> getSortedRelationships() {
+		List<EORelationship> list = new ArrayList<>(getRelationships());
+		list.sort(Comparator.comparing(EORelationship::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EORelationship::getName));
 		return list;
 	}
 
@@ -260,7 +294,7 @@ public class EOEntity {
 
 	public List<EORelationship> getSortedClassRelationships() {
 		List<EORelationship> list = new ArrayList<>(getClassRelationships());
-		list.sort(Comparator.comparing(EORelationship::getName));
+		list.sort(Comparator.comparing(EORelationship::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(EORelationship::getName));
 		return list;
 	}
 

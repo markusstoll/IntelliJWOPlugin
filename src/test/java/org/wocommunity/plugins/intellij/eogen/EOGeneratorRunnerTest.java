@@ -375,7 +375,49 @@ public class EOGeneratorRunnerTest {
 		assertFalse(genericDirect.exists(), "Must never generate _ERXGenericRecord.java");
 
 		// SkippedEntity should be skipped!
-		File skippedSuperclass = tempDir.resolve("src/main/java/de/junidas/bosch/ptextranet/data/_SkippedEntity.java").toFile();
+		File skippedSuperclass = tempDir.resolve("src/main/java/de/junidas/bosch/ptextranet.data/_SkippedEntity.java").toFile();
 		assertFalse(skippedSuperclass.exists(), "Entity with generateSource=NO must not have generated code");
+	}
+
+	@Test
+	public void testCaseInsensitiveAttributeAndRelationshipSorting() {
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity entity =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Auftrag");
+
+		// Case: "auftragsart" vs "auftragsGrund"
+		// In case-sensitive ASCII: G (71) < a (97), so auftragsGrund would come first (AUFTRAGS_GRUND before AUFTRAGSART)
+		// In case-insensitive order (WOLips): a < g, so auftragsart comes first (AUFTRAGSART before AUFTRAGS_GRUND)
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute attrGrund =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("auftragsGrund");
+		attrGrund.setClassProperty(true);
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute attrArt =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute("auftragsart");
+		attrArt.setClassProperty(true);
+
+		entity.addAttribute(attrGrund);
+		entity.addAttribute(attrArt);
+
+		List<org.wocommunity.plugins.intellij.eomodel.core.model.EOAttribute> sortedAttrs = entity.getSortedClassAttributes();
+		assertEquals(2, sortedAttrs.size());
+		assertEquals("auftragsart", sortedAttrs.get(0).getName(), "auftragsart (AUFTRAGSART) must come before auftragsGrund (AUFTRAGS_GRUND)");
+		assertEquals("auftragsGrund", sortedAttrs.get(1).getName());
+
+		// Test relationship sorting
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship relGrund =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("auftragsGrundRel");
+		relGrund.setClassProperty(true);
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship relArt =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("auftragsartRel");
+		relArt.setClassProperty(true);
+
+		entity.addRelationship(relGrund);
+		entity.addRelationship(relArt);
+
+		List<org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship> sortedRels = entity.getSortedClassRelationships();
+		assertEquals(2, sortedRels.size());
+		assertEquals("auftragsartRel", sortedRels.get(0).getName());
+		assertEquals("auftragsGrundRel", sortedRels.get(1).getName());
 	}
 }
