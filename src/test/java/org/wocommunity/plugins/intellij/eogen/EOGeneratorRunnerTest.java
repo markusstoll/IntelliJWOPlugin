@@ -380,6 +380,25 @@ public class EOGeneratorRunnerTest {
 	}
 
 	@Test
+	public void testPluralNameMatchesWOLips() {
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity bereich =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Bereich");
+		assertEquals("Bereichs", bereich.getPluralName(), "Bereich must produce Bereichs (not Bereiches)");
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity company =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Company");
+		assertEquals("Companies", company.getPluralName());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity address =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Address");
+		assertEquals("Addresses", address.getPluralName());
+
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity box =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Box");
+		assertEquals("Boxes", box.getPluralName());
+	}
+
+	@Test
 	public void testCaseInsensitiveAttributeAndRelationshipSorting() {
 		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity entity =
 				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Auftrag");

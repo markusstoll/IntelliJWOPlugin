@@ -155,11 +155,11 @@ public class EOEntity {
 
 	public String getPluralName() {
 		if (name == null || name.isEmpty()) return "";
-		if (name.endsWith("y") && !name.endsWith("ay") && !name.endsWith("ey") && !name.endsWith("oy") && !name.endsWith("uy")) {
-			return name.substring(0, name.length() - 1) + "ies";
-		}
-		if (name.endsWith("s") || name.endsWith("x") || name.endsWith("z") || name.endsWith("ch") || name.endsWith("sh")) {
+		char ch = name.charAt(name.length() - 1);
+		if (ch == 's' || ch == 'x') {
 			return name + "es";
+		} else if (ch == 'y') {
+			return name.substring(0, name.length() - 1) + "ies";
 		}
 		return name + "s";
 	}
