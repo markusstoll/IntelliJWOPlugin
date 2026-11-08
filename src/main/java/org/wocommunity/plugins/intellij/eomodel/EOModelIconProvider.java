@@ -21,8 +21,13 @@ public class EOModelIconProvider extends IconProvider {
 			}
 		} else if (element instanceof PsiFile psiFile) {
 			VirtualFile vFile = psiFile.getVirtualFile();
-			if (vFile != null && EOModelFileUtil.fileIsInModel(vFile)) {
-				return WOIcons.EOMODEL_ICON;
+			if (vFile != null) {
+				if (EOModelFileUtil.fileIsInModel(vFile)) {
+					return WOIcons.EOMODEL_ICON;
+				}
+				if ("eogen".equalsIgnoreCase(vFile.getExtension())) {
+					return WOIcons.EOGEN_ICON;
+				}
 			}
 		}
 		return null;

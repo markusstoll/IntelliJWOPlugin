@@ -169,6 +169,9 @@
         <lang.inspectionSuppressor language="XHTML"
                                    implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlInspectionSuppressor"/>
 
+        <!-- EOGen files -->
+        <fileType name="EOGenerator" implementationClass="org.wocommunity.plugins.intellij.eogen.EOGenFileType" fieldName="INSTANCE" extensions="eogen"/>
+
         <!-- WOD files -->
         <fileType name="Web Object Declaration" implementationClass="org.wocommunity.plugins.intellij.wod.WODFileType" fieldName="INSTANCE" language="WOD" extensions="wod"/>
         <lang.parserDefinition language="WOD" implementationClass="org.wocommunity.plugins.intellij.wod.WODParserDefinition"/>

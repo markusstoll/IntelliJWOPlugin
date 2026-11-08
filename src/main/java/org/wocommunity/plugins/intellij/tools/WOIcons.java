@@ -12,4 +12,5 @@ public final class WOIcons {
     public static final Icon PLUGIN_ICON_DARK = IconLoader.getIcon("icons/WebObjectsIcon_dark.svg", WOIcons.class);
     public static final Icon WOCOMPONENT_ICON = IconLoader.getIcon("icons/WOComponentIcon.svg", WOIcons.class);
     public static final Icon EOMODEL_ICON = IconLoader.getIcon("icons/EOModelIcon.svg", WOIcons.class);
+    public static final Icon EOGEN_ICON = IconLoader.getIcon("icons/EOGenIcon.svg", WOIcons.class);
 }
