@@ -1,0 +1,4 @@
+<!-- In Component.wod: -->
+<spot>HeaderString: WOString {
+    value = title;
+}</spot>
