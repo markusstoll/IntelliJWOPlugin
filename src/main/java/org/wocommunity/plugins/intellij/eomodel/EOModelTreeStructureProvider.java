@@ -65,8 +65,7 @@ public class EOModelTreeStructureProvider implements SelectableTreeStructureProv
 				VirtualFile p = vFile.getParent();
 				while (p != null) {
 					if (EOModelFileUtil.fileIsModel(p)) {
-						PsiDirectory dir = psiFile.getManager().findDirectory(p);
-						return dir != null ? new EOModelNavigatableDirectory(dir) : null;
+						return psiFile.getManager().findDirectory(p);
 					}
 					p = p.getParent();
 				}
@@ -74,7 +73,7 @@ public class EOModelTreeStructureProvider implements SelectableTreeStructureProv
 		} else if (element instanceof PsiDirectory dir) {
 			VirtualFile vFile = dir.getVirtualFile();
 			if (EOModelFileUtil.fileIsModel(vFile)) {
-				return new EOModelNavigatableDirectory(dir);
+				return dir;
 			}
 		}
 		return null;
