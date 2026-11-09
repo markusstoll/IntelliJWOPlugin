@@ -170,7 +170,7 @@
                                    implementationClass="org.wocommunity.plugins.intellij.wotemplate.WOHtmlInspectionSuppressor"/>
 
         <!-- EOGen files -->
-        <fileType name="EOGenerator" implementationClass="org.wocommunity.plugins.intellij.eogen.EOGenFileType" fieldName="INSTANCE" extensions="eogen"/>
+        <fileType name="EOGenerator" implementationClass="org.wocommunity.plugins.intellij.eogen.EOGenFileType" fieldName="INSTANCE" language="TEXT" extensions="eogen"/>
 
         <!-- WOD files -->
         <fileType name="Web Object Declaration" implementationClass="org.wocommunity.plugins.intellij.wod.WODFileType" fieldName="INSTANCE" language="WOD" extensions="wod"/>
