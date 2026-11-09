@@ -140,23 +140,6 @@ public class WOComponentNode extends ProjectViewNode<PsiDirectory> {
     }
 
     @Override
-    public @Nullable com.intellij.platform.backend.navigation.NavigationRequest navigationRequest() {
-        if (getValue() != null && getValue().getVirtualFile() != null) {
-            VirtualFile woDir = getValue().getVirtualFile();
-            String componentName = getValue().getName().replace(".wo", "");
-            VirtualFile htmlFile = woDir.findChild(componentName + ".html");
-            if (htmlFile != null && !htmlFile.isDirectory()) {
-                return com.intellij.platform.backend.navigation.NavigationRequest.sourceNavigationRequest(myProject, htmlFile, 0);
-            }
-            VirtualFile wodFile = woDir.findChild(componentName + ".wod");
-            if (wodFile != null && !wodFile.isDirectory()) {
-                return com.intellij.platform.backend.navigation.NavigationRequest.sourceNavigationRequest(myProject, wodFile, 0);
-            }
-        }
-        return null;
-    }
-
-    @Override
     public void navigate(boolean requestFocus) {
         if (getValue() != null && getValue().getVirtualFile() != null) {
             VirtualFile woDir = getValue().getVirtualFile();

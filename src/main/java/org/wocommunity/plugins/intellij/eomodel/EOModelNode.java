@@ -7,7 +7,6 @@ import com.intellij.ide.util.treeView.AbstractTreeNode;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.platform.backend.navigation.NavigationRequest;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiUtilCore;
@@ -116,15 +115,6 @@ public class EOModelNode extends ProjectViewNode<PsiDirectory> {
 	@Override
 	public boolean canNavigateToSource() {
 		return true;
-	}
-
-	@Override
-	public @Nullable NavigationRequest navigationRequest() {
-		VirtualFile vf = getVirtualFile();
-		if (vf != null && !vf.isDirectory() && myProject != null) {
-			return NavigationRequest.sourceNavigationRequest(myProject, vf, 0);
-		}
-		return null;
 	}
 
 	@Override

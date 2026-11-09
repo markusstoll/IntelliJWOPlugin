@@ -8,7 +8,6 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.platform.backend.navigation.NavigationRequest;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilCore;
@@ -93,15 +92,6 @@ public class EOGenNode extends ProjectViewNode<PsiFile> {
 	@Override
 	public boolean canNavigateToSource() {
 		return true;
-	}
-
-	@Override
-	public @Nullable NavigationRequest navigationRequest() {
-		VirtualFile vf = getVirtualFile();
-		if (vf != null && !vf.isDirectory() && myProject != null) {
-			return NavigationRequest.sourceNavigationRequest(myProject, vf, 0);
-		}
-		return null;
 	}
 
 	@Override
