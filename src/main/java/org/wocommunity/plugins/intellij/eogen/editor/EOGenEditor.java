@@ -85,7 +85,7 @@ public class EOGenEditor implements FileEditor, DumbAware, UiDataProvider {
 		));
 
 		JBPanel<?> leftHeader = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, 8, 2));
-		leftHeader.add(new JLabel(WOIcons.PLUGIN_ICON));
+		leftHeader.add(new JLabel(WOIcons.EOGEN_ICON));
 		titleLabel = new JBLabel(getTitleText());
 		titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 13f));
 		leftHeader.add(titleLabel);
