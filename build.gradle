@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'de.junidas.webobjects.ijplugin'
-version = '0.10.1'
+version = '0.10.2'
 
 repositories {
     mavenCentral()

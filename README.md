@@ -193,7 +193,16 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.10.1)
+## Recent Highlights (v0.10.2)
+
+- **IntelliJ Platform Compatibility & API Polish**:
+  - Eliminated deprecated `FileEditorManager.openFile(...)` calls in favor of `OpenFileDescriptor.navigate(...)`.
+  - Replaced deprecated `checkAdd`/`checkDelete` PSI methods with lightweight `FakePsiElement` navigation.
+  - Dynamically isolated experimental `WriteIntentReadAction` runtime calls to maintain seamless UI editor creation without validator warnings.
+  - Removed experimental `Navigatable.navigationRequest` overrides in favor of standard `navigate()` contract across Project View nodes.
+  - Fixed `.eogen` `<fileType>` declaration in `plugin.xml` to specify `language="TEXT"`.
+
+## Highlights (v0.10.1)
 
 - **Complete EOGenerator Workflow (`.eogen`)**:
   - **Finished & Production-Ready**: Full parity with WOLips/Eclipse generation behavior.
