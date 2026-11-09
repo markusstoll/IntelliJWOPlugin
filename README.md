@@ -1,8 +1,13 @@
 # IntelliJWOPlugin
 
-Plugin for **mavenized WebObjects / Project WONDER** applications in IntelliJ IDEA: project wizard, run configurations, WO component workflow, template editing, and deep code insight for HTML component bindings across Java and Kotlin.
+Plugin for **mavenized WebObjects / Project WONDER** applications in IntelliJ IDEA: project wizard, run configurations, WO component workflow, template editing, deep code insight for HTML component bindings across Java and Kotlin, complete **EOGenerator** workflow, and **EOModel** integration.
 
-> **Note:** This is an active community project. Feedback, feature requests, and pull requests are welcome!
+> **Status Overview:**
+> - **WO Components, Templates & WOD Support:** Production-Ready
+> - **EOGenerator (`.eogen`):** Finished & Production-Ready (Full WOLips / Wonder Parity)
+> - **EOModeler (`.eomodeld`):** Rudimentary / Work in Progress (Active Development)
+>
+> Feedback, feature requests, and pull requests are welcome!
 
 ---
 
@@ -119,6 +124,42 @@ Create and run WebObjects applications with production-ready settings out of the
   - `--add-exports=java.base/sun.util.calendar=ALL-UNNAMED`
   - `--add-opens=java.base/java.lang=ALL-UNNAMED`
 
+### 11. EOGenerator Workflow (`.eogen` Files) — Production-Ready
+> **Status:** Finished & Production-Ready (Complete WOLips / Eclipse Parity)
+
+Full-featured, native tooling for `.eogen` files and class generation without external dependencies:
+- **Dedicated Multi-Tab Editor**:
+  - **Configuration Form**: Visual form mirroring the Eclipse/WOLips EOGenerator layout with sections for Models, Referenced Models, Destination Directories (Sources, Subclasses), Template Configuration, Options, and Defines (`-define-<name> <value>`).
+  - **Raw Source View**: Directly inspect and edit the underlying `.eogen` command-line style configuration with automatic two-way synchronization.
+  - **Live Output / Log Tab**: Real-time console log showing executed generation steps, generated files, warnings, and errors with single-click re-run capability.
+- **Embedded Velocity Generation Engine**:
+  - Generates standard Wonder-compatible abstract superclasses (`_Entity.java`, overwritten on update) and concrete subclasses (`Entity.java`, preserved if existing) purely in-process.
+  - **Dynamic Template Resolution**: Resolves custom Velocity templates from project-relative paths, searches up the directory hierarchy, or falls back to bundled classpath templates.
+  - **Full WOLips Parity**:
+    - **Entity Inheritance**: Honors `userInfo._EntityModeler.parentClassName` for custom entity superclasses without falling back to generic records or generating redundant base classes.
+    - **Flattened Relationships**: Resolves destination entity types and multiplicity (`toMany`) across join relationships.
+    - **Inverse Relationships**: Accurately matches reversed join column mappings.
+    - **Pluralization & Ordering**: Matches WOLips pluralization rules (`StringUtils.toPlural`) and case-insensitive attribute/relationship ordering.
+    - **Subpackage Separation (`-superclassPackage`)**: Places `_Entity.java` superclasses in subpackages (`_` or `auto`) with proper package statements and subclass imports.
+- **Project View & Action Integration**:
+  - Custom vector SVG icon for `.eogen` files.
+  - Automatically sorted at the bottom of resource folders alongside `.eomodeld` bundles.
+  - Single-click **"EOGenerate..."** action in the editor header toolbar, editor context menu, and Project View context menu.
+
+### 12. EOModel Support (`.eomodeld` Bundles) — In Active Development
+> **Status:** Rudimentary / Work in Progress
+
+Initial support for inspecting and basic editing of Apple WebObjects / Wonder `.eomodeld` bundles:
+- **Project View Encapsulation**: `.eomodeld` folders are displayed as single model nodes with a custom vector SVG icon, preventing clutter from individual `.plist` files, and sorted alongside `.eogen` files at the bottom of resource folders.
+- **Multi-Pane Model Editor Tab**:
+  - **Entities Overview (Left Pane)**: Search and filter entities; add and remove entities with immediate visual feedback.
+  - **Entity Details**: Entity name, table name, external name, abstract and read-only flags, and quick navigation to the corresponding Java class ("Open Java Class" button).
+  - **Attributes Table**: Inspect attributes, column names, external SQL data types, Java value types, primary keys, class properties, and nullability.
+  - **Relationships & Joins**: Inspect to-one and to-many relationships, delete rules, and join column definitions.
+  - **Database Connection Settings**: Basic view of adaptor, JDBC connection URL, driver class, and credentials.
+  - **Raw Plist Source Tab**: Direct formatted inspection of `index.eomodeld` and `<Entity>.plist` files.
+- *Note:* While inspection and basic editing are functional, advanced EOModeler features (diagram view, schema synchronization, database migration scripts, and complex fetch specification editing) are under active development.
+
 ---
 
 ## Default Keyboard Shortcuts
@@ -152,7 +193,24 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.9.10)
+## Recent Highlights (v0.9.24)
+
+- **Complete EOGenerator Workflow (`.eogen`)**:
+  - **Finished & Production-Ready**: Full parity with WOLips/Eclipse generation behavior.
+  - **WOLips Parity Fixes**:
+    - Supported `userInfo._EntityModeler.parentClassName` entity inheritance (honoring parent entity classes and suppressing redundant base class generation).
+    - Resolved destination entity types and multiplicity (`isToMany`) for flattened relationships across join definitions.
+    - Accurately mapped inverse relationships based on reversed column joins.
+    - Case-insensitive attribute and relationship ordering matching WOLips.
+    - Word pluralization conforming to WOLips `StringUtils.toPlural`.
+    - Preserved multi-character acronym boundaries in `uppercaseUnderscoreName` (e.g. `fkLandingPageMPElementId` $\rightarrow$ `FK_LANDING_PAGE_MP_ELEMENT_ID`).
+    - Handled Velocity space gobbling and `valueType = "c"` Boolean mappings.
+  - **Project View & Icon Polish**:
+    - Custom vector SVG icons for `.eomodeld` bundles and `.eogen` files.
+    - `.eogen` files sort alongside `.eomodeld` bundles at the bottom of resource directories.
+    - EOGen editor header and "EOGenerate..." actions display the dedicated `.eogen` icon.
+
+## Highlights (v0.9.10)
 
 - **EOGenerator Diagnostics & Superclass Package Support**:
   - **Live Log & Output Tab**: Real-time execution log in the `.eogen` editor with timestamps, automatic switching on 0 generated files, and a "View Log" notification dialog.
@@ -238,9 +296,9 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 ## Roadmap
 
 Planned improvements for upcoming releases:
-- Direct-to-Web (D2W) rule editor and assistant.
-- EOGen / EOF data modeling tools and entity inspection.
-- Component refactoring actions (rename/delete component bundles atomically).
+- **EOModeler**: Expand beyond current rudimentary support to full entity modeling parity with Apple/WOLips EOModeler (visual ER diagramming, SQL schema generation, database migration scripts, and fetch specification editing).
+- **Direct-to-Web (D2W)**: Rule editor and assistant.
+- **Component refactoring actions**: Rename and delete component bundles atomically across `.html`, `.wod`, `.woo`, `.api`, and backing Java/Kotlin classes.
 
 ---
 
