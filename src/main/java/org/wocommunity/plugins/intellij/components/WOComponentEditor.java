@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.DataSink;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.actionSystem.UiDataProvider;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.WriteIntentReadAction;
+import org.wocommunity.plugins.intellij.tools.WOWriteIntentRunner;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -202,7 +202,7 @@ public class WOComponentEditor implements com.intellij.openapi.fileEditor.TextEd
     }
 
     private FileEditor createIntellijFileEditor(VirtualFile file) {
-        FileEditor editor = WriteIntentReadAction.compute(() ->
+        FileEditor editor = WOWriteIntentRunner.compute(() ->
                 TextEditorProvider.getInstance().createEditor(project, file)
         );
         JComponent comp = editor.getComponent();
