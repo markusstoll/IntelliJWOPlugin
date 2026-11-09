@@ -86,6 +86,16 @@ public class EOModel {
 		return entities;
 	}
 
+	private EOModelGroup modelGroup;
+
+	public EOModelGroup getModelGroup() {
+		return modelGroup;
+	}
+
+	public void setModelGroup(EOModelGroup modelGroup) {
+		this.modelGroup = modelGroup;
+	}
+
 	public EOEntity getEntity(String entityName) {
 		if (entityName == null) return null;
 		for (EOEntity entity : entities) {
@@ -93,7 +103,14 @@ public class EOModel {
 				return entity;
 			}
 		}
+		if (modelGroup != null) {
+			return modelGroup.getEntityNamed(entityName);
+		}
 		return null;
+	}
+
+	public EOEntity getEntityNamed(String entityName) {
+		return getEntity(entityName);
 	}
 
 	public void addEntity(EOEntity entity) {

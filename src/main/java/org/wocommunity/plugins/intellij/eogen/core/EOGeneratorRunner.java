@@ -142,7 +142,11 @@ public class EOGeneratorRunner {
 
 			log(logConsumer, result, "Models to process: " + modelsToLoad.size());
 
-			// Load each model
+			// Load each model into a shared EOModelGroup
+			List<EOModel> loadedModels = new ArrayList<>();
+			org.wocommunity.plugins.intellij.eomodel.core.model.EOModelGroup modelGroup =
+					new org.wocommunity.plugins.intellij.eomodel.core.model.EOModelGroup();
+
 			for (String modelPath : modelsToLoad) {
 				log(logConsumer, result, "--- Resolving model: '" + modelPath + "' ---");
 				File modelFolder = resolveModel(project, workingDir, projectRoot, modelPath);
@@ -160,6 +164,8 @@ public class EOGeneratorRunner {
 				log(logConsumer, result, "Found model folder: " + modelFolder.getAbsolutePath());
 				EOModel eoModel = new EOModel();
 				eoModel.loadFromFolder(modelFolder);
+				loadedModels.add(eoModel);
+				modelGroup.addModel(eoModel);
 
 				List<EOEntity> entities = eoModel.getEntities();
 				log(logConsumer, result, "Loaded model '" + eoModel.getName() + "' with " + entities.size() + " entities: " +
@@ -168,8 +174,16 @@ public class EOGeneratorRunner {
 				if (entities.isEmpty()) {
 					log(logConsumer, result, "WARNING: Model '" + eoModel.getName() + "' has 0 entities.");
 				}
+			}
 
-				for (EOEntity entity : entities) {
+			// Re-resolve all models in context of the complete model group
+			for (EOModel eoModel : loadedModels) {
+				eoModel.resolveModel();
+			}
+
+			// Generate entities
+			for (EOModel eoModel : loadedModels) {
+				for (EOEntity entity : eoModel.getEntities()) {
 					if (indicator != null) {
 						indicator.setText("Generating " + entity.getName() + "...");
 					}

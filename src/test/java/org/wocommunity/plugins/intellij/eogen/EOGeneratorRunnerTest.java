@@ -50,6 +50,10 @@ public class EOGeneratorRunnerTest {
 		assertTrue(superclassContent.contains("public String artistName()"), "Should have artistName getter");
 		assertTrue(superclassContent.contains("public void setArtistName(String value)"), "Should have artistName setter");
 		assertTrue(superclassContent.contains("paintingArray()"), "Should have relationship getter");
+		assertTrue(superclassContent.contains("public NSArray<org.objectstyle.art.Exhibit> exhibitArray()"),
+				"Flattened relationship exhibitArray must return NSArray<org.objectstyle.art.Exhibit>");
+		assertTrue(superclassContent.contains("addToExhibitArrayRelationship(org.objectstyle.art.Exhibit object)"),
+				"Should have addToExhibitArrayRelationship with Exhibit parameter");
 		assertFalse(superclassContent.contains("artistId()"), "artistId is not a class property and must not have a getter");
 		assertFalse(superclassContent.contains("ARTIST_ID_KEY"), "artistId is not a class property and must not have a key constant");
 		assertTrue(superclassContent.contains("dateOfBirth()"), "dateOfBirth is a class property and must have a getter");
@@ -438,5 +442,58 @@ public class EOGeneratorRunnerTest {
 		assertEquals(2, sortedRels.size());
 		assertEquals("auftragsartRel", sortedRels.get(0).getName());
 		assertEquals("auftragsGrundRel", sortedRels.get(1).getName());
+	}
+
+	@Test
+	public void testFlattenedRelationshipOverLinkTable() {
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOModel model =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOModel();
+
+		// Entity A: Auftrag
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity auftrag =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Auftrag");
+		auftrag.setClassName("de.junidas.data.Auftrag");
+		model.addEntity(auftrag);
+
+		// Entity B: LinkTable
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity linkTable =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("AuftragZielLink");
+		linkTable.setClassName("de.junidas.data.AuftragZielLink");
+		model.addEntity(linkTable);
+
+		// Entity C: Ziel
+		org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity ziel =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EOEntity("Ziel");
+		ziel.setClassName("de.junidas.data.Ziel");
+		model.addEntity(ziel);
+
+		// Link rel on Auftrag -> AuftragZielLink (to-many)
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship auftragLinks =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("auftragLinks");
+		auftragLinks.setDestinationEntityName("AuftragZielLink");
+		auftragLinks.setToMany(true);
+		auftrag.addRelationship(auftragLinks);
+
+		// Target rel on AuftragZielLink -> Ziel (to-many)
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship toZiele =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("toZiele");
+		toZiele.setDestinationEntityName("Ziel");
+		toZiele.setToMany(true);
+		linkTable.addRelationship(toZiele);
+
+		// Flattened rel on Auftrag: ziele (definition = "auftragLinks.toZiele")
+		org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship ziele =
+				new org.wocommunity.plugins.intellij.eomodel.core.model.EORelationship("ziele");
+		ziele.setDefinition("auftragLinks.toZiele");
+		auftrag.addRelationship(ziele);
+
+		model.resolveModel();
+
+		assertTrue(ziele.isFlattened(), "ziele must be flattened");
+		assertTrue(ziele.isToMany(), "ziele must be toMany because definition traverses to-many relationships");
+		assertNotNull(ziele.getDestination(), "Destination entity must be resolved");
+		assertEquals("Ziel", ziele.getDestination().getName(), "Destination must be Ziel");
+		assertEquals("de.junidas.data.Ziel", ziele.getActualDestination().getClassNameWithDefault());
+		assertEquals("Ziel", ziele.getDestinationEntityName());
 	}
 }

@@ -2,10 +2,7 @@ package org.wocommunity.plugins.intellij.eomodel.core.model;
 
 import org.wocommunity.plugins.intellij.eomodel.core.plist.PropertyListMap;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class EORelationship {
 	private EOEntity entity;
@@ -64,21 +61,22 @@ public class EORelationship {
 
 	public EOEntity getActualDestination() {
 		EOEntity dest = getDestination();
-		if (dest == null && destinationEntityName != null && entity != null && entity.getModel() != null) {
-			dest = entity.getModel().getEntity(destinationEntityName);
+		if (dest == null && getDestinationEntityName() != null && entity != null && entity.getModel() != null) {
+			dest = entity.getModel().getEntity(getDestinationEntityName());
 		}
 		if (dest != null && dest.isPartialEntitySet()) {
 			dest = dest.getPartialEntity();
 		}
 		if (dest == null) {
-			dest = new EOEntity(destinationEntityName != null ? destinationEntityName : "EOGenericRecord");
-			dest.setClassName(destinationEntityName);
+			String destName = getDestinationEntityName();
+			dest = new EOEntity(destName != null ? destName : "EOGenericRecord");
+			dest.setClassName(destName);
 		}
 		return dest;
 	}
 
 	public boolean isInverseRelationship(EORelationship other) {
-		if (other == null || other == this) {
+		if (other == null || other == this || isFlattened() || other.isFlattened()) {
 			return false;
 		}
 		String thisEntityName = entity != null ? entity.getName() : null;
@@ -137,7 +135,16 @@ public class EORelationship {
 	}
 
 	public String getDestinationEntityName() {
-		return destinationEntityName;
+		if (destinationEntityName != null) {
+			return destinationEntityName;
+		}
+		if (isFlattened()) {
+			EOEntity dest = getDestination();
+			if (dest != null) {
+				return dest.getName();
+			}
+		}
+		return null;
 	}
 
 	public void setDestinationEntityName(String destinationEntityName) {
@@ -145,7 +152,21 @@ public class EORelationship {
 	}
 
 	public EOEntity getDestination() {
-		return destination;
+		if (destination != null) {
+			return destination;
+		}
+		if (isFlattened()) {
+			List<EORelationship> path = getFlattenedRelationshipPath();
+			if (!path.isEmpty()) {
+				EORelationship lastRel = path.get(path.size() - 1);
+				return lastRel.getDestination();
+			}
+			return null;
+		}
+		if (destinationEntityName != null && entity != null && entity.getModel() != null) {
+			return entity.getModel().getEntity(destinationEntityName);
+		}
+		return null;
 	}
 
 	public void setDestination(EOEntity destination) {
@@ -156,6 +177,18 @@ public class EORelationship {
 	}
 
 	public boolean isToMany() {
+		if (toMany) {
+			return true;
+		}
+		if (isFlattened()) {
+			List<EORelationship> path = getFlattenedRelationshipPath();
+			for (EORelationship rel : path) {
+				if (rel.isToMany()) {
+					return true;
+				}
+			}
+			return false;
+		}
 		return toMany;
 	}
 
@@ -218,6 +251,33 @@ public class EORelationship {
 		return definition != null && !definition.trim().isEmpty();
 	}
 
+	public List<EORelationship> getFlattenedRelationshipPath() {
+		return getFlattenedRelationshipPath(new HashSet<>());
+	}
+
+	public List<EORelationship> getFlattenedRelationshipPath(Set<EORelationship> visited) {
+		if (!isFlattened() || entity == null || visited.contains(this)) {
+			return Collections.emptyList();
+		}
+		visited.add(this);
+		List<EORelationship> path = new ArrayList<>();
+		String[] parts = definition.split("\\.");
+		EOEntity currentEntity = entity;
+		for (String part : parts) {
+			part = part.trim();
+			if (part.isEmpty() || currentEntity == null) {
+				return Collections.emptyList();
+			}
+			EORelationship rel = currentEntity.getRelationship(part);
+			if (rel == null) {
+				return Collections.emptyList();
+			}
+			path.add(rel);
+			currentEntity = rel.getDestination();
+		}
+		return path;
+	}
+
 	public boolean isOwnsDestination() {
 		return ownsDestination;
 	}
@@ -271,8 +331,21 @@ public class EORelationship {
 	}
 
 	public void resolve(EOModel model) {
-		if (model != null && destinationEntityName != null) {
-			this.destination = model.getEntity(destinationEntityName);
+		if (!isFlattened()) {
+			if (model != null && destinationEntityName != null) {
+				this.destination = model.getEntity(destinationEntityName);
+			}
+		} else {
+			EOEntity dest = getDestination();
+			if (dest != null) {
+				this.destination = dest;
+				if (this.destinationEntityName == null) {
+					this.destinationEntityName = dest.getName();
+				}
+			}
+			if (isToMany()) {
+				this.toMany = true;
+			}
 		}
 		for (EOJoin join : joins) {
 			join.resolve(this.entity, this.destination);
@@ -330,7 +403,11 @@ public class EORelationship {
 	public EOModelMap toMap() {
 		EOModelMap map = new EOModelMap(new PropertyListMap<>(rawProperties));
 		map.setString("name", name, true);
-		map.setString("destination", destinationEntityName, true);
+		if (!isFlattened() && destinationEntityName != null) {
+			map.setString("destination", destinationEntityName, true);
+		} else {
+			map.remove("destination");
+		}
 		map.setString("definition", definition, true);
 
 		map.setBoolean("isToMany", toMany, EOModelMap.BooleanStyle.Y_N_OPTIONAL_DEFAULT_NO);
