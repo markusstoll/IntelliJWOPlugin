@@ -193,7 +193,7 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.10.0)
+## Recent Highlights (v0.10.1)
 
 - **Complete EOGenerator Workflow (`.eogen`)**:
   - **Finished & Production-Ready**: Full parity with WOLips/Eclipse generation behavior.
