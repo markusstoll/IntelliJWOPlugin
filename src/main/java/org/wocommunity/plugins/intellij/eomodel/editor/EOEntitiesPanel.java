@@ -1,11 +1,7 @@
 package org.wocommunity.plugins.intellij.eomodel.editor;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.ui.ColoredListCellRenderer;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.SearchTextField;
@@ -81,7 +77,7 @@ public class EOEntitiesPanel extends JBPanel<EOEntitiesPanel> {
 			}
 		});
 
-		ActionToolbarImpl toolbar = new ActionToolbarImpl("EOEntitiesToolbar", actionGroup, true);
+		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("EOEntitiesToolbar", actionGroup, true);
 		toolbar.setTargetComponent(entitiesList);
 
 		JBPanel<?> topPanel = new JBPanel<>(new BorderLayout());

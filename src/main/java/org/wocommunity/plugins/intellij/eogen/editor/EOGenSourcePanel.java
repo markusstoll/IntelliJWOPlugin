@@ -1,11 +1,7 @@
 package org.wocommunity.plugins.intellij.eogen.editor;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
@@ -49,7 +45,7 @@ public class EOGenSourcePanel extends JBPanel<EOGenSourcePanel> {
 			}
 		});
 
-		ActionToolbarImpl toolbar = new ActionToolbarImpl("EOGenSourceToolbar", actionGroup, true);
+		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("EOGenSourceToolbar", actionGroup, true);
 		toolbar.setTargetComponent(this);
 		add(toolbar.getComponent(), BorderLayout.NORTH);
 

@@ -1,11 +1,7 @@
 package org.wocommunity.plugins.intellij.eomodel.editor;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
@@ -63,7 +59,7 @@ public class EOModelRawSourcePanel extends JBPanel<EOModelRawSourcePanel> {
 			}
 		});
 
-		ActionToolbarImpl toolbar = new ActionToolbarImpl("EOSourceToolbar", actionGroup, true);
+		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("EOSourceToolbar", actionGroup, true);
 		toolbar.setTargetComponent(this);
 		topPanel.add(toolbar.getComponent(), BorderLayout.EAST);
 

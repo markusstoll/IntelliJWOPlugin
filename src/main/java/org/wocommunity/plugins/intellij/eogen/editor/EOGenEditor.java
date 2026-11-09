@@ -5,7 +5,6 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.actionSystem.impl.ActionToolbarImpl;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -133,7 +132,7 @@ public class EOGenEditor implements FileEditor, DumbAware, UiDataProvider {
 		);
 		actionGroup.add(generateAction);
 
-		ActionToolbarImpl toolbar = new ActionToolbarImpl("EOGenMainToolbar", actionGroup, true);
+		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("EOGenMainToolbar", actionGroup, true);
 		toolbar.setTargetComponent(rootComponent);
 		topBar.add(toolbar.getComponent(), BorderLayout.EAST);
 
