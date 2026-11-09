@@ -40,6 +40,11 @@ public class EOModelNode extends ProjectViewNode<PsiDirectory> {
 	}
 
 	@Override
+	public int getWeight() {
+		return 30; // Matches EOGenNode so .eomodeld and .eogen are sorted at the bottom
+	}
+
+	@Override
 	public boolean contains(@NotNull VirtualFile file) {
 		PsiDirectory directory = getValue();
 		if (directory == null) {

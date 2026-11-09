@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.wocommunity.plugins.intellij.eogen.EOGenNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +35,13 @@ public class EOModelTreeStructureProvider implements SelectableTreeStructureProv
 				} else {
 					modified.add(child);
 				}
+			} else if (value instanceof PsiFile psiFile) {
+				VirtualFile vf = psiFile.getVirtualFile();
+				if (vf != null && "eogen".equalsIgnoreCase(vf.getExtension())) {
+					modified.add(new EOGenNode(child.getProject(), psiFile, settings));
+				} else {
+					modified.add(child);
+				}
 			} else {
 				modified.add(child);
 			}
@@ -51,6 +59,9 @@ public class EOModelTreeStructureProvider implements SelectableTreeStructureProv
 		if (psiFile != null) {
 			VirtualFile vFile = psiFile.getVirtualFile();
 			if (vFile != null) {
+				if ("eogen".equalsIgnoreCase(vFile.getExtension())) {
+					return psiFile;
+				}
 				VirtualFile p = vFile.getParent();
 				while (p != null) {
 					if (EOModelFileUtil.fileIsModel(p)) {
