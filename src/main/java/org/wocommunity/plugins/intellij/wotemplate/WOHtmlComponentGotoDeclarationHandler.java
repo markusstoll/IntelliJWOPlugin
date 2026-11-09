@@ -14,6 +14,7 @@ import com.intellij.psi.xml.XmlToken;
 import com.intellij.psi.xml.XmlTokenType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.wocommunity.plugins.intellij.components.WOComponentNavigatableElement;
 import org.wocommunity.plugins.intellij.tools.WOFileUtil;
 import org.wocommunity.plugins.intellij.tools.WOPsiUtil;
 import org.wocommunity.plugins.intellij.wod.CreateWodElementPlaceholder;
@@ -113,8 +114,11 @@ public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarat
         if (componentFolder == null) {
             componentFolder = WOPsiUtil.getComponentFolderForComponentName(resolvedName, project);
         }
-        if (componentFolder != null && !targets.contains(componentFolder)) {
-            targets.add(componentFolder);
+        if (componentFolder != null) {
+            WOComponentNavigatableElement navigatableElement = new WOComponentNavigatableElement(componentFolder);
+            if (!targets.contains(navigatableElement)) {
+                targets.add(navigatableElement);
+            }
         }
 
         if (targets.isEmpty()) {

@@ -3,6 +3,7 @@ package org.wocommunity.plugins.intellij.eomodel;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +81,7 @@ public final class EOModelEditorUtils {
 			}
 		}
 
-		manager.openFile(fileToOpen, true);
+		new OpenFileDescriptor(project, fileToOpen).navigate(true);
 	}
 }
 

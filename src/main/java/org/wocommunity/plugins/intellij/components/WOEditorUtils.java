@@ -3,6 +3,7 @@ package org.wocommunity.plugins.intellij.components;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
@@ -96,8 +97,10 @@ public final class WOEditorUtils {
                 REQUEST_OPEN_FILE_METHOD.invoke(fileEditorManager, fileToOpen);
                 return;
             } catch (Exception e) {
-                LOG.error("Failed to open file via requestOpenFile", e);
+                LOG.warn("Failed to open file via requestOpenFile", e);
             }
         }
+
+        new OpenFileDescriptor(project, fileToOpen).navigate(true);
     }
 }

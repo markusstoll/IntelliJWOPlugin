@@ -50,7 +50,7 @@ public final class WODComponentReference extends PsiPolyVariantReferenceBase<WOD
         // Find matching .wo Folders
         PsiDirectory directory = WOPsiUtil.getComponentFolderForComponentName(componentName, myElement.getProject());
         if (directory != null) {
-            results.add(new PsiElementResolveResult(directory));
+            results.add(new PsiElementResolveResult(new org.wocommunity.plugins.intellij.components.WOComponentNavigatableElement(directory)));
         }
 
         return results.toArray(new ResolveResult[0]);

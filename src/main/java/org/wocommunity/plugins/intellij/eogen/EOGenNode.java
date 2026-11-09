@@ -5,7 +5,7 @@ import com.intellij.ide.projectView.ProjectViewNode;
 import com.intellij.ide.projectView.ViewSettings;
 import com.intellij.ide.util.treeView.AbstractTreeNode;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.platform.backend.navigation.NavigationRequest;
@@ -108,7 +108,7 @@ public class EOGenNode extends ProjectViewNode<PsiFile> {
 	public void navigate(boolean requestFocus) {
 		VirtualFile vf = getVirtualFile();
 		if (vf != null && myProject != null) {
-			FileEditorManager.getInstance(myProject).openFile(vf, requestFocus);
+			new OpenFileDescriptor(myProject, vf).navigate(requestFocus);
 		}
 	}
 }
