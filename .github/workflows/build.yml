@@ -30,13 +30,16 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run tests and build plugin
-        run: ./gradlew test buildPlugin
+        run: ./gradlew test composedJar
 
-      - name: Upload plugin archive
+      - name: Upload plugin JAR
         uses: actions/upload-artifact@v4
         with:
           name: IntelliJWOPlugin
-          path: build/distributions/*.zip
+          path: |
+            build/libs/IntelliJWOPlugin-*.jar
+            !build/libs/*-base.jar
+            !build/libs/*-instrumented.jar
           retention-days: 30
 
       - name: Upload test results on failure
