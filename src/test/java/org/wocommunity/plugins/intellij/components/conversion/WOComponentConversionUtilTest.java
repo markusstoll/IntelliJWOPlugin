@@ -12,6 +12,8 @@ public class WOComponentConversionUtilTest {
     public void testResolveTypeName() {
         assertEquals("WOConditional", WOComponentConversionUtil.resolveTypeName("if"));
         assertEquals("WOConditional", WOComponentConversionUtil.resolveTypeName("If"));
+        assertEquals("WOConditional", WOComponentConversionUtil.resolveTypeName("not"));
+        assertEquals("WOConditional", WOComponentConversionUtil.resolveTypeName("Not"));
         assertEquals("WOConditional", WOComponentConversionUtil.resolveTypeName("conditional"));
         assertEquals("WOConditional", WOComponentConversionUtil.resolveTypeName("WOConditional"));
         assertEquals("WOString", WOComponentConversionUtil.resolveTypeName("str"));

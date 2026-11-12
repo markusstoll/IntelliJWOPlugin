@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +14,7 @@ public final class WOComponentTagAliasRegistry {
 
     private static final String RESOURCE_PATH = "/wotemplate/wo-tag-aliases.properties";
     private static final Map<String, String> ALIASES = new ConcurrentHashMap<>();
+    private static final Map<String, String> ALIASES_LOWER = new ConcurrentHashMap<>();
     private static volatile boolean loaded;
 
     private WOComponentTagAliasRegistry() {
@@ -21,6 +23,9 @@ public final class WOComponentTagAliasRegistry {
     public static @NotNull String resolveAlias(@NotNull String rawLocalName) {
         ensureLoaded();
         String mapped = ALIASES.get(rawLocalName);
+        if (mapped == null) {
+            mapped = ALIASES_LOWER.get(rawLocalName.toLowerCase(Locale.ROOT));
+        }
         return mapped != null ? mapped : rawLocalName;
     }
 
@@ -54,6 +59,7 @@ public final class WOComponentTagAliasRegistry {
                 String v = String.valueOf(e.getValue()).trim();
                 if (!k.isEmpty() && !v.isEmpty()) {
                     ALIASES.put(k, v);
+                    ALIASES_LOWER.putIfAbsent(k.toLowerCase(Locale.ROOT), v);
                 }
             }
         } catch (IOException ignored) {
