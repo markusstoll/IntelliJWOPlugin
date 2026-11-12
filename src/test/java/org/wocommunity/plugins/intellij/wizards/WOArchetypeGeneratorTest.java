@@ -1,5 +1,6 @@
 package org.wocommunity.plugins.intellij.wizards;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -182,10 +183,11 @@ public class WOArchetypeGeneratorTest {
 
     @Test
     public void testMavenGenerationIfAvailable(@TempDir Path tempDir) throws Exception {
+        Assumptions.assumeFalse("true".equalsIgnoreCase(System.getenv("CI")),
+                "Skipping live Maven CLI archetype:generate test in CI");
         File mvnExe = WOArchetypeGenerator.findMavenExecutable();
-        if (mvnExe == null || !mvnExe.exists()) {
-            return; // Skip if Maven CLI is not installed
-        }
+        Assumptions.assumeTrue(mvnExe != null && mvnExe.exists(),
+                "Skipping Maven CLI test because mvn executable was not found");
 
         WOProjectModel model = new WOProjectModel();
         model.setName("MavenTestApp");
