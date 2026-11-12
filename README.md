@@ -193,7 +193,14 @@ The packaged plugin archive will be generated at `build/distributions/IntelliJWO
 
 ---
 
-## Recent Highlights (v0.10.2)
+## Recent Highlights (v0.10.3)
+
+- **WO Template Shortname & CI Automation**:
+  - Full support for the `<wo name=...>` shortname tag identically to `<webobject name=...>`, including WOD references, navigation/line markers, intention actions, inspection suppression, and code completion.
+  - Added missing `not` (`WOConditional`) inline tag alias and case-insensitive alias lookup for `<wo:*>` tags.
+  - Added GitHub Actions workflow ([`.github/workflows/build.yml`](.github/workflows/build.yml)) to automatically test and build the plugin archive.
+
+## Highlights (v0.10.2)
 
 - **IntelliJ Platform Compatibility & API Polish**:
   - Eliminated deprecated `FileEditorManager.openFile(...)` calls in favor of `OpenFileDescriptor.navigate(...)`.
