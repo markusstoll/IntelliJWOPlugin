@@ -43,7 +43,7 @@ public final class WOHtmlWebObjectReferenceContributor extends PsiReferenceContr
     private static boolean isWebObjectName(@NotNull XmlAttribute attribute) {
         PsiElement parent = attribute.getParent();
         return parent instanceof XmlTag tag
-                && "webobject".equalsIgnoreCase(tag.getLocalName())
+                && WOHtmlWebObjectUtil.isWebObjectTag(tag)
                 && "name".equalsIgnoreCase(attribute.getName());
     }
 

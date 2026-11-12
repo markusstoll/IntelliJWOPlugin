@@ -14,6 +14,31 @@ public final class WOHtmlWebObjectUtil {
     private WOHtmlWebObjectUtil() {}
 
     /**
+     * Checks if the given local/tag name is a WebObjects template tag name ({@code webobject} or its shortname {@code wo}).
+     */
+    public static boolean isWebObjectTagName(@Nullable String name) {
+        return "webobject".equalsIgnoreCase(name) || "wo".equalsIgnoreCase(name);
+    }
+
+    /**
+     * Checks if the given {@link XmlTag} is a {@code <webobject>} or {@code <wo>} tag (without a namespace prefix like {@code wo:*}).
+     */
+    public static boolean isWebObjectTag(@Nullable XmlTag tag) {
+        if (tag == null) {
+            return false;
+        }
+        String prefix = tag.getNamespacePrefix();
+        if (prefix != null && !prefix.isEmpty()) {
+            return false;
+        }
+        String qn = tag.getName();
+        if (qn != null && qn.indexOf(':') >= 0) {
+            return false;
+        }
+        return isWebObjectTagName(tag.getLocalName());
+    }
+
+    /**
      * Extracts and normalizes the WebObject element name from a &lt;webobject&gt; tag.
      * Handles both quoted and unquoted attributes, case insensitivity (name/NAME),
      * and self-closing tags without preceding whitespace (&lt;webobject name=ShortTermLoginButton/&gt;).

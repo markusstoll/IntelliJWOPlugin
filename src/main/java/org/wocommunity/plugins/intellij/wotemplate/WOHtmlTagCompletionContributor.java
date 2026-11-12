@@ -74,6 +74,14 @@ public final class WOHtmlTagCompletionContributor extends CompletionContributor 
                                         .withInsertHandler(WebObjectTagInsertHandler.INSTANCE);
                                 result.withPrefixMatcher(htmlTagPrefix).addElement(PrioritizedLookupElement.withPriority(builder, 200.0));
                             }
+                            if ("wo".startsWith(lower) || lower.isEmpty()) {
+                                LookupElementBuilder builder = LookupElementBuilder.create("wo")
+                                        .withIcon(WOIcons.WOCOMPONENT_ICON)
+                                        .withTypeText("WebObject (short)", true)
+                                        .withTailText(" name=\"...\"", true)
+                                        .withInsertHandler(WebObjectTagInsertHandler.INSTANCE);
+                                result.withPrefixMatcher(htmlTagPrefix).addElement(PrioritizedLookupElement.withPriority(builder, 195.0));
+                            }
                         }
                     }
                 });

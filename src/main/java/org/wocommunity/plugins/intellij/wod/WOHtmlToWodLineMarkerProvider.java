@@ -28,7 +28,7 @@ public class WOHtmlToWodLineMarkerProvider implements LineMarkerProvider {
         if (!(token.getParent() instanceof XmlTag tag)) {
             return null;
         }
-        if (!"webobject".equalsIgnoreCase(tag.getLocalName())) {
+        if (!WOHtmlWebObjectUtil.isWebObjectTag(tag)) {
             return null;
         }
 

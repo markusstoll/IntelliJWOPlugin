@@ -55,6 +55,26 @@ public class WOHtmlWebObjectUtilTest {
 
         // 6. Inline wo-tag without space: <wo:String value=myVal/>
         assertTrue(WOHtmlInspectionSuppressor.isSelfClosingSyntax(false, "<wo:String value=myVal/>", "myVal/", "value=myVal/"));
+
+        // 7. Shortname <wo name=abc/> without space
+        assertTrue(WOHtmlInspectionSuppressor.isSelfClosingSyntax(false, "<wo name=abc/>", "abc/", "name=abc/"));
+        assertFalse(WOHtmlInspectionSuppressor.isSelfClosingSyntax(false, "<wo name=abc>\n<div></div>\n</wo>", "abc", "name=abc"));
+    }
+
+    @Test
+    public void testIsWebObjectTagName() {
+        assertTrue(WOHtmlWebObjectUtil.isWebObjectTagName("webobject"));
+        assertTrue(WOHtmlWebObjectUtil.isWebObjectTagName("WebObject"));
+        assertTrue(WOHtmlWebObjectUtil.isWebObjectTagName("WEBOBJECT"));
+        assertTrue(WOHtmlWebObjectUtil.isWebObjectTagName("wo"));
+        assertTrue(WOHtmlWebObjectUtil.isWebObjectTagName("WO"));
+        assertTrue(WOHtmlWebObjectUtil.isWebObjectTagName("Wo"));
+
+        assertFalse(WOHtmlWebObjectUtil.isWebObjectTagName(null));
+        assertFalse(WOHtmlWebObjectUtil.isWebObjectTagName(""));
+        assertFalse(WOHtmlWebObjectUtil.isWebObjectTagName("div"));
+        assertFalse(WOHtmlWebObjectUtil.isWebObjectTagName("wo:String"));
+        assertFalse(WOHtmlWebObjectUtil.isWebObjectTagName("webobjects"));
     }
 }
 

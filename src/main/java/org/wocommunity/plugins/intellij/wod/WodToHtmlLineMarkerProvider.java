@@ -87,7 +87,7 @@ public class WodToHtmlLineMarkerProvider implements LineMarkerProvider {
     private static XmlTag findMatchingTag(XmlFile xmlFile, String name) {
         Collection<XmlTag> tags = PsiTreeUtil.findChildrenOfType(xmlFile, XmlTag.class);
         for (XmlTag tag : tags) {
-            if ("webobject".equalsIgnoreCase(tag.getLocalName())) {
+            if (WOHtmlWebObjectUtil.isWebObjectTag(tag)) {
                 String val = WOHtmlWebObjectUtil.getWebObjectName(tag);
                 if (name.equals(val)) {
                     return tag;

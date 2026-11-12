@@ -35,8 +35,9 @@ public final class WOHtmlXmlExtension extends XmlExtension {
         localNames.addAll(WOComponentTagAliasRegistry.getAliases().keySet());
         localNames.addAll(WOComponentCollector.collectAllComponentAndElementNames(file.getProject()));
 
-        List<TagInfo> out = new ArrayList<>(localNames.size() + 1);
+        List<TagInfo> out = new ArrayList<>(localNames.size() + 2);
         out.add(new TagInfo("webobject", null));
+        out.add(new TagInfo("wo", null));
         for (String localName : localNames) {
             out.add(new TagInfo(localName, WOHtmlFileNSInfoProvider.WO_NAMESPACE_URI));
         }
@@ -111,7 +112,6 @@ public final class WOHtmlXmlExtension extends XmlExtension {
     }
 
     private static boolean isLegacyWebObjectTag(@NotNull XmlTag tag) {
-        return "webobject".equalsIgnoreCase(tag.getName())
-                || "webobject".equalsIgnoreCase(tag.getLocalName());
+        return WOHtmlWebObjectUtil.isWebObjectTag(tag);
     }
 }

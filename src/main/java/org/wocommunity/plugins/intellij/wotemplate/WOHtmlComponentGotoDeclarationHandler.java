@@ -52,8 +52,8 @@ public final class WOHtmlComponentGotoDeclarationHandler implements GotoDeclarat
             return null;
         }
 
-        // 1. Check <webobject name="..."> tag
-        if ("webobject".equalsIgnoreCase(tag.getLocalName())) {
+        // 1. Check <webobject name="..."> / <wo name="..."> tag
+        if (WOHtmlWebObjectUtil.isWebObjectTag(tag)) {
             return resolveWebObjectGotoTargets(tag, sourceElement);
         }
 

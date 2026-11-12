@@ -43,7 +43,7 @@ public final class WOHtmlInspectionSuppressor extends XmlInspectionSuppressor {
         }
 
         String localName = tag.getLocalName();
-        boolean isWo = "webobject".equalsIgnoreCase(localName)
+        boolean isWo = WOHtmlWebObjectUtil.isWebObjectTag(tag)
                 || (localName != null && "wo".equalsIgnoreCase(tag.getNamespacePrefix()));
 
         if (!isWo) {

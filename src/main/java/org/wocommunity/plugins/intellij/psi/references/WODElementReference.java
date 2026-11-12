@@ -40,7 +40,7 @@ public final class WODElementReference extends PsiReferenceBase<WODElement> {
         Collection<XmlTag> tags = PsiTreeUtil.findChildrenOfType(htmlFile, XmlTag.class);
 
         for (XmlTag tag : tags) {
-            if ("webobject".equalsIgnoreCase(tag.getLocalName())) {
+            if (WOHtmlWebObjectUtil.isWebObjectTag(tag)) {
                 String val = WOHtmlWebObjectUtil.getWebObjectName(tag);
                 if (elementName.equals(val)) {
                     return tag;

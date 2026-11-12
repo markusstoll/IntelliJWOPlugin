@@ -46,8 +46,8 @@ public final class WOHtmlElementDescriptorProvider implements XmlElementDescript
         String qualifiedName = tag.getName();
         String localTagName = tag.getLocalName();
 
-        if ("webobject".equalsIgnoreCase(localTagName)) {
-            return new WOXmlElementDescriptor("webobject", null, tag);
+        if (WOHtmlWebObjectUtil.isWebObjectTag(tag)) {
+            return new WOXmlElementDescriptor(localTagName, null, tag);
         }
 
         String prefix = tag.getNamespacePrefix();

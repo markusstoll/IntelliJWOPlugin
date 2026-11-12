@@ -35,7 +35,7 @@ public class CreateWodElementIntentionAction extends PsiElementBaseIntentionActi
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, @NotNull PsiElement element) {
         XmlTag tag = PsiTreeUtil.getParentOfType(element, XmlTag.class, false);
-        if (tag == null || !"webobject".equalsIgnoreCase(tag.getLocalName())) {
+        if (!WOHtmlWebObjectUtil.isWebObjectTag(tag)) {
             return false;
         }
 

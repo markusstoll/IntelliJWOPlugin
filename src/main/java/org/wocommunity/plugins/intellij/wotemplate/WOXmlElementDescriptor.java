@@ -44,7 +44,7 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
 
     @Override
     public PsiElement getDeclaration() {
-        if ("webobject".equalsIgnoreCase(name) && tag != null) {
+        if (WOHtmlWebObjectUtil.isWebObjectTagName(name) && tag != null) {
             return WOHtmlElementDescriptorProvider.resolveWebObjectDeclaration(tag);
         }
         return declaration;
@@ -96,7 +96,7 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
         if (attributeName == null || attributeName.isBlank()) {
             return null;
         }
-        if ("webobject".equalsIgnoreCase(name)) {
+        if (WOHtmlWebObjectUtil.isWebObjectTagName(name)) {
             return new WOXmlAttributeDescriptor(attributeName, null, false, "string", null);
         }
         return getOrBuildAttributeDescriptors().get(attributeName);
@@ -148,7 +148,7 @@ final class WOXmlElementDescriptor implements XmlElementDescriptor {
     }
 
     private @NotNull Map<String, XmlAttributeDescriptor> buildAttributeDescriptors() {
-        if ("webobject".equalsIgnoreCase(name)) {
+        if (WOHtmlWebObjectUtil.isWebObjectTagName(name)) {
             Map<String, XmlAttributeDescriptor> map = new LinkedHashMap<>();
             map.put("name", new WOXmlAttributeDescriptor("name", null, false, "string", null));
             map.put("NAME", new WOXmlAttributeDescriptor("NAME", null, false, "string", null));
