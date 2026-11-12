@@ -25,8 +25,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -83,7 +86,7 @@ public class WOArchetypeGenerator {
                                          @NotNull File targetDir,
                                          @Nullable ProgressIndicator indicator) throws Exception {
         com.intellij.openapi.application.Application app = ApplicationManager.getApplication();
-        if (app != null && (app.isDispatchThread() || app.holdsReadLock())) {
+        if (app != null && !app.isDisposed() && (app.isDispatchThread() || app.holdsReadLock())) {
             LOG.warn("generateWithMaven called on EDT or under read lock, falling back to direct extraction");
             generateDirectly(model, targetDir, indicator);
             return;
@@ -93,42 +96,29 @@ public class WOArchetypeGenerator {
 
         Path tempGenDir = Files.createTempDirectory("wo-gen-");
         try {
-            GeneralCommandLine cmd = new GeneralCommandLine();
-            cmd.setExePath(mvnExe.getAbsolutePath());
-            cmd.setWorkDirectory(tempGenDir.toFile());
-
-            cmd.addParameters("archetype:generate", "-B");
-            cmd.addParameter("-DarchetypeGroupId=" + WOArchetype.GROUP_ID);
-            cmd.addParameter("-DarchetypeArtifactId=" + model.getArchetype().getArtifactId());
-            cmd.addParameter("-DarchetypeVersion=" + model.getArchetypeVersion());
-            cmd.addParameter("-DarchetypeRepository=" + WOArchetype.REPOSITORY_URL);
-            cmd.addParameter("-DgroupId=" + model.getGroupId());
-            cmd.addParameter("-DartifactId=" + model.getArtifactId());
-            cmd.addParameter("-Dversion=" + model.getVersion());
-            cmd.addParameter("-Dpackage=" + model.getPackageName());
-            cmd.addParameter("-DJavaVersion=" + model.getJavaVersion());
+            List<String> params = new ArrayList<>();
+            params.add("archetype:generate");
+            params.add("-B");
+            params.add("-DarchetypeGroupId=" + WOArchetype.GROUP_ID);
+            params.add("-DarchetypeArtifactId=" + model.getArchetype().getArtifactId());
+            params.add("-DarchetypeVersion=" + model.getArchetypeVersion());
+            params.add("-DarchetypeRepository=" + WOArchetype.REPOSITORY_URL);
+            params.add("-DgroupId=" + model.getGroupId());
+            params.add("-DartifactId=" + model.getArtifactId());
+            params.add("-Dversion=" + model.getVersion());
+            params.add("-Dpackage=" + model.getPackageName());
+            params.add("-DJavaVersion=" + model.getJavaVersion());
 
             if (model.getArchetype().isWonder()) {
-                cmd.addParameter("-DWonderVersion=" + model.getWonderVersion());
+                params.add("-DWonderVersion=" + model.getWonderVersion());
             }
             if (model.getArchetype() == WOArchetype.WO_FRAMEWORK) {
-                cmd.addParameter("-DWonderSupport=" + (model.isWonderSupport() ? "yes" : "no"));
-                cmd.addParameter("-DWonderVersion=" + model.getWonderVersion());
+                params.add("-DWonderSupport=" + (model.isWonderSupport() ? "yes" : "no"));
+                params.add("-DWonderVersion=" + model.getWonderVersion());
             }
-            cmd.addParameter("-DinteractiveMode=false");
+            params.add("-DinteractiveMode=false");
 
-            CapturingProcessHandler handler = new CapturingProcessHandler(cmd);
-            ProcessOutput output = (indicator != null)
-                    ? handler.runProcessWithProgressIndicator(indicator, 120_000)
-                    : handler.runProcess(120_000);
-
-            if (output.getExitCode() != 0) {
-                String err = output.getStderr();
-                if (err == null || err.isBlank()) {
-                    err = output.getStdout();
-                }
-                throw new IOException("Maven archetype generation failed (exit code " + output.getExitCode() + "): " + err);
-            }
+            runMavenProcess(mvnExe, tempGenDir.toFile(), params, indicator);
 
             File generatedProject = new File(tempGenDir.toFile(), model.getArtifactId());
             if (!generatedProject.exists()) {
@@ -145,6 +135,51 @@ public class WOArchetypeGenerator {
             }
         } finally {
             deleteRecursively(tempGenDir.toFile());
+        }
+    }
+
+    private static void runMavenProcess(@NotNull File mvnExe,
+                                        @NotNull File workDir,
+                                        @NotNull List<String> params,
+                                        @Nullable ProgressIndicator indicator) throws Exception {
+        if (indicator != null) {
+            GeneralCommandLine cmd = new GeneralCommandLine()
+                    .withExePath(mvnExe.getAbsolutePath())
+                    .withWorkDirectory(workDir)
+                    .withCharset(StandardCharsets.UTF_8)
+                    .withParameters(params);
+            CapturingProcessHandler handler = new CapturingProcessHandler(cmd);
+            ProcessOutput output = handler.runProcessWithProgressIndicator(indicator, 120_000);
+            if (output.getExitCode() != 0) {
+                String err = output.getStderr();
+                if (err == null || err.isBlank()) {
+                    err = output.getStdout();
+                }
+                throw new IOException("Maven archetype generation failed (exit code " + output.getExitCode() + "): " + err);
+            }
+            return;
+        }
+
+        List<String> command = new ArrayList<>(params.size() + 1);
+        command.add(mvnExe.getAbsolutePath());
+        command.addAll(params);
+
+        ProcessBuilder pb = new ProcessBuilder(command)
+                .directory(workDir)
+                .redirectErrorStream(true);
+        Process process = pb.start();
+        String outputText;
+        try (InputStream is = process.getInputStream()) {
+            outputText = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        boolean finished = process.waitFor(120, TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroyForcibly();
+            throw new IOException("Maven archetype generation timed out after 120 seconds");
+        }
+        int exitCode = process.exitValue();
+        if (exitCode != 0) {
+            throw new IOException("Maven archetype generation failed (exit code " + exitCode + "): " + outputText);
         }
     }
 
